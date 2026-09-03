@@ -21,21 +21,31 @@ const button2 = document.getElementById('button2');
 const mejorText = document.getElementById('mejorText');
 const r2Text = document.getElementById('r2Text');
 
-// 1. Inicialización
+// 1. Inicialización de la pantalla
 document.addEventListener('DOMContentLoaded', () => {
   web1Url = TinyDB1.getValue('script', '');
   webViewer1.classList.add('hidden');
 
   globalJson = TinyDB1.getValue('Usuario', '');
 
+  // Fecha actual YYYY-M-D
   const today = new Date();
   globalDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
+  // Cargar lista de ejercicios desde la clave 'Ejercicio' guardada en menu_principal
   const ejercicios = TinyDB1.getValue('Ejercicio', []);
   listPicker1.innerHTML = '<option value="" disabled selected>Elige un ejercicio</option>';
 
-  if (Array.isArray(ejercicios)) {
+  if (Array.isArray(ejercicios) && ejercicios.length > 0) {
     ejercicios.forEach(ejercicio => {
+      const option = document.createElement('option');
+      option.value = ejercicio;
+      option.textContent = ejercicio;
+      listPicker1.appendChild(option);
+    });
+  } else if (typeof ejercicios === 'string') {
+    const opciones = ejercicios.split(',').map(e => e.trim());
+    opciones.forEach(ejercicio => {
       const option = document.createElement('option');
       option.value = ejercicio;
       option.textContent = ejercicio;
@@ -44,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 2. Selección de ejercicio
+// 2. Al seleccionar en el desplegable, copiar el valor al textBox11
 listPicker1.addEventListener('change', () => {
   textBox11.value = listPicker1.value;
 });
@@ -67,9 +77,9 @@ function handleWeb1GotText(responseContent) {
   r2Text.textContent = cleanText.substring(startIndex, startIndex + 4);
 }
 
-// 4. Guardar datos
+// 4. Guardar datos (se envía siempre el valor escrito/modificado en textBox11)
 button2.addEventListener('click', () => {
-  const selectedExercise = textBox11.value;
+  const selectedExercise = textBox11.value.trim();
   const textoMejor = mejorText.textContent.trim();
   const textoR2 = r2Text.textContent.trim();
   const isChecked = checkBox1.checked;
