@@ -29,34 +29,25 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.08);
     }
 
-    h2 {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     label {
       display: block;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       color: #444;
     }
 
     select, input[type="text"], input[type="number"] {
       width: 100%;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border: 1px solid #dcdfe6;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 0.95rem;
       background-color: #fff;
-      transition: border-color 0.2s ease;
     }
 
     select:focus, input:focus {
@@ -68,14 +59,15 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .checkbox-group {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      margin: 18px 0;
+      margin: 16px 0;
       cursor: pointer;
     }
 
@@ -86,50 +78,69 @@
       cursor: pointer;
     }
 
-    .checkbox-group label {
-      margin-bottom: 0;
-      font-weight: 500;
-      cursor: pointer;
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
-    .btn-submit {
-      width: 100%;
-      padding: 12px;
-      background-color: #0066cc;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
+    .btn {
+      flex: 1;
+      padding: 10px;
+      background-color: #e0e0e0;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       transition: background-color 0.2s ease;
+      text-align: center;
     }
 
-    .btn-submit:hover {
+    .btn:hover {
+      background-color: #d0d0d0;
+    }
+
+    .btn-main {
+      background-color: #0066cc;
+      color: #ffffff;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+    }
+
+    .btn-main:hover {
       background-color: #0052a3;
     }
 
     .results-card {
-      margin-top: 24px;
-      padding: 16px;
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      padding: 12px;
       background-color: #f8f9fa;
       border: 1px solid #e9ecef;
       border-radius: 8px;
+      text-align: center;
     }
 
-    .results-card .row {
+    .results-card div {
       display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      font-size: 0.95rem;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .results-card .row:not(:last-child) {
-      border-bottom: 1px solid #eee;
-    }
-
-    .results-card span.value {
+    .results-card .title {
+      font-size: 0.85rem;
+      color: #666;
       font-weight: 600;
+    }
+
+    .results-card .value {
+      font-size: 1.1rem;
+      font-weight: 700;
       color: #0066cc;
     }
 
@@ -141,75 +152,71 @@
 <body>
 
   <div class="container">
-    <h2>Perfil Fuerza-Velocidad</h2>
-
     <iframe id="webViewer1" class="hidden" src="about:blank"></iframe>
 
     <div class="form-group">
-      <label for="listPicker1">Seleccionar Ejercicio</label>
       <select id="listPicker1">
-        <option value="" disabled selected>Elige un ejercicio</option>
+        <option value="" disabled selected>Selecciona ejercicio</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label for="textBox11">Ejercicio Seleccionado</label>
-      <input type="text" id="textBox11" placeholder="Escribe o selecciona un ejercicio">
+      <input type="text" id="textBox11" placeholder="Ejercicio seleccionado">
     </div>
 
     <!-- Cargas y Velocidades (textBox1 a textBox10) -->
     <div class="grid-pair">
       <div>
-        <label for="textBox1">Carga 1 (kg)</label>
-        <input type="number" id="textBox1" step="any" placeholder="0">
+        <label for="textBox1">Carga 1</label>
+        <input type="number" id="textBox1" step="any">
       </div>
       <div>
-        <label for="textBox2">Velocidad 1 (m/s)</label>
-        <input type="number" id="textBox2" step="any" placeholder="0.00">
-      </div>
-    </div>
-
-    <div class="grid-pair">
-      <div>
-        <label for="textBox3">Carga 2 (kg)</label>
-        <input type="number" id="textBox3" step="any" placeholder="0">
-      </div>
-      <div>
-        <label for="textBox4">Velocidad 2 (m/s)</label>
-        <input type="number" id="textBox4" step="any" placeholder="0.00">
+        <label for="textBox2">VMP 1</label>
+        <input type="number" id="textBox2" step="any">
       </div>
     </div>
 
     <div class="grid-pair">
       <div>
-        <label for="textBox5">Carga 3 (kg)</label>
-        <input type="number" id="textBox5" step="any" placeholder="0">
+        <label for="textBox3">Carga 2</label>
+        <input type="number" id="textBox3" step="any">
       </div>
       <div>
-        <label for="textBox6">Velocidad 3 (m/s)</label>
-        <input type="number" id="textBox6" step="any" placeholder="0.00">
-      </div>
-    </div>
-
-    <div class="grid-pair">
-      <div>
-        <label for="textBox7">Carga 4 (kg)</label>
-        <input type="number" id="textBox7" step="any" placeholder="0">
-      </div>
-      <div>
-        <label for="textBox8">Velocidad 4 (m/s)</label>
-        <input type="number" id="textBox8" step="any" placeholder="0.00">
+        <label for="textBox4">VMP 2</label>
+        <input type="number" id="textBox4" step="any">
       </div>
     </div>
 
     <div class="grid-pair">
       <div>
-        <label for="textBox9">Carga 5 (kg)</label>
-        <input type="number" id="textBox9" step="any" placeholder="0">
+        <label for="textBox5">Carga 3</label>
+        <input type="number" id="textBox5" step="any">
       </div>
       <div>
-        <label for="textBox10">Velocidad 5 (m/s)</label>
-        <input type="number" id="textBox10" step="any" placeholder="0.00">
+        <label for="textBox6">VMP 3</label>
+        <input type="number" id="textBox6" step="any">
+      </div>
+    </div>
+
+    <div class="grid-pair">
+      <div>
+        <label for="textBox7">Carga 4</label>
+        <input type="number" id="textBox7" step="any">
+      </div>
+      <div>
+        <label for="textBox8">VMP 4</label>
+        <input type="number" id="textBox8" step="any">
+      </div>
+    </div>
+
+    <div class="grid-pair">
+      <div>
+        <label for="textBox9">Carga 5</label>
+        <input type="number" id="textBox9" step="any">
+      </div>
+      <div>
+        <label for="textBox10">VMP 5</label>
+        <input type="number" id="textBox10" step="any">
       </div>
     </div>
 
@@ -218,18 +225,23 @@
       <label for="checkBox1">Test Máximo</label>
     </div>
 
-    <button id="button2" class="btn-submit">Guardar Datos</button>
+    <div class="button-row">
+      <button id="button1" class="btn">Consultar</button>
+      <button id="button3" class="btn">Menu Principal</button>
+    </div>
 
     <div class="results-card">
-      <div class="row">
-        <span>Mejor:</span>
+      <div>
+        <span class="title">Best</span>
         <span id="mejorText" class="value">-</span>
       </div>
-      <div class="row">
-        <span>R²:</span>
-        <span id="r2Text" class="value">-</span>
+      <div>
+        <span class="title">V1RM</span>
+        <span id="v1rmText" class="value">-</span>
       </div>
     </div>
+
+    <button id="button2" class="btn btn-main">Grabar</button>
   </div>
 
   <script src="PerfilFV.js"></script>
