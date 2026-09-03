@@ -39,3 +39,65 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   border: 1px solid #e2e8f0;
 }
+/* Estilos para Menú Principal */
+.user-badge {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 0.2rem;
+  opacity: 0.9;
+}
+
+.menu-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.menu-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-menu {
+  width: 100%;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-menu:active {
+  transform: scale(0.98);
+}
+
+.btn-menu:hover {
+  background-color: #0369a1;
+}
+
+.btn-secondary {
+  width: 100%;
+  background-color: #64748b;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #475569;
+}
+
+.margin-top {
+  margin-top: 1rem;
+}
