@@ -148,9 +148,34 @@ button1.addEventListener('click', () => {
       if (data.label14 !== undefined) {
         v1rmText.textContent = data.label14;
       }
+
+      // Muestra/actualiza el Web Viewer con el gráfico dinámico debajo de los resultados
+      mostrarWebViewer();
     })
     .catch(err => console.error("Error en Consultar:", err));
 });
+
+/**
+ * Crea o actualiza el iframe desplegado debajo del bloque de resultados (Best / V1RM)
+ */
+function mostrarWebViewer() {
+  let iframe = document.getElementById('webViewerGrafico');
+
+  // Si no existe, se crea dinámicamente e inserta tras el contenedor de V1RM / Best
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'webViewerGrafico';
+    iframe.style.cssText = 'width: 100%; height: 400px; border: 1px solid #ccc; border-radius: 8px; margin-top: 15px;';
+    
+    // Identifica el bloque donde se muestran Best y V1RM para insertarlo inmediatamente debajo
+    const contenedorResultados = mejorText?.closest('div') || v1rmText?.closest('div') || button1.parentNode;
+    contenedorResultados.parentNode.insertBefore(iframe, contenedorResultados.nextSibling);
+  }
+
+  // Genera un nocache dinámico para asegurar que cargue la versión actualizada de los datos
+  const cacheBuster = Date.now();
+  iframe.src = `https://alexjusto96-cloud.github.io/Grafico/?nocache=${cacheBuster}`;
+}
 
 // 5. Botón "Grabar" -> Envío a Google Forms
 button2.addEventListener('click', () => {
