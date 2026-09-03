@@ -10,31 +10,29 @@ const TinyDB1 = {
 let globalJson = "";
 let globalDate = "";
 let globalLongitud = 0;
-let web1Url = "";
+const scriptUrl = "https://script.google.com/macros/s/AKfycbyPfGgRmGtJ6R_5P3NA6D7dhbT0CYW0Aw6i053H-F13PpvARKWYdV_MLxtymgmglUcd6Q/exec";
 
 // Referencias al DOM
-const webViewer1 = document.getElementById('webViewer1');
 const listPicker1 = document.getElementById('listPicker1');
 const textBox11 = document.getElementById('textBox11');
 const checkBox1 = document.getElementById('checkBox1');
-const button2 = document.getElementById('button2');
+const button1 = document.getElementById('button1'); // Consultar
+const button2 = document.getElementById('button2'); // Grabar
+const button3 = document.getElementById('button3'); // Menu Principal
 const mejorText = document.getElementById('mejorText');
-const r2Text = document.getElementById('r2Text');
+const v1rmText = document.getElementById('v1rmText');
 
-// 1. Inicialización de la pantalla
+// 1. Inicialización
 document.addEventListener('DOMContentLoaded', () => {
-  web1Url = TinyDB1.getValue('script', '');
-  webViewer1.classList.add('hidden');
-
   globalJson = TinyDB1.getValue('Usuario', '');
 
-  // Fecha actual YYYY-M-D
+  // Fecha YYYY-M-D
   const today = new Date();
   globalDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-  // Cargar lista de ejercicios desde la clave 'Ejercicio' guardada en menu_principal
+  // Cargar lista 'Ejercicio' desde localStorage
   const ejercicios = TinyDB1.getValue('Ejercicio', []);
-  listPicker1.innerHTML = '<option value="" disabled selected>Elige un ejercicio</option>';
+  listPicker1.innerHTML = '<option value="" disabled selected>Selecciona ejercicio</option>';
 
   if (Array.isArray(ejercicios) && ejercicios.length > 0) {
     ejercicios.forEach(ejercicio => {
@@ -54,12 +52,48 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 2. Al seleccionar en el desplegable, copiar el valor al textBox11
+// 2. Selección en desplegable -> Pasa a textBox11
 listPicker1.addEventListener('change', () => {
   textBox11.value = listPicker1.value;
 });
 
-// 3. Procesar respuesta de Web1
+// 3. Botón "Menu Principal" -> Redirige a menu_principal.html
+button3.addEventListener('click', () => {
+  window.location.href = "menu_principal.html";
+});
+
+// 4. Botón "Consultar" -> Llama al Apps Script
+button1.addEventListener('click', () => {
+  const tb1 = document.getElementById('textBox1')?.value || '';
+  const tb2 = document.getElementById('textBox2')?.value || '';
+  const tb3 = document.getElementById('textBox3')?.value || '';
+  const tb4 = document.getElementById('textBox4')?.value || '';
+  const tb5 = document.getElementById('textBox5')?.value || '';
+  const tb6 = document.getElementById('textBox6')?.value || '';
+  const tb7 = document.getElementById('textBox7')?.value || '';
+  const tb8 = document.getElementById('textBox8')?.value || '';
+  const tb9 = document.getElementById('textBox9')?.value || '';
+  const tb10 = document.getElementById('textBox10')?.value || '';
+
+  const params = new URLSearchParams({
+    usuario: globalJson,
+    ejercicio: textBox11.value.trim(),
+    c1: tb1, v1: tb2,
+    c2: tb3, v2: tb4,
+    c3: tb5, v3: tb6,
+    c4: tb7, v4: tb8,
+    c5: tb9, v5: tb10
+  });
+
+  fetch(`${scriptUrl}?${params.toString()}`)
+    .then(response => response.text())
+    .then(data => {
+      handleWeb1GotText(data);
+    })
+    .catch(err => console.error("Error en Consultar:", err));
+});
+
+// Procesar respuesta del script para actualizar "Best" y "V1RM"
 function handleWeb1GotText(responseContent) {
   let cleanText = responseContent
     .replace(/\{/g, '')
@@ -70,18 +104,20 @@ function handleWeb1GotText(responseContent) {
 
   globalJson = cleanText;
 
+  // Extraer "Best"
   mejorText.textContent = cleanText.substring(8, 19);
 
+  // Extraer "V1RM"
   globalLongitud = cleanText.length;
   const startIndex = globalLongitud - 4;
-  r2Text.textContent = cleanText.substring(startIndex, startIndex + 4);
+  v1rmText.textContent = cleanText.substring(startIndex, startIndex + 4);
 }
 
-// 4. Guardar datos (se envía siempre el valor escrito/modificado en textBox11)
+// 5. Botón "Grabar" -> Envío a Google Forms
 button2.addEventListener('click', () => {
   const selectedExercise = textBox11.value.trim();
   const textoMejor = mejorText.textContent.trim();
-  const textoR2 = r2Text.textContent.trim();
+  const textoV1RM = v1rmText.textContent.trim();
   const isChecked = checkBox1.checked;
 
   if (isChecked) {
@@ -89,7 +125,7 @@ button2.addEventListener('click', () => {
       `entry.421504529=${encodeURIComponent(globalJson)}&` +
       `entry.1295778689=${encodeURIComponent(globalDate)}&` +
       `entry.758645353=${encodeURIComponent(selectedExercise)}&` +
-      `entry.610994258=${encodeURIComponent(textoR2)}`;
+      `entry.610994258=${encodeURIComponent(textoV1RM)}`;
 
     fetch(web3Url, { mode: 'no-cors' }).catch(err => console.error("Error Web3:", err));
   }
@@ -123,7 +159,7 @@ button2.addEventListener('click', () => {
       `entry.614158757=${encodeURIComponent(tb10 || tb8)}&` +
       `entry.1460219012=${encodeURIComponent(tb9 || tb7)}&` +
       `entry.210271129=${encodeURIComponent(siNoText)}&` +
-      `entry.472309366=${encodeURIComponent(textoR2)}`;
+      `entry.472309366=${encodeURIComponent(textoV1RM)}`;
 
     fetch(web2Url, { mode: 'no-cors' }).catch(err => console.error("Error Web2:", err));
   }
