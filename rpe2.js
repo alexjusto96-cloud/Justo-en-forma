@@ -38,6 +38,12 @@ const textareaComentarios = document.getElementById('comentarios');
 const form = document.getElementById('rpeForm');
 const statusMessage = document.getElementById('statusMessage');
 
+// Elementos UI para el buscador tipo ListPicker
+const inputSearchTipo = document.getElementById('search-tipo'); // <input type="text" id="search-tipo" placeholder="Buscar tipo...">
+
+// Variables de estado
+let opcionesActuales = [];
+
 // Función auxiliar para habilitar/deshabilitar campos según selección
 function setFormFieldsDisabled(disabled) {
   if (grpTipo) grpTipo.querySelectorAll('select, input').forEach(el => el.disabled = disabled);
@@ -48,6 +54,40 @@ function setFormFieldsDisabled(disabled) {
   if (textareaComentarios) textareaComentarios.disabled = disabled;
   const submitBtn = form.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.disabled = disabled;
+}
+
+// Cargar y renderizar opciones sin el "-- Seleccionar --"
+function renderOptions(filtro = "") {
+  selectTipo.innerHTML = "";
+  
+  const filtroLower = filtro.toLowerCase();
+
+  const estandarFiltradas = opcionesActuales.estandar.filter(opt => opt.toLowerCase().includes(filtroLower));
+  const especificasFiltradas = opcionesActuales.especificas.filter(opt => opt.toLowerCase().includes(filtroLower));
+
+  if (estandarFiltradas.length > 0) {
+    const groupEstandar = document.createElement('optgroup');
+    groupEstandar.label = "Modalidades Generales";
+    estandarFiltradas.forEach(opcion => {
+      const opt = document.createElement('option');
+      opt.value = opcion;
+      opt.textContent = opcion;
+      groupEstandar.appendChild(opt);
+    });
+    selectTipo.appendChild(groupEstandar);
+  }
+
+  if (especificasFiltradas.length > 0) {
+    const groupEspecificas = document.createElement('optgroup');
+    groupEspecificas.label = "Mis Entrenamientos Específicos";
+    especificasFiltradas.forEach(opcion => {
+      const opt = document.createElement('option');
+      opt.value = opcion;
+      opt.textContent = opcion;
+      groupEspecificas.appendChild(opt);
+    });
+    selectTipo.appendChild(groupEspecificas);
+  }
 }
 
 // 1. Inicialización según el tipo de entrenamiento (RPE2.Initialize)
@@ -61,7 +101,6 @@ function initializeScreen() {
     grpIntensidad.classList.add('hidden');
 
     selectTipo.innerHTML = `
-      <option value="">-- Seleccionar Bloque --</option>
       <option value="A">Bloque A</option>
       <option value="B">Bloque B</option>
     `;
@@ -85,28 +124,30 @@ function initializeScreen() {
     grpPulso.classList.remove('hidden');
     grpIntensidad.classList.remove('hidden');
 
-    // Inicializar desplegable con opción en blanco no-seleccionable a posteriori
     selectModalidad.innerHTML = `
       <option value="" disabled selected hidden>-- Seleccionar Modalidad --</option>
       <option value="Carrera">Carrera</option>
       <option value="Ciclismo">Ciclismo</option>
     `;
 
-    // Bloquear campos hasta que se elija una modalidad
     setFormFieldsDisabled(true);
   }
+}
+
+// Evento de búsqueda dinámica en tiempo real
+if (inputSearchTipo) {
+  inputSearchTipo.addEventListener('input', function(e) {
+    renderOptions(e.target.value);
+  });
 }
 
 // 2. Lógica al cambiar la modalidad en Cardio
 selectModalidad.addEventListener('change', function() {
   const modalidad = selectModalidad.value;
-  selectTipo.innerHTML = '<option value="">-- Seleccionar --</option>';
 
   if (modalidad === "Carrera" || modalidad === "Ciclismo") {
-    // Habilitar campos del formulario
     setFormFieldsDisabled(false);
 
-    // 2.1 Ajustar Etiquetas e Inputs de Intensidad PP
     if (modalidad === "Carrera") {
       lblInten.textContent = "Intensidad PP (Ritmo)";
       inputMin.placeholder = "Min";
@@ -119,37 +160,17 @@ selectModalidad.addEventListener('change', function() {
       delimiterSeg.classList.add('hidden');
     }
 
-    // 2.2 Cargar Opciones Estándar / Generales
-    const groupEstandar = document.createElement('optgroup');
-    groupEstandar.label = "Modalidades Generales";
-    
-    opcionesEstandar[modalidad].forEach(opcion => {
-      const opt = document.createElement('option');
-      opt.value = opcion;
-      opt.textContent = opcion;
-      groupEstandar.appendChild(opt);
-    });
-    selectTipo.appendChild(groupEstandar);
+    // Preparar listas de datos
+    const estandar = opcionesEstandar[modalidad] || [];
+    const rawEspecificas = getTinyBD(modalidad);
+    const especificas = (Array.isArray(rawEspecificas) ? rawEspecificas : [])
+      .filter(opcion => !estandar.includes(opcion));
 
-    // 2.3 Cargar Opciones Específicas del Atleta (Guardadas en el Menú Principal)
-    const especificas = getTinyBD(modalidad);
-    if (Array.isArray(especificas) && especificas.length > 0) {
-      const groupEspecificas = document.createElement('optgroup');
-      groupEspecificas.label = "Mis Entrenamientos Específicos";
+    opcionesActuales = { estandar, especificas };
 
-      especificas.forEach(opcion => {
-        if (!opcionesEstandar[modalidad].includes(opcion)) {
-          const opt = document.createElement('option');
-          opt.value = opcion;
-          opt.textContent = opcion;
-          groupEspecificas.appendChild(opt);
-        }
-      });
-
-      if (groupEspecificas.children.length > 0) {
-        selectTipo.appendChild(groupEspecificas);
-      }
-    }
+    // Limpiar campo de búsqueda y renderizar directo sin opción "-- Seleccionar --"
+    if (inputSearchTipo) inputSearchTipo.value = "";
+    renderOptions("");
 
     grpTipo.classList.remove('hidden');
   }
