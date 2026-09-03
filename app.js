@@ -10,12 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- EQUIVALENTE A: Screen1.Initialize ---
   // Cargar credenciales si estaban guardadas previamente (TinyDB "check")
-  const savedCheck = JSON.parse(localStorage.getItem('check'));
-  if (savedCheck && savedCheck.Usuario) {
-    usuarioInput.value = savedCheck.Usuario || '';
-    passwordInput.value = savedCheck.Contraseña || '';
-    rememberCheckbox.checked = true;
-  } else {
+  try {
+    const savedCheck = JSON.parse(localStorage.getItem('check'));
+    if (savedCheck && savedCheck.Usuario) {
+      usuarioInput.value = savedCheck.Usuario || '';
+      passwordInput.value = savedCheck.Contraseña || '';
+      rememberCheckbox.checked = true;
+    } else {
+      rememberCheckbox.checked = false;
+    }
+  } catch (e) {
+    console.error('Error al leer credenciales locales:', e);
     rememberCheckbox.checked = false;
   }
 
@@ -61,8 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       
       // --- EQUIVALENTE A: Web1.GotText ---
-      // Comparar la clave 'columna2' del primer elemento devuelto con la contraseña ingresada
-      if (data && data.length > 0 && data[0].columna2 === password) {
+      // Forzar la conversión a String para asegurar compatibilidad con contraseñas puramente numéricas
+      const dbPassword = (data && data.length > 0 && data[0].columna2 !== undefined && data[0].columna2 !== null)
+        ? String(data[0].columna2).trim()
+        : null;
+
+      if (dbPassword !== null && dbPassword === password) {
         // Almacenar el usuario en la sesión
         sessionStorage.setItem('usuarioLogueado', usuario);
         
