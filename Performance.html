@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f5f5f5;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .row-center {
+      justify-content: center;
+    }
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      text-align: center;
+    }
+    .field-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    button {
+      background-color: #0288D1;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:active {
+      background-color: #01579B;
+    }
+    .hidden {
+      display: none !important;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin: 8px 0;
+    }
+    .info-label {
+      text-align: center;
+      font-weight: bold;
+      color: #0288D1;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <span id="User"></span>
+      <span id="Fecha"></span>
+    </div>
+
+    <div>
+      <select id="ListPicker1">
+        <option value="" disabled selected>Selecciona ejercicio</option>
+      </select>
+    </div>
+
+    <div>
+      <input type="text" id="Ejercicio" placeholder="Ejercicio seleccionado">
+    </div>
+
+    <div class="row">
+      <div class="field-group">
+        <label for="TextBox1">Carga (Kg)</label>
+        <input type="number" id="TextBox1" step="any">
+      </div>
+      <div class="field-group">
+        <label for="TextBox2">VMP</label>
+        <input type="number" id="TextBox2" step="any">
+      </div>
+    </div>
+
+    <div class="row row-center">
+      <span id="Label4" class="info-label"></span>
+    </div>
+
+    <div class="field-group">
+      <label for="TextBox3">RM (kg)</label>
+      <input type="text" id="TextBox3">
+    </div>
+
+    <button id="Consultar">Consultar</button>
+
+    <div id="sliderContainer" class="hidden">
+      <input type="range" id="Slider1" min="0" max="100" value="50">
+      <div class="row row-center">
+        <span id="Label5" class="info-label">50% RM</span>
+      </div>
+      <div class="field-group">
+        <input type="text" id="TextBox4" readonly>
+      </div>
+    </div>
+
+    <button id="Grabar">Grabar performance</button>
+  </div>
+
+  <script src="performance.js"></script>
+</body>
+</html>
