@@ -32,27 +32,27 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-perfil-fv').addEventListener('click', () => {
-    window.location.href = 'perfil_fv.html'; // Corresponde a PerfilFV
+    window.location.href = 'PerfilFV.html'; // Corresponde a PerfilFV
   });
 
   document.getElementById('btn-performance').addEventListener('click', () => {
-    window.location.href = 'performance.html';
+    window.location.href = 'Performance.html';
   });
 
   document.getElementById('btn-consultar-performance').addEventListener('click', () => {
-    window.location.href = 'consulta_performance.html'; // Corresponde a Consulta
+    window.location.href = 'Consulta.html'; // Corresponde a Consulta
   });
 
   document.getElementById('btn-entrenamiento-fuerza').addEventListener('click', () => {
-    window.location.href = 'entrenamiento_fuerza.html';
+    window.location.href = 'EntrenamientoFurza.html';
   });
 
   document.getElementById('btn-registrar-test').addEventListener('click', () => {
-    window.location.href = 'test_registro.html';
+    window.location.href = 'Test_registro.html';
   });
 
   document.getElementById('btn-consultar-test').addEventListener('click', () => {
-    window.location.href = 'test_consulta.html';
+    window.location.href = 'Test_consulta.html';
   });
 
   // LogOut
