@@ -47,11 +47,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('user-display').textContent = `Usuario: ${usuario}`;
 
-  // Configurar sliders con degradado dinámico y contadores
+  // Configurar sliders con degradado dinámico y seguimiento de interacción
   const sliders = document.querySelectorAll('input[type="range"]');
   sliders.forEach(slider => {
-    updateSlider(slider);
-    slider.addEventListener('input', (e) => updateSlider(e.target));
+    // Inicialmente no se ha tocado
+    slider.dataset.touched = "false";
+    
+    // Aplicar estilo inicial de degradado
+    updateSliderStyle(slider);
+
+    // Eventos para detectar cuándo el usuario desliza/interactúa
+    const markAsTouched = (e) => {
+      e.target.dataset.touched = "true";
+      updateSlider(e.target);
+    };
+
+    slider.addEventListener('input', markAsTouched);
+    slider.addEventListener('change', markAsTouched);
   });
 
   // Evento Botón Atrás
@@ -67,6 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando...';
 
+    // Función auxiliar: Devuelve el valor del slider SOLO si fue deslizado por el usuario
+    const getSliderValue = (id) => {
+      const slider = document.getElementById(id);
+      return (slider && slider.dataset.touched === 'true') ? slider.value : '';
+    };
+
     // 1. Crear un iframe oculto para procesar el envío sin problemas de CORS ni redirección inmediata
     let iframe = document.getElementById('hidden_iframe');
     if (!iframe) {
@@ -77,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(iframe);
     }
 
-    // 2. Crear un formulario invisible para enviar mediante POST a Google Forms (Mismo mapeo de entradas de la APK)
+    // 2. Crear un formulario invisible para enviar mediante POST a Google Forms
     const googleForm = document.createElement('form');
     googleForm.action = FORM_ACTION_URL;
     googleForm.method = 'POST';
@@ -85,10 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fields = {
       'entry.1796953843': usuario,
-      'entry.2042151343': document.getElementById('soreness').value,
-      'entry.1747390100': document.getElementById('fatiga').value,
-      'entry.54922584': document.getElementById('sueno').value,
-      'entry.2019749365': document.getElementById('estres').value,
+      'entry.2042151343': getSliderValue('soreness'),
+      'entry.1747390100': getSliderValue('fatiga'),
+      'entry.54922584': getSliderValue('sueno'),
+      'entry.2019749365': getSliderValue('estres'),
       'entry.1866528932': document.getElementById('horas').value || '',
       'entry.691415070': document.getElementById('hrv').value || '',
       'entry.2041644075': document.getElementById('peso').value || '',
@@ -114,12 +132,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Actualiza tanto el texto visible como los colores
 function updateSlider(slider) {
   const valSpan = document.getElementById(`val-${slider.id}`);
-  if (valSpan) {
+  if (valSpan && slider.dataset.touched === 'true') {
     valSpan.textContent = slider.value;
   }
+  updateSliderStyle(slider);
+}
 
+// Aplica solo el degradado de color
+function updateSliderStyle(slider) {
   const isGoodRight = slider.getAttribute('data-type') === 'good-right';
   if (isGoodRight) {
     slider.style.background = 'linear-gradient(to right, #ef4444, #eab308, #22c55e)';
