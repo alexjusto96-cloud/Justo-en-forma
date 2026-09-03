@@ -23,7 +23,7 @@
     .container {
       background: #ffffff;
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.08);
@@ -49,7 +49,7 @@
       color: #444;
     }
 
-    select, input[type="text"] {
+    select, input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #dcdfe6;
@@ -59,7 +59,7 @@
       transition: border-color 0.2s ease;
     }
 
-    select:focus, input[type="text"]:focus {
+    select:focus, input:focus {
       outline: none;
       border-color: #0066cc;
     }
@@ -67,6 +67,13 @@
     input[readonly] {
       background-color: #f8f9fa;
       color: #666;
+    }
+
+    .grid-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
     .checkbox-group {
@@ -141,7 +148,6 @@
   <div class="container">
     <h2>Perfil Fuerza-Velocidad</h2>
 
-    <!-- WebViewer / iframe (Oculto) -->
     <iframe id="webViewer1" class="hidden" src="about:blank"></iframe>
 
     <div class="form-group">
@@ -154,6 +160,62 @@
     <div class="form-group">
       <label for="textBox11">Ejercicio Seleccionado</label>
       <input type="text" id="textBox11" readonly placeholder="Ninguno">
+    </div>
+
+    <!-- Cargas y Velocidades (textBox1 a textBox10) -->
+    <div class="grid-pair">
+      <div>
+        <label for="textBox1">Carga 1 (kg)</label>
+        <input type="number" id="textBox1" step="any" placeholder="0">
+      </div>
+      <div>
+        <label for="textBox2">Velocidad 1 (m/s)</label>
+        <input type="number" id="textBox2" step="any" placeholder="0.00">
+      </div>
+    </div>
+
+    <div class="grid-pair">
+      <div>
+        <label for="textBox3">Carga 2 (kg)</label>
+        <input type="number" id="textBox3" step="any" placeholder="0">
+      </div>
+      <div>
+        <label for="textBox4">Velocidad 2 (m/s)</label>
+        <input type="number" id="textBox4" step="any" placeholder="0.00">
+      </div>
+    </div>
+
+    <div class="grid-pair">
+      <div>
+        <label for="textBox5">Carga 3 (kg)</label>
+        <input type="number" id="textBox5" step="any" placeholder="0">
+      </div>
+      <div>
+        <label for="textBox6">Velocidad 3 (m/s)</label>
+        <input type="number" id="textBox6" step="any" placeholder="0.00">
+      </div>
+    </div>
+
+    <div class="grid-pair">
+      <div>
+        <label for="textBox7">Carga 4 (kg)</label>
+        <input type="number" id="textBox7" step="any" placeholder="0">
+      </div>
+      <div>
+        <label for="textBox8">Velocidad 4 (m/s)</label>
+        <input type="number" id="textBox8" step="any" placeholder="0.00">
+      </div>
+    </div>
+
+    <div class="grid-pair">
+      <div>
+        <label for="textBox9">Carga 5 (kg)</label>
+        <input type="number" id="textBox9" step="any" placeholder="0">
+      </div>
+      <div>
+        <label for="textBox10">Velocidad 5 (m/s)</label>
+        <input type="number" id="textBox10" step="any" placeholder="0.00">
+      </div>
     </div>
 
     <div class="checkbox-group">
