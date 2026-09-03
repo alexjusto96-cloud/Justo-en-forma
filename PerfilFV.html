@@ -5,69 +5,176 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Perfil Fuerza-Velocidad</title>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 16px;
-      max-width: 500px;
-      margin: 0 auto;
+      background-color: #f4f6f9;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      padding: 20px 12px;
     }
+
+    .container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
     .form-group {
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
+
     label {
       display: block;
-      margin-bottom: 4px;
-      font-weight: bold;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #444;
     }
-    input, select, button {
+
+    select, input[type="text"] {
       width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-      margin-top: 4px;
+      padding: 10px 12px;
+      border: 1px solid #dcdfe6;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background-color: #fff;
+      transition: border-color 0.2s ease;
     }
-    .hidden {
-      display: none;
+
+    select:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: #0066cc;
     }
-    .results {
-      margin-top: 16px;
+
+    input[readonly] {
+      background-color: #f8f9fa;
+      color: #666;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 18px 0;
+      cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #0066cc;
+      cursor: pointer;
+    }
+
+    .checkbox-group label {
+      margin-bottom: 0;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      width: 100%;
       padding: 12px;
-      background-color: #f0f0f0;
-      border-radius: 4px;
+      background-color: #0066cc;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #0052a3;
+    }
+
+    .results-card {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+    }
+
+    .results-card .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 0.95rem;
+    }
+
+    .results-card .row:not(:last-child) {
+      border-bottom: 1px solid #eee;
+    }
+
+    .results-card span.value {
+      font-weight: 600;
+      color: #0066cc;
+    }
+
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
 
-  <h2>Perfil Fuerza-Velocidad</h2>
+  <div class="container">
+    <h2>Perfil Fuerza-Velocidad</h2>
 
-  <!-- WebViewer / iframe (Oculto por defecto) -->
-  <iframe id="webViewer1" class="hidden" src="about:blank"></iframe>
+    <!-- WebViewer / iframe (Oculto) -->
+    <iframe id="webViewer1" class="hidden" src="about:blank"></iframe>
 
-  <div class="form-group">
-    <label for="listPicker1">Seleccionar Ejercicio:</label>
-    <select id="listPicker1">
-      <option value="" disabled selected>Elige un ejercicio</option>
-    </select>
+    <div class="form-group">
+      <label for="listPicker1">Seleccionar Ejercicio</label>
+      <select id="listPicker1">
+        <option value="" disabled selected>Elige un ejercicio</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="textBox11">Ejercicio Seleccionado</label>
+      <input type="text" id="textBox11" readonly placeholder="Ninguno">
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="checkBox1">
+      <label for="checkBox1">Opciones avanzadas</label>
+    </div>
+
+    <button id="button2" class="btn-submit">Guardar Datos</button>
+
+    <div class="results-card">
+      <div class="row">
+        <span>Mejor:</span>
+        <span id="mejorText" class="value">-</span>
+      </div>
+      <div class="row">
+        <span>R²:</span>
+        <span id="r2Text" class="value">-</span>
+      </div>
+    </div>
   </div>
 
-  <div class="form-group">
-    <label for="textBox11">Ejercicio Seleccionado:</label>
-    <input type="text" id="textBox11" readonly>
-  </div>
-
-  <div class="form-group">
-    <label>
-      <input type="checkbox" id="checkBox1"> Opciones avanzadas
-    </label>
-  </div>
-
-  <button id="button2">Guardar Datos</button>
-
-  <div class="results">
-    <p><strong>Mejor:</strong> <span id="mejorText">-</span></p>
-    <p><strong>R2:</strong> <span id="r2Text">-</span></p>
-  </div>
-
-  <script src="app.js"></script>
+  <script src="PerfilFV.js"></script>
 </body>
 </html>
