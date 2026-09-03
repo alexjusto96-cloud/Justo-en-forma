@@ -1,8 +1,15 @@
-// Simulación de TinyDB con LocalStorage
+// Simulación de TinyDB con LocalStorage y manejo seguro de errores
 const TinyDB1 = {
   getValue: function(key, notFoundValue) {
     const val = localStorage.getItem(key);
-    return val !== null ? JSON.parse(val) : notFoundValue;
+    if (val === null) return notFoundValue;
+    
+    try {
+      return JSON.parse(val);
+    } catch (e) {
+      // Si el valor guardado es texto plano (ej: "ajusa"), se retorna directamente sin fallar
+      return val;
+    }
   }
 };
 
@@ -24,7 +31,8 @@ const v1rmText = document.getElementById('v1rmText');
 
 // 1. Inicialización
 document.addEventListener('DOMContentLoaded', () => {
-  globalJson = TinyDB1.getValue('Usuario', '');
+  // Obtener usuario activo
+  globalJson = TinyDB1.getValue('Usuario', '') || sessionStorage.getItem('usuarioLogueado') || '';
 
   // Fecha YYYY-M-D
   const today = new Date();
@@ -41,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
       option.textContent = ejercicio;
       listPicker1.appendChild(option);
     });
-  } else if (typeof ejercicios === 'string') {
+  } else if (typeof ejercicios === 'string' && ejercicios.length > 0) {
     const opciones = ejercicios.split(',').map(e => e.trim());
     opciones.forEach(ejercicio => {
       const option = document.createElement('option');
