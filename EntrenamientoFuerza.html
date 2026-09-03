@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrenamiento Fuerza</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.5; }
+    .form-group { margin-bottom: 12px; }
+    label { display: inline-block; width: 140px; font-weight: bold; }
+    input[type="text"], select { padding: 5px; width: 200px; }
+    .serie-row { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+    .serie-row.disabled { opacity: 0.5; pointer-events: none; }
+    .timer { font-size: 1.2em; font-weight: bold; color: #2c3e50; margin: 15px 0; }
+    button { padding: 8px 15px; margin-right: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h2>Registro de Entrenamiento de Fuerza</h2>
+
+  <div class="form-group">
+    <label for="ejercicio">Ejercicio:</label>
+    <input type="text" id="ejercicio">
+  </div>
+
+  <div class="form-group">
+    <label for="listPicker1">Histórico Ejercicios:</label>
+    <select id="listPicker1"></select>
+  </div>
+
+  <div class="form-group">
+    <label>Tempo / Tiempos:</label><br>
+    Concéntrica: <select id="con"><option value="1">1</option></select>
+    Pausa Con.: <select id="pausaCon"><option value="1">1</option></select>
+    Excéntrica: <select id="ecc"><option value="2">2</option></select>
+    Pausa Exc.: <select id="pausaEcc"><option value="1">1</option></select>
+  </div>
+
+  <div class="form-group">
+    <label><input type="checkbox" id="vbt"> VBT</label>
+  </div>
+
+  <hr>
+
+  <!-- Series 1 a 6 -->
+  <div id="seriesContainer"></div>
+
+  <div class="form-group">
+    <label for="textBox1">Observaciones:</label>
+    <input type="text" id="textBox1">
+  </div>
+
+  <div class="form-group">
+    <label for="slider1">Porcentaje RM (%):</label>
+    <input type="range" id="slider1" min="0" max="100" value="50">
+    <input type="text" id="percentage" readonly style="width: 50px;">
+  </div>
+
+  <div class="timer">
+    Tiempo de Descanso: <span id="minutos">0</span>:<span id="segundos">00</span>
+  </div>
+
+  <div class="form-group">
+    <button id="nuevoEjercicio">Nuevo Ejercicio</button>
+    <button id="enviar">Enviar Registro</button>
+    <button id="consultar">Consultar Entrenamientos</button>
+    <button id="fin">Finalizar Entrenamiento</button>
+  </div>
+
+  <div id="label12"></div>
+  <div id="label32"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
