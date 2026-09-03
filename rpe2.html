@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro RPE - Entrenamiento</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #cbd5e1;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .time-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .time-group input {
+      flex: 1;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    #statusMessage {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Registro de Sesión</h2>
+    <form id="rpeForm">
+      
+      <!-- Modality (Cardio only) -->
+      <div class="form-group hidden" id="grp-modalidad">
+        <label for="modalidad">Modalidad</label>
+        <select id="modalidad">
+          <option value="">-- Seleccionar --</option>
+          <option value="Carrera">Carrera</option>
+          <option value="Ciclismo">Ciclismo</option>
+        </select>
+      </div>
+
+      <!-- Workout Block / Type -->
+      <div class="form-group hidden" id="grp-tipo">
+        <label for="tipo" id="lbl-tipo">Tipo de Entrenamiento</label>
+        <select id="tipo">
+          <!-- Dynamic options -->
+        </select>
+      </div>
+
+      <!-- Distance / Notes -->
+      <div class="form-group hidden" id="grp-kilometraje">
+        <label for="kilometraje" id="lbl-kilometraje">Kilometraje (km)</label>
+        <input type="text" id="kilometraje" placeholder="Ej: 10,5">
+      </div>
+
+      <!-- Heart Rate -->
+      <div class="form-group hidden" id="grp-pulso">
+        <label for="pulso">Pulso Medio (ppm)</label>
+        <input type="number" id="pulso" placeholder="Ej: 145">
+      </div>
+
+      <!-- Intensity / Pace Minutes & Seconds -->
+      <div class="form-group hidden" id="grp-intensidad">
+        <label id="lbl-inten">Intensidad PP</label>
+        <div class="time-group">
+          <input type="number" id="min" placeholder="Min / Watios">
+          <span id="delimiter-seg" class="hidden">:</span>
+          <input type="number" id="seg" class="hidden" placeholder="Seg">
+        </div>
+      </div>
+
+      <!-- Optional Comments -->
+      <div class="form-group">
+        <label for="comentarios">Comentarios</label>
+        <textarea id="comentarios" rows="3" placeholder="Sensaciones, observaciones..."></textarea>
+      </div>
+
+      <button type="submit" id="btnEnviar">Enviar Registro</button>
+    </form>
+    
+    <div id="statusMessage"></div>
+  </div>
+
+  <script>
+    // Global Configuration
+    const scriptRPE = "https://script.google.com/macros/s/.../exec";
+
+    // Local Storage Mock Data (simulates TinyBD1)
+    const localStorageData = {
+      nombre: "Atleta Demo",
+      fecha: new Date().toISOString().split('T')[0],
+      estatus: "Activo",
+      duración: "60",
+      rpe: "7",
+      entrenamiento: "Cardio", // Options: "Fuerza", "Cardio", "Otro"
+      Carrera: ["Rodaje", "Series", "Fartlek", "Cuesta"],
+      Ciclismo: ["Z2", "SweetSpot", "Vo2Max", "Recuperación"]
+    };
+
+    // Helper functions for TinyBD substitution
+    function getTinyBD(key) {
+      return localStorageData[key] || "";
+    }
+
+    // DOM Elements
+    const grpModalidad = document.getElementById('grp-modalidad');
+    const grpTipo = document.getElementById('grp-tipo');
+    const grpKilometraje = document.getElementById('grp-kilometraje');
+    const grpPulso = document.getElementById('grp-pulso');
+    const grpIntensidad = document.getElementById('grp-intensidad');
+
+    const selectModalidad = document.getElementById('modalidad');
+    const selectTipo = document.getElementById('tipo');
+    const lblTipo = document.getElementById('lbl-tipo');
+    const inputKilometraje = document.getElementById('kilometraje');
+    const lblKilometraje = document.getElementById('lbl-kilometraje');
+    const lblInten = document.getElementById('lbl-inten');
+    const inputMin = document.getElementById('min');
+    const inputSeg = document.getElementById('seg');
+    const delimiterSeg = document.getElementById('delimiter-seg');
+    const inputPulso = document.getElementById('pulso');
+    const textareaComentarios = document.getElementById('comentarios');
+    const form = document.getElementById('rpeForm');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // 1. Initialize logic based on 'entrenamiento' (RPE2.Initialize equivalent)
+    function initializeScreen() {
+      const entrenamiento = getTinyBD("entrenamiento");
+
+      if (entrenamiento === "Fuerza") {
+        grpModalidad.classList.add('hidden');
+        grpKilometraje.classList.add('hidden');
+        grpPulso.classList.add('hidden');
+        grpIntensidad.classList.add('hidden');
+
+        // Populate dynamic dynamic block options ["A", "B"]
+        selectTipo.innerHTML = `
+          <option value="">-- Seleccionar Bloque --</option>
+          <option value="A">Bloque A</option>
+          <option value="B">Bloque B</option>
+        `;
+        grpTipo.classList.remove('hidden');
+
+      } else if (entrenamiento === "Otro") {
+        grpModalidad.classList.add('hidden');
+        grpTipo.classList.add('hidden');
+        grpPulso.classList.add('hidden');
+        grpIntensidad.classList.add('hidden');
+
+        // Freeform distance field
+        lblKilometraje.textContent = "Notas / Distancia";
+        inputKilometraje.type = "text";
+        grpKilometraje.classList.remove('hidden');
+
+      } else if (entrenamiento === "Cardio") {
+        grpModalidad.classList.remove('hidden');
+        grpKilometraje.classList.remove('hidden');
+        grpPulso.classList.remove('hidden');
+        grpIntensidad.classList.remove('hidden');
+      }
+    }
+
+    // 2. modalidad.AfterPicking equivalent
+    selectModalidad.addEventListener('change', function() {
+      const modalidad = selectModalidad.value;
+      selectTipo.innerHTML = '<option value="">-- Seleccionar --</option>';
+
+      if (modalidad === "Carrera") {
+        lblInten.textContent = "Intensidad PP (Ritmo)";
+        inputSeg.classList.remove('hidden');
+        delimiterSeg.classList.remove('hidden');
+
+        // Load dynamic list options from storage
+        const opcionesCarrera = getTinyBD("Carrera");
+        opcionesCarrera.forEach(opcion => {
+          const opt = document.createElement('option');
+          opt.value = opcion;
+          opt.textContent = opcion;
+          selectTipo.appendChild(opt);
+        });
+        grpTipo.classList.remove('hidden');
+
+      } else if (modalidad === "Ciclismo") {
+        lblInten.textContent = "Intensidad PP (Watios)";
+        inputSeg.classList.add('hidden');
+        delimiterSeg.classList.add('hidden');
+
+        // Load dynamic list options from storage
+        const opcionesCiclismo = getTinyBD("Ciclismo");
+        opcionesCiclismo.forEach(opcion => {
+          const opt = document.createElement('option');
+          opt.value = opcion;
+          opt.textContent = opcion;
+          selectTipo.appendChild(opt);
+        });
+        grpTipo.classList.remove('hidden');
+      } else {
+        grpTipo.classList.add('hidden');
+      }
+    });
+
+    // 3. Botón1.Click equivalent (Form Submission)
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      let datosFormulario = {};
+      const modalidad = selectModalidad.value;
+
+      // Formatting comma delimiter replacement for distance values
+      const kilometrajeFormateado = inputKilometraje.value.replace(/\./g, ',');
+
+      if (modalidad === "Carrera") {
+        // Payload layout for Carrera (13 Fields)
+        datosFormulario = {
+          "447695566": getTinyBD("nombre"),
+          "2081534771": getTinyBD("fecha"),
+          "1398928361": getTinyBD("estatus"),
+          "1365149838": getTinyBD("duración"),
+          "588570418": getTinyBD("rpe"),
+          "1741028914": getTinyBD("entrenamiento"),
+          "1559998109": selectModalidad.value,
+          "2044148955": selectTipo.value,
+          "1154502400": kilometrajeFormateado,
+          "974882316": inputPulso.value,
+          "536031654": inputMin.value,
+          "167727428": inputSeg.value,
+          "1787909564": textareaComentarios.value
+        };
+
+      } else if (modalidad === "Ciclismo") {
+        // Payload layout for Ciclismo (12 Fields)
+        datosFormulario = {
+          "447695566": getTinyBD("nombre"),
+          "2081534771": getTinyBD("fecha"),
+          "1398928361": getTinyBD("estatus"),
+          "1365149838": getTinyBD("duración"),
+          "588570418": getTinyBD("rpe"),
+          "1741028914": getTinyBD("entrenamiento"),
+          "1559998109": selectModalidad.value,
+          "1179324040": selectTipo.value,
+          "1748461340": kilometrajeFormateado,
+          "138731787": inputPulso.value,
+          "942369874": inputMin.value,
+          "1787909564": textareaComentarios.value
+        };
+
+      } else {
+        // Payload layout for Fuerza or Otro (8 Fields)
+        datosFormulario = {
+          "447695566": getTinyBD("nombre"),
+          "2081534771": getTinyBD("fecha"),
+          "1398928361": getTinyBD("estatus"),
+          "1365149838": getTinyBD("duración"),
+          "588570418": getTinyBD("rpe"),
+          "1741028914": getTinyBD("entrenamiento"),
+          "2051757060": selectTipo.value || "",
+          "1156962475": kilometrajeFormateado,
+          "1787909564": textareaComentarios.value
+        };
+      }
+
+      // Execute POST fetch request
+      statusMessage.style.color = "blue";
+      statusMessage.textContent = "Enviando datos...";
+
+      fetch(scriptRPE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(datosFormulario),
+        mode: "no-cors" // Google Apps Script Web App standard mode
+      })
+      .then(() => {
+        statusMessage.style.color = "green";
+        statusMessage.textContent = "¡Registro enviado con éxito!";
+      })
+      .catch(error => {
+        console.error("Error al enviar:", error);
+        statusMessage.style.color = "red";
+        statusMessage.textContent = "Error al enviar los datos.";
+      });
+    });
+
+    // Run initialization on load
+    initializeScreen();
+  </script>
+</body>
+</html>
