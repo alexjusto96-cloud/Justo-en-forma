@@ -10,13 +10,14 @@
 
   <header style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #ffffff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15);">
     <h1 style="margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px;">Readiness</h1>
-    <span id="user-display" style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">Usuario</span>
+    <span id="user-display" style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;">Cargando...</span>
   </header>
 
   <main style="padding: 16px; max-width: 480px; margin: 0 auto; box-sizing: border-box;">
     <div style="background: #ffffff; border-radius: 16px; padding: 20px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
       <form id="readiness-form" style="display: flex; flex-direction: column; gap: 20px;">
 
+        <!-- Estado Muscular -->
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <label for="soreness" style="font-weight: 600; font-size: 0.95rem; color: #334155;">Estado muscular</label>
@@ -25,6 +26,7 @@
           <input type="range" id="soreness" min="0" max="10" value="5" data-type="good-right" class="mobile-slider">
         </div>
 
+        <!-- Energía -->
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <label for="fatiga" style="font-weight: 600; font-size: 0.95rem; color: #334155;">Energía</label>
@@ -33,6 +35,7 @@
           <input type="range" id="fatiga" min="0" max="10" value="5" data-type="good-right" class="mobile-slider">
         </div>
 
+        <!-- Calidad de Sueño -->
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <label for="sueno" style="font-weight: 600; font-size: 0.95rem; color: #334155;">Calidad de sueño</label>
@@ -41,6 +44,7 @@
           <input type="range" id="sueno" min="0" max="10" value="5" data-type="good-right" class="mobile-slider">
         </div>
 
+        <!-- Estrés -->
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <label for="estres" style="font-weight: 600; font-size: 0.95rem; color: #334155;">Estrés</label>
@@ -51,8 +55,8 @@
 
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 4px 0;">
 
+        <!-- Campos numéricos -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          
           <div>
             <label for="horas" style="display: block; font-weight: 600; font-size: 0.85rem; color: #475569; margin-bottom: 6px;">Horas sueño</label>
             <div style="position: relative; display: flex; align-items: center;">
@@ -68,7 +72,6 @@
               <span style="position: absolute; right: 10px; font-size: 0.8rem; font-weight: 600; color: #94a3b8; pointer-events: none;">ms</span>
             </div>
           </div>
-
         </div>
 
         <div>
@@ -84,6 +87,7 @@
           <textarea id="observaciones" rows="3" placeholder="¿Cómo te sientes hoy?..." style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; outline: none; box-sizing: border-box; background: #f8fafc; resize: none; font-family: inherit;"></textarea>
         </div>
 
+        <!-- Botones -->
         <div style="display: flex; gap: 12px; margin-top: 8px;">
           <button type="button" id="btn-atras" style="flex: 1; padding: 14px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer;">Atrás</button>
           <button type="submit" id="btn-enviar" style="flex: 2; padding: 14px; border: none; background: #2563eb; color: #ffffff; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">Enviar Registro</button>
@@ -93,101 +97,6 @@
     </div>
   </main>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Inyección de estilos globales para sliders y touch responsive
-      const style = document.createElement('style');
-      style.textContent = `
-        /* Reseteo para quitar apariencia azul por defecto */
-        input[type="range"].mobile-slider {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 100%;
-          height: 12px;
-          border-radius: 6px;
-          outline: none;
-          margin: 10px 0;
-          cursor: pointer;
-        }
-
-        /* Botón táctil grande optimizado para móvil (Chrome, Safari, Edge) */
-        input[type="range"].mobile-slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 26px;
-          height: 26px;
-          border-radius: 50%;
-          background: #ffffff;
-          border: 2px solid #0f172a;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-          cursor: pointer;
-        }
-
-        /* Botón táctil para Firefox */
-        input[type="range"].mobile-slider::-moz-range-thumb {
-          width: 26px;
-          height: 26px;
-          border-radius: 50%;
-          background: #ffffff;
-          border: 2px solid #0f172a;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-          cursor: pointer;
-        }
-
-        /* Efecto al presionar botones e inputs */
-        input:focus, textarea:focus {
-          border-color: #2563eb !important;
-          background-color: #ffffff !important;
-        }
-        button:active {
-          opacity: 0.85;
-          transform: scale(0.98);
-        }
-      `;
-      document.head.appendChild(style);
-
-      // Manejo dinámico de sliders
-      const sliders = document.querySelectorAll('input[type="range"]');
-
-      function updateSlider(slider) {
-        const valSpan = document.getElementById(`val-${slider.id}`);
-        if (valSpan) {
-          valSpan.textContent = slider.value;
-        }
-
-        const isGoodRight = slider.getAttribute('data-type') === 'good-right';
-        if (isGoodRight) {
-          slider.style.background = 'linear-gradient(to right, #ef4444, #eab308, #22c55e)';
-        } else {
-          slider.style.background = 'linear-gradient(to right, #22c55e, #eab308, #ef4444)';
-        }
-      }
-
-      sliders.forEach(slider => {
-        updateSlider(slider);
-        slider.addEventListener('input', (e) => updateSlider(e.target));
-      });
-
-      // Envío de formulario
-      const form = document.getElementById('readiness-form');
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const formData = {
-          soreness: document.getElementById('soreness').value,
-          fatiga: document.getElementById('fatiga').value,
-          sueno: document.getElementById('sueno').value,
-          estres: document.getElementById('estres').value,
-          horas: document.getElementById('horas').value,
-          hrv: document.getElementById('hrv').value,
-          peso: document.getElementById('peso').value,
-          observaciones: document.getElementById('observaciones').value
-        };
-
-        console.log('Datos enviados:', formData);
-        alert('¡Registro guardado con éxito!');
-      });
-    });
-  </script>
+  <script src="readiness.js"></script>
 </body>
 </html>
