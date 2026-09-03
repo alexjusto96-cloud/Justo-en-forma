@@ -1,4 +1,4 @@
-// --- VARIABLES GLOBAL Y DE ESTADO ---
+// --- VARIABLES GLOBALES Y DE ESTADO ---
 let dia1 = "";
 let dia2 = "";
 let dia3 = "";
@@ -33,14 +33,24 @@ function renderSeriesInputs() {
     const row = document.createElement("div");
     row.className = `serie-row ${i > 2 ? "disabled" : ""}`;
     row.id = `serie_row_${i}`;
+    
     row.innerHTML = `
-      <h4>Serie ${i} ${i >= 2 ? `<label><input type="checkbox" id="s${i}" ${i > 2 ? 'disabled' : ''}> Habilitar</label>` : ''}</h4>
-      Kg: <input type="text" id="kg${i}">
-      Intensidad (i): <input type="text" id="i${i}" readonly>
-      Reps: <input type="text" id="Rep${i}">
-      RIR: <input type="text" id="RIR${i}">
-      Rec: <input type="text" id="rec${i}">
-      RM: <input type="text" id="rm${i}">
+      <div class="serie-header">
+        <h4>Serie ${i}</h4>
+        ${i >= 2 ? `<label class="checkbox-inline" style="font-size: 12px;"><input type="checkbox" id="s${i}" ${i > 2 ? 'disabled' : ''}> Habilitar</label>` : ''}
+      </div>
+      <div class="grid-2col">
+        <div class="field-unit">Kg: <input type="text" id="kg${i}"></div>
+        <div class="field-unit">i: <input type="text" id="i${i}" readonly></div>
+      </div>
+      <div class="grid-2col">
+        <div class="field-unit">Reps: <input type="text" id="Rep${i}"></div>
+        <div class="field-unit">RIR: <input type="text" id="RIR${i}"></div>
+      </div>
+      <div class="grid-2col">
+        <div class="field-unit">Rec: <input type="text" id="rec${i}"></div>
+        <div class="field-unit">RM: <input type="text" id="rm${i}"></div>
+      </div>
     `;
     container.appendChild(row);
   }
@@ -56,31 +66,49 @@ function bindEvents() {
     document.getElementById("percentage").value = e.target.value;
   });
 
-  // Evento dinámico para el switch de Serie 3 (s3)
+  // Evento para sincronizar el ListPicker/Select de ejercicios
+  document.getElementById("listPicker1").addEventListener("change", (e) => {
+    document.getElementById("ejercicio").value = e.target.value;
+  });
+
+  // Manejo de la habilitación de series secuenciales (s2 -> s6)
   document.addEventListener("change", (e) => {
-    if (e.target.id === "s3") {
-      manejadorCambioS3(e.target.checked);
+    const targetId = e.target.id;
+    if (targetId.match(/^s[2-6]$/)) {
+      const numSerie = parseInt(targetId.replace("s", ""), 10);
+      manejadorCambioSerie(numSerie, e.target.checked);
     }
   });
 }
 
 function inicializarValores() {
-  const name = TinyDB.getValue("Usuario");
   document.getElementById("percentage").value = document.getElementById("slider1").value;
+  
+  // Cargar histórico de ejercicios en el select si existe
+  const rawEj = TinyDB.getValue("Ejercicio", "");
+  if (rawEj) {
+    const picker = document.getElementById("listPicker1");
+    picker.innerHTML = '<option value="">-- Seleccionar --</option>';
+    const lista = rawEj.split(",");
+    lista.forEach(ej => {
+      const opt = document.createElement("option");
+      opt.value = ej.trim();
+      opt.textContent = ej.trim();
+      picker.appendChild(opt);
+    });
+  }
 }
 
-// --- LÓGICA DE EVENTOS (Traducción directa de los Bloques) ---
+// --- LÓGICA DE EVENTOS (Traducción de los Bloques de App Inventor) ---
 
-// Bloque: Nuevo_ejercicio.Click
+// Bloque: Nuevo_ejercicio.Click[cite: 1]
 function ejecutarNuevoEjercicio() {
   const now = new Date();
   fecha = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
 
   document.getElementById("listPicker1").value = "";
-  // Cargar lista desde TinyDB
-  const ejGuardados = TinyDB.getValue("Ejercicio", "");
-  
   document.getElementById("ejercicio").value = "";
+  
   document.getElementById("con").value = "1";
   document.getElementById("pausaCon").value = "1";
   document.getElementById("ecc").value = "2";
@@ -88,10 +116,11 @@ function ejecutarNuevoEjercicio() {
 
   // Estados de habilitación de switches
   setElementEnabled("s2", true);
-  setElementEnabled("s3", false);
-  setElementEnabled("s4", false);
-  setElementEnabled("s5", false);
-  setElementEnabled("s6", false);
+  for (let i = 3; i <= 6; i++) {
+    setElementEnabled(`s${i}`, false);
+    const row = document.getElementById(`serie_row_${i}`);
+    if (row) row.classList.add("disabled");
+  }
 
   // Campos i1-i6 ReadOnly
   for (let i = 1; i <= 6; i++) {
@@ -107,27 +136,30 @@ function ejecutarNuevoEjercicio() {
     if (el) el.checked = false;
   });
 
-  // Limpiar campos de texto de series y temporizador
-  const camposTexto = ["kg1", "Rep1", "RIR1", "rec1", "i1", "rm1", "ejercicio", "textBox1"];
-  camposTexto.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
-  });
+  // Limpiar campos de texto de todas las series y observaciones
+  for (let i = 1; i <= 6; i++) {
+    ["kg", "Rep", "RIR", "rec", "i", "rm"].forEach(prefix => {
+      setVal(`${prefix}${i}`, "");
+    });
+  }
+  setVal("textBox1", "");
 
+  // Restablecer cronómetro
+  if (timerInterval) clearInterval(timerInterval);
   document.getElementById("minutos").innerText = "0";
   document.getElementById("segundos").innerText = "00";
+  
   document.getElementById("slider1").value = 50;
   document.getElementById("percentage").value = "50";
   document.getElementById("label12").innerText = "";
 }
 
-// Bloque: Enviar.Click (Google Form Query Params)
+// Bloque: Enviar.Click (Google Form Query Params)[cite: 1]
 function enviarFormularioGoogle() {
   const usuario = encodeURIComponent(TinyDB.getValue("Usuario"));
   const fechaEnc = encodeURIComponent(fecha);
   const vbtVal = encodeURIComponent(document.getElementById("vbt").checked ? "TRUE" : "FALSE");
-  const ejVal = encodeURIComponent(document.getElementById("ejercicio").value);
-
+  
   const params = new URLSearchParams({
     "entry.1052562463": usuario,
     "entry.2002526298": fecha,
@@ -137,11 +169,11 @@ function enviarFormularioGoogle() {
     "entry.2132618651": document.getElementById("pausaCon").value,
     "entry.1198689613": document.getElementById("ecc").value,
     "entry.2062861622": document.getElementById("pausaEcc").value,
-    "entry.631342381": document.getElementById("kg1").value,
-    "entry.1743166598": document.getElementById("i1").value,
-    "entry.189884999": document.getElementById("Rep1").value,
-    "entry.164706516": document.getElementById("RIR1").value,
-    "entry.297841540": document.getElementById("rec1").value,
+    "entry.631342381": getVal("kg1"),
+    "entry.1743166598": getVal("i1"),
+    "entry.189884999": getVal("Rep1"),
+    "entry.164706516": getVal("RIR1"),
+    "entry.297841540": getVal("rec1"),
     "entry.1579682820": getVal("kg2"),
     "entry.1209305030": getVal("i2"),
     "entry.676283789": getVal("Rep2"),
@@ -176,13 +208,12 @@ function enviarFormularioGoogle() {
     "entry.408397467": getVal("rm6")
   });
 
-  // Envío mediante petición GET sin CORS (comportamiento idéntico al Web component)
   fetch(`${FORM_URL}?${params.toString()}`, { mode: 'no-cors' })
-    .then(() => console.log("Enviado correctamente"))
+    .then(() => alert("Registro enviado con éxito"))
     .catch(err => console.error("Error al enviar:", err));
 }
 
-// Bloque: Consultar_entrenamientos.Click
+// Bloque: Consultar_entrenamientos.Click[cite: 1]
 function consultarEntrenamientos() {
   const scriptUrl = TinyDB.getValue("script");
   const usuario = encodeURIComponent(TinyDB.getValue("Usuario"));
@@ -190,6 +221,11 @@ function consultarEntrenamientos() {
   const ejEnc = encodeURIComponent(document.getElementById("ejercicio").value);
 
   const payload = `tipo=entrenamientoFuerza&usuario=${usuario}&date=${dateEnc}&listpicker=${ejEnc}`;
+
+  if (!scriptUrl) {
+    console.warn("URL de Apps Script no configurada en TinyDB");
+    return;
+  }
 
   fetch(scriptUrl, {
     method: "POST",
@@ -199,44 +235,54 @@ function consultarEntrenamientos() {
   .then(response => response.text())
   .then(data => {
     calendar = 0;
-    // Se deshabilita el botón equivalente a Post
-  });
+    console.log("Consulta realizada:", data);
+  })
+  .catch(err => console.error("Error al consultar:", err));
 }
 
-// Bloque: Fin.Click
+// Bloque: Fin.Click[cite: 1]
 function finalizarEntrenamiento() {
   last = "Fuerza";
   TinyDB.storeValue("Last", last);
-  // Redirección equivalente a openAnotherScreen("RPE")
   window.location.href = "RPE.html";
 }
 
-// Bloque: s3.Changed
-function manejadorCambioS3(isOn) {
-  const camposS3 = ["kg3", "i3", "Rep3", "RIR3", "rec3", "rm3"];
-  camposS3.forEach(id => setVal(id, ""));
-
-  const rowS4 = document.getElementById("serie_row_4");
-
+// Bloque: s3.Changed y Habilitación Dinámica[cite: 1]
+function manejadorCambioSerie(numSerie, isOn) {
+  const camposActuales = [`kg${numSerie}`, `i${numSerie}`, `Rep${numSerie}`, `RIR${numSerie}`, `rec${numSerie}`, `rm${numSerie}`];
+  
   if (isOn) {
-    setVal("kg3", getVal("kg2"));
-    setElementEnabled("s4", true);
-    camposS3.forEach(id => setElementEnabled(id, true));
-    if (rowS4) rowS4.classList.remove("disabled");
+    // Autocompletar kg con el valor de la serie anterior
+    const kgAnterior = getVal(`kg${numSerie - 1}`);
+    setVal(`kg${numSerie}`, kgAnterior);
 
-    // Iniciar cronómetro de descanso (Clock2.Timer logic)
+    // Habilitar la casilla de verificación de la siguiente serie
+    if (numSerie < 6) {
+      setElementEnabled(`s${numSerie + 1}`, true);
+      const siguienteRow = document.getElementById(`serie_row_${numSerie + 1}`);
+      if (siguienteRow) siguienteRow.classList.remove("disabled");
+    }
+
+    // Iniciar el cronómetro de descanso[cite: 1]
     inicio = Date.now();
     iniciarCronometro();
   } else {
-    setElementEnabled("s4", false);
-    const switchS4 = document.getElementById("s4");
-    if (switchS4) switchS4.checked = false;
-    camposS3.forEach(id => setElementEnabled(id, false));
-    if (rowS4) rowS4.classList.add("disabled");
+    // Deshabilitar subsiguientes
+    for (let i = numSerie; i <= 6; i++) {
+      if (i > numSerie) {
+        setElementEnabled(`s${i}`, false);
+        const switchEl = document.getElementById(`s${i}`);
+        if (switchEl) switchEl.checked = false;
+        
+        const row = document.getElementById(`serie_row_${i}`);
+        if (row) row.classList.add("disabled");
+      }
+      ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => setVal(`${prefix}${i}`, ""));
+    }
   }
 }
 
-// Temporizador equivalente a Clock2.Timer
+// Cronómetro de Descanso (Lógica del evento Clock2.Timer)[cite: 1]
 function iniciarCronometro() {
   if (timerInterval) clearInterval(timerInterval);
 
