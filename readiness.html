@@ -18,69 +18,78 @@
     <div class="card">
       <form id="readiness-form">
 
-        <!-- Estado Muscular -->
+        <!-- Estado Muscular (Rojo a Verde) -->
         <div class="slider-group">
           <div class="slider-header">
             <label for="soreness">Estado muscular</label>
             <span id="val-soreness" class="slider-value">5</span>
           </div>
-          <input type="range" id="soreness" min="0" max="10" value="5" class="slider">
+          <input type="range" id="soreness" min="0" max="10" value="5" class="slider slider-good-right">
         </div>
 
-        <!-- Energía / Fatiga -->
+        <!-- Energía / Fatiga (Rojo a Verde) -->
         <div class="slider-group">
           <div class="slider-header">
             <label for="fatiga">Energía</label>
             <span id="val-fatiga" class="slider-value">5</span>
           </div>
-          <input type="range" id="fatiga" min="0" max="10" value="5" class="slider">
+          <input type="range" id="fatiga" min="0" max="10" value="5" class="slider slider-good-right">
         </div>
 
-        <!-- Calidad de Sueño -->
+        <!-- Calidad de Sueño (Rojo a Verde) -->
         <div class="slider-group">
           <div class="slider-header">
             <label for="sueno">Calidad de sueño</label>
             <span id="val-sueno" class="slider-value">5</span>
           </div>
-          <input type="range" id="sueno" min="0" max="10" value="5" class="slider">
+          <input type="range" id="sueno" min="0" max="10" value="5" class="slider slider-good-right">
         </div>
 
-        <!-- Estrés -->
+        <!-- Estrés (Verde a Rojo - Invertido) -->
         <div class="slider-group">
           <div class="slider-header">
             <label for="estres">Estrés</label>
             <span id="val-estres" class="slider-value">5</span>
           </div>
-          <input type="range" id="estres" min="0" max="10" value="5" class="slider">
+          <input type="range" id="estres" min="0" max="10" value="5" class="slider slider-good-left">
         </div>
 
         <!-- Horas de Sueño -->
         <div class="form-group">
           <label for="horas">Horas de sueño</label>
-          <input type="number" id="horas" step="0.1" placeholder="Ej. 7.5">
+          <div class="input-wrapper">
+            <input type="number" id="horas" step="0.1" placeholder="Ej. 7.5">
+            <span class="input-unit">hs</span>
+          </div>
         </div>
 
         <!-- HRV -->
         <div class="form-group">
           <label for="hrv">HRV</label>
-          <input type="number" id="hrv" step="1" placeholder="Ej. 65">
+          <div class="input-wrapper">
+            <input type="number" id="hrv" step="1" placeholder="Ej. 65">
+            <span class="input-unit">ms</span>
+          </div>
         </div>
 
         <!-- Peso -->
         <div class="form-group">
-          <label for="peso">Peso (kg)</label>
-          <input type="number" id="peso" step="0.1" placeholder="Ej. 70.5">
+          <label for="peso">Peso</label>
+          <div class="input-wrapper">
+            <input type="number" id="peso" step="0.1" placeholder="Ej. 70.5">
+            <span class="input-unit">kg</span>
+          </div>
         </div>
 
         <!-- Observaciones -->
         <div class="form-group">
           <label for="observaciones">Observaciones</label>
-          <textarea id="observaciones" rows="3" placeholder="Añade algún comentario..."></textarea>
+          <textarea id="observaciones" rows="3" placeholder="Añade algún comentario sobre cómo te sientes hoy..."></textarea>
         </div>
 
         <div class="button-group">
-          <button type="submit" id="btn-enviar" class="btn-primary">Enviar</button>
           <button type="button" id="btn-atras" class="btn-secondary">Atrás</button>
+          <button type="submit" id="btn-enviar" class="btn-primary">Enviar</button>
         </div>
       </form>
     </div>
