@@ -38,6 +38,18 @@ const textareaComentarios = document.getElementById('comentarios');
 const form = document.getElementById('rpeForm');
 const statusMessage = document.getElementById('statusMessage');
 
+// Función auxiliar para habilitar/deshabilitar campos según selección
+function setFormFieldsDisabled(disabled) {
+  if (grpTipo) grpTipo.querySelectorAll('select, input').forEach(el => el.disabled = disabled);
+  if (inputKilometraje) inputKilometraje.disabled = disabled;
+  if (inputPulso) inputPulso.disabled = disabled;
+  if (inputMin) inputMin.disabled = disabled;
+  if (inputSeg) inputSeg.disabled = disabled;
+  if (textareaComentarios) textareaComentarios.disabled = disabled;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.disabled = disabled;
+}
+
 // 1. Inicialización según el tipo de entrenamiento (RPE2.Initialize)
 function initializeScreen() {
   const entrenamiento = getTinyBD("entrenamiento");
@@ -54,6 +66,7 @@ function initializeScreen() {
       <option value="B">Bloque B</option>
     `;
     grpTipo.classList.remove('hidden');
+    setFormFieldsDisabled(false);
 
   } else if (entrenamiento === "Otro") {
     grpModalidad.classList.add('hidden');
@@ -64,12 +77,23 @@ function initializeScreen() {
     lblKilometraje.textContent = "Notas / Distancia";
     inputKilometraje.type = "text";
     grpKilometraje.classList.remove('hidden');
+    setFormFieldsDisabled(false);
 
   } else if (entrenamiento === "Cardio") {
     grpModalidad.classList.remove('hidden');
     grpKilometraje.classList.remove('hidden');
     grpPulso.classList.remove('hidden');
     grpIntensidad.classList.remove('hidden');
+
+    // Inicializar desplegable con opción en blanco no-seleccionable a posteriori
+    selectModalidad.innerHTML = `
+      <option value="" disabled selected hidden>-- Seleccionar Modalidad --</option>
+      <option value="Carrera">Carrera</option>
+      <option value="Ciclismo">Ciclismo</option>
+    `;
+
+    // Bloquear campos hasta que se elija una modalidad
+    setFormFieldsDisabled(true);
   }
 }
 
@@ -79,6 +103,9 @@ selectModalidad.addEventListener('change', function() {
   selectTipo.innerHTML = '<option value="">-- Seleccionar --</option>';
 
   if (modalidad === "Carrera" || modalidad === "Ciclismo") {
+    // Habilitar campos del formulario
+    setFormFieldsDisabled(false);
+
     // 2.1 Ajustar Etiquetas e Inputs de Intensidad PP
     if (modalidad === "Carrera") {
       lblInten.textContent = "Intensidad PP (Ritmo)";
@@ -105,7 +132,7 @@ selectModalidad.addEventListener('change', function() {
     selectTipo.appendChild(groupEstandar);
 
     // 2.3 Cargar Opciones Específicas del Atleta (Guardadas en el Menú Principal)
-    const especificas = getTinyBD(modalidad); // Lee la clave "Carrera" o "Ciclismo"
+    const especificas = getTinyBD(modalidad);
     if (Array.isArray(especificas) && especificas.length > 0) {
       const groupEspecificas = document.createElement('optgroup');
       groupEspecificas.label = "Mis Entrenamientos Específicos";
@@ -125,9 +152,6 @@ selectModalidad.addEventListener('change', function() {
     }
 
     grpTipo.classList.remove('hidden');
-
-  } else {
-    grpTipo.classList.add('hidden');
   }
 });
 
