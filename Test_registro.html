@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Registro</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="date"], select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .hidden {
+      display: none !important;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .btn-submit {
+      background-color: #007bff;
+      color: white;
+    }
+    .btn-menu {
+      background-color: #6c757d;
+      color: white;
+    }
+    #notificador {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      color: #28a745;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="form-group">
+    <label for="nombre">Usuario</label>
+    <input type="text" id="nombre" readonly>
+  </div>
+
+  <div class="form-group">
+    <label for="fecha">Fecha</label>
+    <input type="date" id="fecha">
+  </div>
+
+  <div class="form-group">
+    <label for="uniMulti">Tipo de Test</label>
+    <select id="uniMulti">
+      <option value="" disabled selected>Selecciona tipo</option>
+      <option value="Bilateral">Bilateral</option>
+      <option value="Unilateral">Unilateral</option>
+    </select>
+  </div>
+
+  <div class="form-group hidden" id="group-lateralidad">
+    <label for="lateralidad">Lateralidad</label>
+    <select id="lateralidad" disabled>
+      <option value="" disabled selected>Selecciona lado</option>
+      <option value="IZQ">IZQ</option>
+      <option value="DCH">DCH</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="test">Test</label>
+    <select id="test" disabled>
+      <option value="" disabled selected>Selecciona test</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="resultadoPRE">Selección PRE</label>
+    <input type="text" id="resultadoPRE" readonly disabled>
+  </div>
+
+  <div class="form-group">
+    <label for="resultado">Resultado</label>
+    <input type="text" id="resultado" placeholder="Ingresa el resultado">
+  </div>
+
+  <div class="form-group">
+    <label for="observaciones">Observaciones</label>
+    <input type="text" id="observaciones">
+  </div>
+
+  <button type="button" class="btn-submit" id="btnEnviar">Registrar</button>
+  <button type="button" class="btn-menu" id="btnMenu">Menú principal</button>
+
+  <div id="notificador"></div>
+</div>
+
+<script src="test_registro.js"></script>
+</body>
+</html>
