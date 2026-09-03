@@ -1,21 +1,20 @@
 // Configuración Global (URL de tu Google Apps Script)
 const scriptRPE = "https://script.google.com/macros/s/AKfycbzKUOOv-1nsiiBBwZ6t9cmNQw6_ogU8Eue6CnZnm0cRgxvYZq462bCMTfmj2ItoEZFF/exec";
 
-// Datos simulados de LocalStorage (equivalente a TinyBD1)
-const localStorageData = {
-  nombre: "Atleta Demo",
-  fecha: new Date().toISOString().split('T')[0],
-  estatus: "Activo",
-  duración: "60",
-  rpe: "7",
-  entrenamiento: "Cardio", // Opciones: "Fuerza", "Cardio", "Otro"
-  Carrera: ["Rodaje", "Series", "Fartlek", "Cuesta"],
-  Ciclismo: ["Z2", "SweetSpot", "Vo2Max", "Recuperación"]
+// Opciones estándar generales (fijas para todos los usuarios)
+const opcionesEstandar = {
+  Carrera: ["Z2", "Tempo", "Umbral", "Series", "Otro"],
+  Ciclismo: ["Z2", "Tempo", "Umbral", "Series", "Otro"]
 };
 
-// Función auxiliar para simular TinyBD1.GetValue
+// Obtención de datos del almacenamiento local (equivalente a TinyBD1)
 function getTinyBD(key) {
-  return localStorageData[key] || "";
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : "";
+  } catch (e) {
+    return localStorage.getItem(key) || "";
+  }
 }
 
 // Elementos del DOM
@@ -39,7 +38,7 @@ const textareaComentarios = document.getElementById('comentarios');
 const form = document.getElementById('rpeForm');
 const statusMessage = document.getElementById('statusMessage');
 
-// 1. Inicialización según el tipo de entrenamiento (Equivalente a RPE2.Initialize)
+// 1. Inicialización según el tipo de entrenamiento (RPE2.Initialize)
 function initializeScreen() {
   const entrenamiento = getTinyBD("entrenamiento");
 
@@ -74,47 +73,57 @@ function initializeScreen() {
   }
 }
 
-// 2. Lógica al cambiar modalidad (Equivalente a modalidad.AfterPicking)
+// 2. Lógica al cambiar la modalidad en Cardio
 selectModalidad.addEventListener('change', function() {
   const modalidad = selectModalidad.value;
   selectTipo.innerHTML = '<option value="">-- Seleccionar --</option>';
 
-  if (modalidad === "Carrera") {
-    // Etiqueta y campos para Carrera (Min y Seg con delímitador :)
-    lblInten.textContent = "Intensidad PP (Ritmo)";
-    inputMin.placeholder = "Min";
-    inputSeg.classList.remove('hidden');
-    delimiterSeg.classList.remove('hidden');
-
-    // Cargar opciones dinámicas de Carrera
-    const opcionesCarrera = getTinyBD("Carrera");
-    if (Array.isArray(opcionesCarrera)) {
-      opcionesCarrera.forEach(opcion => {
-        const opt = document.createElement('option');
-        opt.value = opcion;
-        opt.textContent = opcion;
-        selectTipo.appendChild(opt);
-      });
+  if (modalidad === "Carrera" || modalidad === "Ciclismo") {
+    // 2.1 Ajustar Etiquetas e Inputs de Intensidad PP
+    if (modalidad === "Carrera") {
+      lblInten.textContent = "Intensidad PP (Ritmo)";
+      inputMin.placeholder = "Min";
+      inputSeg.classList.remove('hidden');
+      delimiterSeg.classList.remove('hidden');
+    } else {
+      lblInten.textContent = "Intensidad PP (Watios)";
+      inputMin.placeholder = "Watios";
+      inputSeg.classList.add('hidden');
+      delimiterSeg.classList.add('hidden');
     }
-    grpTipo.classList.remove('hidden');
 
-  } else if (modalidad === "Ciclismo") {
-    // Etiqueta y campo para Ciclismo (Watios sin segundos)
-    lblInten.textContent = "Intensidad PP (Watios)";
-    inputMin.placeholder = "Watios";
-    inputSeg.classList.add('hidden');
-    delimiterSeg.classList.add('hidden');
+    // 2.2 Cargar Opciones Estándar / Generales
+    const groupEstandar = document.createElement('optgroup');
+    groupEstandar.label = "Modalidades Generales";
+    
+    opcionesEstandar[modalidad].forEach(opcion => {
+      const opt = document.createElement('option');
+      opt.value = opcion;
+      opt.textContent = opcion;
+      groupEstandar.appendChild(opt);
+    });
+    selectTipo.appendChild(groupEstandar);
 
-    // Cargar opciones dinámicas de Ciclismo
-    const opcionesCiclismo = getTinyBD("Ciclismo");
-    if (Array.isArray(opcionesCiclismo)) {
-      opcionesCiclismo.forEach(opcion => {
-        const opt = document.createElement('option');
-        opt.value = opcion;
-        opt.textContent = opcion;
-        selectTipo.appendChild(opt);
+    // 2.3 Cargar Opciones Específicas del Atleta (Guardadas en el Menú Principal)
+    const especificas = getTinyBD(modalidad); // Lee la clave "Carrera" o "Ciclismo"
+    if (Array.isArray(especificas) && especificas.length > 0) {
+      const groupEspecificas = document.createElement('optgroup');
+      groupEspecificas.label = "Mis Entrenamientos Específicos";
+
+      especificas.forEach(opcion => {
+        if (!opcionesEstandar[modalidad].includes(opcion)) {
+          const opt = document.createElement('option');
+          opt.value = opcion;
+          opt.textContent = opcion;
+          groupEspecificas.appendChild(opt);
+        }
       });
+
+      if (groupEspecificas.children.length > 0) {
+        selectTipo.appendChild(groupEspecificas);
+      }
     }
+
     grpTipo.classList.remove('hidden');
 
   } else {
@@ -122,7 +131,7 @@ selectModalidad.addEventListener('change', function() {
   }
 });
 
-// 3. Envío del formulario
+// 3. Envío del Formulario al Apps Script
 form.addEventListener('submit', function(e) {
   e.preventDefault();
   
@@ -199,5 +208,5 @@ form.addEventListener('submit', function(e) {
   });
 });
 
-// Inicializar al cargar
+// Inicialización de pantalla al cargar
 initializeScreen();
