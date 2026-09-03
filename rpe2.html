@@ -82,6 +82,11 @@
       border-color: var(--primary);
     }
 
+    /* Estilo auxiliar para los sub-elementos de tipo */
+    .sub-input {
+      margin-bottom: 8px;
+    }
+
     /* Grupo de tiempo / campos dobles */
     .time-group {
       display: flex;
@@ -115,6 +120,11 @@
       background-color: var(--primary-hover);
     }
 
+    button:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+    }
+
     #statusMessage {
       margin-top: 15px;
       font-size: 0.9rem;
@@ -139,17 +149,23 @@
       <div id="grp-modalidad" class="form-group hidden">
         <label for="modalidad">Modalidad</label>
         <select id="modalidad">
-          <option value="Carrera">Carrera</option>
-          <option value="Ciclismo">Ciclismo</option>
+          <!-- Opciones dinámicas cargadas desde JS -->
         </select>
       </div>
 
       <!-- Tipo de Entrenamiento / Bloque -->
       <div id="grp-tipo" class="form-group hidden">
         <label id="lbl-tipo" for="tipo">Tipo de Entrenamiento</label>
-        <select id="tipo">
-          <!-- Opciones dinámicas generadas desde JS -->
-        </select>
+        
+        <!-- 1. Buscador del ListPicker -->
+        <input type="text" id="search-tipo" class="sub-input" placeholder="🔍 Buscar entrenamiento...">
+        
+        <!-- 2. Catálogo de opciones desplegado -->
+        <select id="tipo" size="5" class="sub-input"></select>
+        
+        <!-- 3. Campo de texto final (al seleccionar toma el valor o permite escribir un tipo nuevo) -->
+        <label for="tipo-texto" style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Valor que se registrará:</label>
+        <input type="text" id="tipo-texto" placeholder="Escribe o selecciona un entrenamiento">
       </div>
 
       <!-- Kilometraje -->
