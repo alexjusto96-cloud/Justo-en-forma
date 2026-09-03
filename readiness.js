@@ -56,14 +56,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aplicar estilo inicial de degradado
     updateSliderStyle(slider);
 
-    // Eventos para detectar cuándo el usuario desliza/interactúa
+    // Evento para marcar como tocado y actualizar valor visual
     const markAsTouched = (e) => {
       e.target.dataset.touched = "true";
       updateSlider(e.target);
     };
 
-    slider.addEventListener('input', markAsTouched);
-    slider.addEventListener('change', markAsTouched);
+    // Escuchar tanto eventos de cambio como de contacto inicial táctil/puntero
+    ['input', 'change', 'touchstart', 'mousedown', 'pointerdown'].forEach(eventType => {
+      slider.addEventListener(eventType, markAsTouched);
+    });
   });
 
   // Evento Botón Atrás
@@ -135,8 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Actualiza tanto el texto visible como los colores
 function updateSlider(slider) {
   const valSpan = document.getElementById(`val-${slider.id}`);
-  if (valSpan && slider.dataset.touched === 'true') {
-    valSpan.textContent = slider.value;
+  if (valSpan) {
+    if (slider.dataset.touched === 'true') {
+      valSpan.textContent = slider.value;
+    } else {
+      valSpan.textContent = '-';
+    }
   }
   updateSliderStyle(slider);
 }
