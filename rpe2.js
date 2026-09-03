@@ -26,7 +26,9 @@ const grpIntensidad = document.getElementById('grp-intensidad');
 
 const selectModalidad = document.getElementById('modalidad');
 const selectTipo = document.getElementById('tipo');
-const lblTipo = document.getElementById('lbl-tipo');
+const inputTipoTexto = document.getElementById('tipo-texto'); // Campo final editable
+const inputSearchTipo = document.getElementById('search-tipo');
+
 const inputKilometraje = document.getElementById('kilometraje');
 const lblKilometraje = document.getElementById('lbl-kilometraje');
 const lblInten = document.getElementById('lbl-inten');
@@ -38,11 +40,8 @@ const textareaComentarios = document.getElementById('comentarios');
 const form = document.getElementById('rpeForm');
 const statusMessage = document.getElementById('statusMessage');
 
-// Elementos UI para el buscador tipo ListPicker
-const inputSearchTipo = document.getElementById('search-tipo'); // <input type="text" id="search-tipo" placeholder="Buscar tipo...">
-
 // Variables de estado
-let opcionesActuales = [];
+let opcionesActuales = { estandar: [], especificas: [] };
 
 // Función auxiliar para habilitar/deshabilitar campos según selección
 function setFormFieldsDisabled(disabled) {
@@ -56,12 +55,11 @@ function setFormFieldsDisabled(disabled) {
   if (submitBtn) submitBtn.disabled = disabled;
 }
 
-// Cargar y renderizar opciones sin el "-- Seleccionar --"
+// Cargar y renderizar opciones del listpicker sin opción "-- Seleccionar --"
 function renderOptions(filtro = "") {
   selectTipo.innerHTML = "";
   
   const filtroLower = filtro.toLowerCase();
-
   const estandarFiltradas = opcionesActuales.estandar.filter(opt => opt.toLowerCase().includes(filtroLower));
   const especificasFiltradas = opcionesActuales.especificas.filter(opt => opt.toLowerCase().includes(filtroLower));
 
@@ -101,9 +99,10 @@ function initializeScreen() {
     grpIntensidad.classList.add('hidden');
 
     selectTipo.innerHTML = `
-      <option value="A">Bloque A</option>
-      <option value="B">Bloque B</option>
+      <option value="Bloque A">Bloque A</option>
+      <option value="Bloque B">Bloque B</option>
     `;
+    if (inputTipoTexto) inputTipoTexto.value = "Bloque A";
     grpTipo.classList.remove('hidden');
     setFormFieldsDisabled(false);
 
@@ -134,12 +133,19 @@ function initializeScreen() {
   }
 }
 
-// Evento de búsqueda dinámica en tiempo real
+// Evento de búsqueda dinámica en el buscador
 if (inputSearchTipo) {
   inputSearchTipo.addEventListener('input', function(e) {
     renderOptions(e.target.value);
   });
 }
+
+// Sincronización: Al hacer clic en un elemento de la lista, pasa su valor al campo de texto
+selectTipo.addEventListener('change', function() {
+  if (inputTipoTexto) {
+    inputTipoTexto.value = selectTipo.value;
+  }
+});
 
 // 2. Lógica al cambiar la modalidad en Cardio
 selectModalidad.addEventListener('change', function() {
@@ -160,7 +166,6 @@ selectModalidad.addEventListener('change', function() {
       delimiterSeg.classList.add('hidden');
     }
 
-    // Preparar listas de datos
     const estandar = opcionesEstandar[modalidad] || [];
     const rawEspecificas = getTinyBD(modalidad);
     const especificas = (Array.isArray(rawEspecificas) ? rawEspecificas : [])
@@ -168,9 +173,16 @@ selectModalidad.addEventListener('change', function() {
 
     opcionesActuales = { estandar, especificas };
 
-    // Limpiar campo de búsqueda y renderizar directo sin opción "-- Seleccionar --"
     if (inputSearchTipo) inputSearchTipo.value = "";
     renderOptions("");
+
+    // Seleccionar automáticamente el primer elemento y colocarlo en el campo de texto
+    if (selectTipo.options.length > 0) {
+      selectTipo.selectedIndex = 0;
+      if (inputTipoTexto) inputTipoTexto.value = selectTipo.value;
+    } else {
+      if (inputTipoTexto) inputTipoTexto.value = "";
+    }
 
     grpTipo.classList.remove('hidden');
   }
@@ -183,6 +195,8 @@ form.addEventListener('submit', function(e) {
   let datosFormulario = {};
   const modalidad = selectModalidad.value;
   const kilometrajeFormateado = inputKilometraje.value.replace(/\./g, ',');
+  // El valor del tipo de entrenamiento sale siempre del campo de texto editable
+  const tipoFinal = inputTipoTexto ? inputTipoTexto.value.trim() : selectTipo.value;
 
   if (modalidad === "Carrera") {
     datosFormulario = {
@@ -193,7 +207,7 @@ form.addEventListener('submit', function(e) {
       "588570418": getTinyBD("rpe"),
       "1741028914": getTinyBD("entrenamiento"),
       "1559998109": selectModalidad.value,
-      "2044148955": selectTipo.value,
+      "2044148955": tipoFinal,
       "1154502400": kilometrajeFormateado,
       "974882316": inputPulso.value,
       "536031654": inputMin.value,
@@ -210,7 +224,7 @@ form.addEventListener('submit', function(e) {
       "588570418": getTinyBD("rpe"),
       "1741028914": getTinyBD("entrenamiento"),
       "1559998109": selectModalidad.value,
-      "1179324040": selectTipo.value,
+      "1179324040": tipoFinal,
       "1748461340": kilometrajeFormateado,
       "138731787": inputPulso.value,
       "942369874": inputMin.value,
@@ -225,7 +239,7 @@ form.addEventListener('submit', function(e) {
       "1365149838": getTinyBD("duración"),
       "588570418": getTinyBD("rpe"),
       "1741028914": getTinyBD("entrenamiento"),
-      "2051757060": selectTipo.value || "",
+      "2051757060": tipoFinal || "",
       "1156962475": kilometrajeFormateado,
       "1787909564": textareaComentarios.value
     };
