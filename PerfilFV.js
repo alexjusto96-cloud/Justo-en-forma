@@ -113,7 +113,7 @@ button3.addEventListener('click', () => {
   window.location.href = "menu_principal.html";
 });
 
-// 4. Botón "Consultar" -> Llama al Apps Script
+// 4. Botón "Consultar" -> Envía los datos vía POST a doPostPerfilFV en Apps Script
 button1.addEventListener('click', () => {
   const tb1 = document.getElementById('textBox1')?.value || '';
   const tb2 = document.getElementById('textBox2')?.value || '';
@@ -126,43 +126,31 @@ button1.addEventListener('click', () => {
   const tb9 = document.getElementById('textBox9')?.value || '';
   const tb10 = document.getElementById('textBox10')?.value || '';
 
-  const params = new URLSearchParams({
-    usuario: globalJson,
-    ejercicio: textBox11.value.trim(),
-    c1: tb1, v1: tb2,
-    c2: tb3, v2: tb4,
-    c3: tb5, v3: tb6,
-    c4: tb7, v4: tb8,
-    c5: tb9, v5: tb10
-  });
+  // Formato JSON esperado por doPostPerfilFV (B: Cargas, D: VMP)
+  const payload = {
+    B: [tb1, tb3, tb5, tb7, tb9],
+    D: [tb2, tb4, tb6, tb8, tb10],
+    name: globalJson,
+    picker: textBox11.value.trim(),
+    checkbox: checkBox1.checked
+  };
 
-  fetch(`${scriptUrl}?${params.toString()}`)
-    .then(response => response.text())
+  fetch(scriptUrl, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
     .then(data => {
-      handleWeb1GotText(data);
+      // Procesa la respuesta JSON directa de doPostPerfilFV
+      if (data.label12 !== undefined) {
+        mejorText.textContent = data.label12;
+      }
+      if (data.label14 !== undefined) {
+        v1rmText.textContent = data.label14;
+      }
     })
     .catch(err => console.error("Error en Consultar:", err));
 });
-
-// Procesar respuesta del script para actualizar "Best" y "V1RM"
-function handleWeb1GotText(responseContent) {
-  let cleanText = responseContent
-    .replace(/\{/g, '')
-    .replace(/\}/g, '')
-    .replace(/"/g, '')
-    .replace(/\[/g, '')
-    .replace(/\]/g, '');
-
-  globalJson = cleanText;
-
-  // Extraer "Best"
-  mejorText.textContent = cleanText.substring(8, 19);
-
-  // Extraer "V1RM"
-  globalLongitud = cleanText.length;
-  const startIndex = globalLongitud - 4;
-  v1rmText.textContent = cleanText.substring(startIndex, startIndex + 4);
-}
 
 // 5. Botón "Grabar" -> Envío a Google Forms
 button2.addEventListener('click', () => {
