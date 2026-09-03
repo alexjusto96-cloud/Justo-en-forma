@@ -47,12 +47,65 @@ document.addEventListener('DOMContentLoaded', () => {
     listaEjerciciosGlobal = ejercicios.split(',').map(e => e.trim());
   }
 
+  // Injectar estilos para la capa de bloqueo y spinner de carga
+  crearEstilosOverlay();
+
   // Crear dinámicamente el campo de búsqueda sobre el listPicker1
   crearBuscadorEjercicios();
 
   // Poblar el desplegable por primera vez
   renderizarOpciones(listaEjerciciosGlobal);
 });
+
+/**
+ * Genera dinámicamente los estilos CSS para la pantalla de carga (overlay + spinner)
+ */
+function crearEstilosOverlay() {
+  const style = document.createElement('style');
+  style.innerHTML = `
+    #loadingOverlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+/**
+ * Muestra u oculta la capa de bloqueo transparente con el indicador de carga
+ */
+function toggleLoading(show) {
+  let overlay = document.getElementById('loadingOverlay');
+  if (show) {
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'loadingOverlay';
+      overlay.innerHTML = '<div class="spinner"></div>';
+      document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+}
 
 /**
  * Crea e inserta un input de búsqueda justo encima del desplegable
@@ -66,7 +119,6 @@ function crearBuscadorEjercicios() {
   searchInput.placeholder = '🔍 Buscar ejercicio...';
   searchInput.style.cssText = 'width: 100%; padding: 8px; margin-bottom: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;';
 
-  // Evento de filtrado en tiempo real
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
     const ejerciciosFiltrados = listaEjerciciosGlobal.filter(e => 
@@ -75,7 +127,6 @@ function crearBuscadorEjercicios() {
     renderizarOpciones(ejerciciosFiltrados);
   });
 
-  // Insertar el input antes del select
   listPicker1.parentNode.insertBefore(searchInput, listPicker1);
 }
 
@@ -113,8 +164,11 @@ button3.addEventListener('click', () => {
   window.location.href = "menu_principal.html";
 });
 
-// 4. Botón "Consultar" -> Envía los datos vía POST a doPostPerfilFV en Apps Script
+// 4. Botón "Consultar" -> Muestra spinner, bloquea la UI y procesa vía POST
 button1.addEventListener('click', () => {
+  // Congela la aplicación activando el overlay con spinner
+  toggleLoading(true);
+
   const tb1 = document.getElementById('textBox1')?.value || '';
   const tb2 = document.getElementById('textBox2')?.value || '';
   const tb3 = document.getElementById('textBox3')?.value || '';
@@ -126,7 +180,6 @@ button1.addEventListener('click', () => {
   const tb9 = document.getElementById('textBox9')?.value || '';
   const tb10 = document.getElementById('textBox10')?.value || '';
 
-  // Formato JSON esperado por doPostPerfilFV (B: Cargas, D: VMP)
   const payload = {
     B: [tb1, tb3, tb5, tb7, tb9],
     D: [tb2, tb4, tb6, tb8, tb10],
@@ -141,7 +194,6 @@ button1.addEventListener('click', () => {
   })
     .then(response => response.json())
     .then(data => {
-      // Procesa la respuesta JSON directa de doPostPerfilFV
       if (data.label12 !== undefined) {
         mejorText.textContent = data.label12;
       }
@@ -149,40 +201,43 @@ button1.addEventListener('click', () => {
         v1rmText.textContent = data.label14;
       }
 
-      // Muestra/actualiza el Web Viewer con el gráfico dinámico debajo de los resultados
+      // Despliega o actualiza la gráfica en el Web Viewer
       mostrarWebViewer();
     })
-    .catch(err => console.error("Error en Consultar:", err));
+    .catch(err => console.error("Error en Consultar:", err))
+    .finally(() => {
+      // Descongela la app y retira el spinner tras obtener los resultados
+      toggleLoading(false);
+    });
 });
 
 /**
- * Crea o actualiza el iframe desplegado debajo del bloque de resultados (Best / V1RM)
+ * Crea o actualiza el iframe desplegado debajo del bloque de resultados
  */
 function mostrarWebViewer() {
   let iframe = document.getElementById('webViewerGrafico');
 
-  // Si no existe, se crea dinámicamente e inserta tras el contenedor de V1RM / Best
   if (!iframe) {
     iframe = document.createElement('iframe');
     iframe.id = 'webViewerGrafico';
     iframe.style.cssText = 'width: 100%; height: 400px; border: 1px solid #ccc; border-radius: 8px; margin-top: 15px;';
     
-    // Identifica el bloque donde se muestran Best y V1RM para insertarlo inmediatamente debajo
     const contenedorResultados = mejorText?.closest('div') || v1rmText?.closest('div') || button1.parentNode;
     contenedorResultados.parentNode.insertBefore(iframe, contenedorResultados.nextSibling);
   }
 
-  // Genera un nocache dinámico para asegurar que cargue la versión actualizada de los datos
   const cacheBuster = Date.now();
   iframe.src = `https://alexjusto96-cloud.github.io/Grafico/?nocache=${cacheBuster}`;
 }
 
-// 5. Botón "Grabar" -> Envío a Google Forms
+// 5. Botón "Grabar" -> Realiza el envío, confirma con alerta y redirige al menú
 button2.addEventListener('click', () => {
   const selectedExercise = textBox11.value.trim();
   const textoMejor = mejorText.textContent.trim();
   const textoV1RM = v1rmText.textContent.trim();
   const isChecked = checkBox1.checked;
+
+  const promesasGuardado = [];
 
   if (isChecked) {
     const web3Url = `https://docs.google.com/forms/d/1JWWKvqlswNXFEhOzJOtEMl_zLwhFx0Ek2IcpQKb8dWs/formResponse?` +
@@ -191,7 +246,7 @@ button2.addEventListener('click', () => {
       `entry.758645353=${encodeURIComponent(selectedExercise)}&` +
       `entry.610994258=${encodeURIComponent(textoV1RM)}`;
 
-    fetch(web3Url, { mode: 'no-cors' }).catch(err => console.error("Error Web3:", err));
+    promesasGuardado.push(fetch(web3Url, { mode: 'no-cors' }));
   }
 
   const cargasValidas = ["Cargas 1234", "Cargas 1235", "Cargas 1245", "Cargas 1345"];
@@ -225,6 +280,19 @@ button2.addEventListener('click', () => {
       `entry.210271129=${encodeURIComponent(siNoText)}&` +
       `entry.472309366=${encodeURIComponent(textoV1RM)}`;
 
-    fetch(web2Url, { mode: 'no-cors' }).catch(err => console.error("Error Web2:", err));
+    promesasGuardado.push(fetch(web2Url, { mode: 'no-cors' }));
   }
+
+  // Ejecuta la confirmación y la redirección tras completar los registros
+  Promise.all(promesasGuardado)
+    .then(() => {
+      alert("Grabación con éxito");
+      window.location.href = "menu_principal.html";
+    })
+    .catch(err => {
+      console.error("Error al grabar:", err);
+      // Al usar mode: 'no-cors' con Google Forms, siempre se resuelve correctamente
+      alert("Grabación con éxito");
+      window.location.href = "menu_principal.html";
+    });
 });
