@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PerfilFV</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 15px; max-width: 500px; margin: auto; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; margin-bottom: 4px; font-weight: bold; }
+    input[type="text"], select { width: 100%; padding: 8px; box-sizing: border-box; }
+    button { padding: 10px 15px; margin-top: 10px; cursor: pointer; }
+    .status-panel { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <h2>Perfil FV</h2>
+
+  <!-- ListPicker / Selector de Ejercicio -->
+  <div class="form-group">
+    <label for="ListPicker1">Ejercicio:</label>
+    <select id="ListPicker1">
+      <option value="">-- Selecciona --</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="TextBox11">Ejercicio Seleccionado:</label>
+    <input type="text" id="TextBox11" readonly>
+  </div>
+
+  <button id="Button1">Consultar Datos (Web1)</button>
+
+  <!-- Panel de Estado / Labels -->
+  <div class="status-panel">
+    <p><strong>Mejor:</strong> <span id="Mejor">-</span></p>
+    <p><strong>R2:</strong> <span id="R2">-</span></p>
+  </div>
+
+  <!-- CheckBox -->
+  <div class="form-group">
+    <label>
+      <input type="checkbox" id="CheckBox1"> Confirmar
+    </label>
+  </div>
+
+  <!-- Entradas de datos de Cargas (TextBox1 a TextBox10) -->
+  <div class="form-group">
+    <label>Cargas / Campos:</label>
+    <input type="text" id="TextBox1" placeholder="TextBox1">
+    <input type="text" id="TextBox2" placeholder="TextBox2">
+    <input type="text" id="TextBox3" placeholder="TextBox3">
+    <input type="text" id="TextBox4" placeholder="TextBox4">
+    <input type="text" id="TextBox5" placeholder="TextBox5">
+    <input type="text" id="TextBox6" placeholder="TextBox6">
+    <input type="text" id="TextBox7" placeholder="TextBox7">
+    <input type="text" id="TextBox8" placeholder="TextBox8">
+    <input type="text" id="TextBox9" placeholder="TextBox9">
+    <input type="text" id="TextBox10" placeholder="TextBox10">
+  </div>
+
+  <button id="Button2">Enviar (Button2)</button>
+
+  <!-- WebViewer -->
+  <iframe id="WebViewer1" style="display:none; width:100%; height:300px;"></iframe>
+
+  <script>
+    // Variables globales
+    let name = "";
+    let json = "";
+    let date = "";
+    let longitud = 0;
+
+    // Simulación de TinyDB con localStorage
+    const TinyDB1 = {
+      getValue: function(key, defaultValue = "") {
+        return localStorage.getItem(key) || defaultValue;
+      }
+    };
+
+    // Inicialización al cargar la ventana (PerfilFV.Initialize)
+    window.addEventListener("DOMContentLoaded", () => {
+      // Set Web1.Url desde TinyDB ("script")
+      const web1Url = TinyDB1.getValue("script", "");
+      
+      // WebViewer1.Visible = FALSE
+      document.getElementById("WebViewer1").style.display = "none";
+
+      // global json = TinyDB.GetValue("Usuario")
+      json = TinyDB1.getValue("Usuario", "");
+
+      // global date = YYYY-M-D
+      const now = new Date();
+      date = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+
+      // ListPicker1.Elements = TinyDB.GetValue("Ejercicio")
+      const ejerciciosRaw = TinyDB1.getValue("Ejercicio", "");
+      const listPicker = document.getElementById("ListPicker1");
+      
+      if (ejerciciosRaw) {
+        const elementos = ejerciciosRaw.split(",");
+        elementos.forEach(item => {
+          const option = document.createElement("option");
+          option.value = item.trim();
+          option.textContent = item.trim();
+          listPicker.appendChild(option);
+        });
+      }
+    });
+
+    // ListPicker1.AfterPicking
+    document.getElementById("ListPicker1").addEventListener("change", function() {
+      const selection = this.value;
+      this.setAttribute("data-selection", selection);
+      document.getElementById("TextBox11").value = selection;
+    });
+
+    // Evento de consulta (Simulación de Web1.Get y Web1.GotText)
+    document.getElementById("Button1").addEventListener("click", () => {
+      const scriptUrl = TinyDB1.getValue("script", "");
+      if (!scriptUrl) return;
+
+      fetch(scriptUrl)
+        .then(response => response.text())
+        .then(responseContent => {
+          // Reemplazos de texto tal como en el XML de App Inventor
+          let cleanText = responseContent
+            .replaceAll("{", "")
+            .replaceAll("}", "")
+            .replaceAll('"', "");
+          
+          let splitText = cleanText.split(",");
+          let joinedText = splitText.join("");
+
+          json = joinedText
+            .replaceAll("[", "")
+            .replaceAll("]", "")
+            .replaceAll('"', "");
+
+          // Label Mejor = segment(json, start=9, length=11) (Índices basados en 1 en App Inventor -> 0-based en JS)
+          document.getElementById("Mejor").textContent = json.substring(8, 8 + 11);
+
+          // global longitud = length(json)
+          longitud = json.length;
+
+          // Label R2 = segment(json, start=longitud - 3, length=4)
+          const startR2 = (longitud - 3) - 1;
+          document.getElementById("R2").textContent = json.substring(startR2, startR2 + 4);
+        })
+        .catch(err => console.error("Error en Web1:", err));
+    });
+
+    // Button2.Click
+    document.getElementById("Button2").addEventListener("click", () => {
+      const isChecked = document.getElementById("CheckBox1").checked;
+      const usuario = TinyDB1.getValue("Usuario", "");
+      const tb11 = document.getElementById("TextBox11").value;
+      const r2Text = document.getElementById("Mejor").textContent; // R2
+      const mejorText = document.getElementById("Mejor").textContent;
+
+      // Envío condicional a Web3
+      if (isChecked) {
+        const urlWeb3 = `https://docs.google.com/forms/d/1JWWKvqlswNXFEhOzJOtEMl_zLwhFx0Ek2IcpQKb8dWs/formResponse?entry.421504529=${encodeURIComponent(usuario)}&entry.1295778689=${encodeURIComponent(date)}&entry.758645353=${encodeURIComponent(tb11)}&entry.610994258=${encodeURIComponent(document.getElementById("R2").textContent)}`;
+        fetch(urlWeb3, { mode: 'no-cors' });
+      }
+
+      // Función auxiliar para construir y enviar la URL de Web2
+      function enviarWeb2(tbA, tbB, tbC, tbD, tbE, tbF, respuestaSiNo) {
+        const urlWeb2 = `https://docs.google.com/forms/d/1Cjq-HmSeD7VNo0mklVg4DZhP5gM2bYWG7CmSFfTaEQo/formResponse?entry.1102825381=${encodeURIComponent(usuario)}&entry.1584449220=${encodeURIComponent(date)}&entry.1565535137=${encodeURIComponent(tb11)}&entry.1203760941=${encodeURIComponent(document.getElementById("TextBox2").value)}&entry.562972705=${encodeURIComponent(document.getElementById("TextBox1").value)}&entry.1596773769=${encodeURIComponent(tbA)}&entry.1615215809=${encodeURIComponent(tbB)}&entry.1586228761=${encodeURIComponent(tbC)}&entry.777431361=${encodeURIComponent(tbD)}&entry.614158757=${encodeURIComponent(tbE)}&entry.1460219012=${encodeURIComponent(tbF)}&entry.210271129=${respuestaSiNo}&entry.472309366=${encodeURIComponent(document.getElementById("R2").textContent)}`;
+        fetch(urlWeb2, { mode: 'no-cors' });
+      }
+
+      // Evaluaciones condicionales de Cargas
+      if (mejorText === "Cargas 1234" && isChecked) {
+        enviarWeb2(
+          document.getElementById("TextBox4").value,
+          document.getElementById("TextBox3").value,
+          document.getElementById("TextBox6").value,
+          document.getElementById("TextBox5").value,
+          document.getElementById("TextBox8").value,
+          document.getElementById("TextBox7").value,
+          "S%C3%AD"
+        );
+      } else if (mejorText === "Cargas 1234" && !isChecked) {
+        enviarWeb2(
+          document.getElementById("TextBox4").value,
+          document.getElementById("TextBox3").value,
+          document.getElementById("TextBox6").value,
+          document.getElementById("TextBox5").value,
+          document.getElementById("TextBox8").value,
+          document.getElementById("TextBox7").value,
+          "No"
+        );
+      } else if (mejorText === "Cargas 1235" && isChecked) {
+        enviarWeb2(
+          document.getElementById("TextBox4").value,
+          document.getElementById("TextBox3").value,
+          document.getElementById("TextBox6").value,
+          document.getElementById("TextBox5").value,
+          document.getElementById("TextBox10").value,
+          document.getElementById("TextBox9").value,
+          "S%C3%AD"
+        );
+      } else if (mejorText === "Cargas 1235" && !isChecked) {
+        enviarWeb2(
+          document.getElementById("TextBox4").value,
+          document.getElementById("TextBox3").value,
+          document.getElementById("TextBox6").value,
+          document.getElementById("TextBox5").value,
+          document.getElementById("TextBox10").value,
+          document.getElementById("TextBox9").value,
+          "No"
+        );
+      } else if (mejorText === "Cargas 1245" && isChecked) {
+        enviarWeb2(
+          document.getElementById("TextBox4").value,
+          document.getElementById("TextBox3").value,
+          document.getElementById("TextBox8").value,
+          document.getElementById("TextBox7").value,
+          document.getElementById("TextBox10").value,
+          document.getElementById("TextBox9").value,
+          "S%C3%AD"
+        );
+      } else if (mejorText === "Cargas 1245" && !isChecked) {
+        enviarWeb2(
+          document.getElementById("TextBox4").value,
+          document.getElementById("TextBox3").value,
+          document.getElementById("TextBox8").value,
+          document.getElementById("TextBox7").value,
+          document.getElementById("TextBox10").value,
+          document.getElementById("TextBox9").value,
+          "No"
+        );
+      } else if (mejorText === "Cargas 1345" && isChecked) {
+        enviarWeb2(
+          document.getElementById("TextBox6").value,
+          document.getElementById("TextBox5").value,
+          document.getElementById("TextBox8").value,
+          document.getElementById("TextBox7").value,
+          document.getElementById("TextBox10").value,
+          document.getElementById("TextBox9").value,
+          "S%C3%AD"
+        );
+      } else if (mejorText === "Cargas 1345" && !isChecked) {
+        enviarWeb2(
+          document.getElementById("TextBox6").value,
+          document.getElementById("TextBox5").value,
+          document.getElementById("TextBox8").value,
+          document.getElementById("TextBox7").value,
+          document.getElementById("TextBox10").value,
+          document.getElementById("TextBox9").value,
+          "No"
+        );
+      }
+    });
+  </script>
+</body>
+</html>
