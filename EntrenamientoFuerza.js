@@ -9,6 +9,8 @@ let last = "";
 let rm = 0;
 let inicio = 0;
 let timerInterval = null;
+let currentTextIndex = 0;
+const textosNavegacion = ["Texto informativo 1", "Texto informativo 2", "Texto informativo 3"];
 
 // Simulación de Almacenamiento Local (sustituye a TinyDB)
 const TinyDB = {
@@ -23,33 +25,31 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSeriesInputs();
   bindEvents();
   inicializarValores();
+  actualizarTextoNavegacion();
 });
 
 function renderSeriesInputs() {
   const container = document.getElementById("seriesContainer");
   container.innerHTML = "";
 
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 7; i++) {
     const row = document.createElement("div");
-    row.className = `serie-row ${i > 2 ? "disabled" : ""}`;
+    row.className = `serie-row ${i > 1 ? "disabled" : ""}`;
     row.id = `serie_row_${i}`;
     
     row.innerHTML = `
-      <div class="serie-header">
-        <h4>Serie ${i}</h4>
-        ${i >= 2 ? `<label class="checkbox-inline" style="font-size: 12px;"><input type="checkbox" id="s${i}" ${i > 2 ? 'disabled' : ''}> Habilitar</label>` : ''}
+      <div class="serie-header" style="margin-bottom: 4px;">
+        <h4 style="font-size: 13px;">Serie ${i}</h4>
       </div>
-      <div class="grid-2col">
-        <div class="field-unit">Kg: <input type="text" id="kg${i}"></div>
-        <div class="field-unit">i: <input type="text" id="i${i}" readonly></div>
-      </div>
-      <div class="grid-2col">
-        <div class="field-unit">Reps: <input type="text" id="Rep${i}"></div>
-        <div class="field-unit">RIR: <input type="text" id="RIR${i}"></div>
-      </div>
-      <div class="grid-2col">
-        <div class="field-unit">Rec: <input type="text" id="rec${i}"></div>
-        <div class="field-unit">RM: <input type="text" id="rm${i}"></div>
+      <div class="grid-8col">
+        <div><input type="checkbox" id="s${i}" ${i === 1 ? 'checked' : ''} ${i > 1 ? 'disabled' : ''}></div>
+        <div style="text-align:center; font-weight:bold;">${i}</div>
+        <div><input type="text" id="kg${i}" placeholder="Kg"></div>
+        <div><input type="text" id="i${i}" placeholder="Int" readonly></div>
+        <div><input type="text" id="Rep${i}" placeholder="Reps"></div>
+        <div><input type="text" id="RIR${i}" placeholder="RIR"></div>
+        <div><input type="text" id="rec${i}" placeholder="R´"></div>
+        <div><input type="text" id="rm${i}" placeholder="RM"></div>
       </div>
     `;
     container.appendChild(row);
@@ -63,7 +63,19 @@ function bindEvents() {
   document.getElementById("fin").addEventListener("click", finalizarEntrenamiento);
 
   document.getElementById("slider1").addEventListener("input", (e) => {
-    document.getElementById("percentage").value = e.target.value;
+    const val = e.target.value;
+    document.getElementById("percentage").value = val + "%";
+    calcularRMAslider(val);
+  });
+
+  document.getElementById("btnTextPrev").addEventListener("click", () => {
+    currentTextIndex = (currentTextIndex - 1 + textosNavegacion.length) % textosNavegacion.length;
+    actualizarTextoNavegacion();
+  });
+
+  document.getElementById("btnTextNext").addEventListener("click", () => {
+    currentTextIndex = (currentTextIndex + 1) % textosNavegacion.length;
+    actualizarTextoNavegacion();
   });
 
   // Evento para sincronizar el ListPicker/Select de ejercicios
@@ -71,18 +83,31 @@ function bindEvents() {
     document.getElementById("ejercicio").value = e.target.value;
   });
 
-  // Manejo de la habilitación de series secuenciales (s2 -> s6)
+  // Manejo de la habilitación de switches de serie (s1 -> s7)
   document.addEventListener("change", (e) => {
     const targetId = e.target.id;
-    if (targetId.match(/^s[2-6]$/)) {
+    if (targetId.match(/^s[1-7]$/)) {
       const numSerie = parseInt(targetId.replace("s", ""), 10);
       manejadorCambioSerie(numSerie, e.target.checked);
     }
   });
 }
 
+function actualizarTextoNavegacion() {
+  document.getElementById("navTextDisplay").innerText = `${textosNavegacion[currentTextIndex]} (${currentTextIndex + 1}/3)`;
+}
+
+function calcularRMAslider(porcentaje) {
+  const rmVal = parseFloat(document.getElementById("rmRef").value) || 0;
+  const resultado = (rmVal * (porcentaje / 100)).toFixed(1);
+  document.getElementById("rmResultKg").value = resultado;
+}
+
 function inicializarValores() {
-  document.getElementById("percentage").value = document.getElementById("slider1").value;
+  const sliderVal = document.getElementById("slider1").value;
+  document.getElementById("percentage").value = sliderVal + "%";
+  document.getElementById("rmRef").value = "100"; // Valor de referencia por defecto para ejemplo
+  calcularRMAslider(sliderVal);
   
   // Cargar histórico de ejercicios en el select si existe
   const rawEj = TinyDB.getValue("Ejercicio", "");
@@ -101,7 +126,6 @@ function inicializarValores() {
 
 // --- LÓGICA DE EVENTOS (Traducción de los Bloques de App Inventor) ---
 
-// Bloque: Nuevo_ejercicio.Click[cite: 1]
 function ejecutarNuevoEjercicio() {
   const now = new Date();
   fecha = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -115,15 +139,19 @@ function ejecutarNuevoEjercicio() {
   document.getElementById("pausaEcc").value = "1";
 
   // Estados de habilitación de switches
-  setElementEnabled("s2", true);
-  for (let i = 3; i <= 6; i++) {
+  setElementEnabled("s1", true);
+  document.getElementById("s1").checked = true;
+  const row1 = document.getElementById(`serie_row_1`);
+  if (row1) row1.classList.remove("disabled");
+
+  for (let i = 2; i <= 7; i++) {
     setElementEnabled(`s${i}`, false);
     const row = document.getElementById(`serie_row_${i}`);
     if (row) row.classList.add("disabled");
   }
 
-  // Campos i1-i6 ReadOnly
-  for (let i = 1; i <= 6; i++) {
+  // Campos i1-i7 ReadOnly
+  for (let i = 1; i <= 7; i++) {
     const field = document.getElementById(`i${i}`);
     if (field) field.readOnly = true;
   }
@@ -131,13 +159,15 @@ function ejecutarNuevoEjercicio() {
   document.getElementById("label32").innerText = "";
 
   // Reset switches
-  ["s2", "s3", "s4", "s5", "s6", "vbt"].forEach(id => {
-    const el = document.getElementById(id);
+  for (let i = 2; i <= 7; i++) {
+    const el = document.getElementById(`s${i}`);
     if (el) el.checked = false;
-  });
+  }
+  const vbtEl = document.getElementById("vbt");
+  if (vbtEl) vbtEl.checked = false;
 
   // Limpiar campos de texto de todas las series y observaciones
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 7; i++) {
     ["kg", "Rep", "RIR", "rec", "i", "rm"].forEach(prefix => {
       setVal(`${prefix}${i}`, "");
     });
@@ -150,14 +180,13 @@ function ejecutarNuevoEjercicio() {
   document.getElementById("segundos").innerText = "00";
   
   document.getElementById("slider1").value = 50;
-  document.getElementById("percentage").value = "50";
+  document.getElementById("percentage").value = "50%";
+  calcularRMAslider(50);
   document.getElementById("label12").innerText = "";
 }
 
-// Bloque: Enviar.Click (Google Form Query Params)[cite: 1]
 function enviarFormularioGoogle() {
   const usuario = encodeURIComponent(TinyDB.getValue("Usuario"));
-  const fechaEnc = encodeURIComponent(fecha);
   const vbtVal = encodeURIComponent(document.getElementById("vbt").checked ? "TRUE" : "FALSE");
   
   const params = new URLSearchParams({
@@ -213,7 +242,6 @@ function enviarFormularioGoogle() {
     .catch(err => console.error("Error al enviar:", err));
 }
 
-// Bloque: Consultar_entrenamientos.Click[cite: 1]
 function consultarEntrenamientos() {
   const scriptUrl = TinyDB.getValue("script");
   const usuario = encodeURIComponent(TinyDB.getValue("Usuario"));
@@ -240,35 +268,32 @@ function consultarEntrenamientos() {
   .catch(err => console.error("Error al consultar:", err));
 }
 
-// Bloque: Fin.Click[cite: 1]
 function finalizarEntrenamiento() {
   last = "Fuerza";
   TinyDB.storeValue("Last", last);
   window.location.href = "RPE.html";
 }
 
-// Bloque: s3.Changed y Habilitación Dinámica[cite: 1]
 function manejadorCambioSerie(numSerie, isOn) {
-  const camposActuales = [`kg${numSerie}`, `i${numSerie}`, `Rep${numSerie}`, `RIR${numSerie}`, `rec${numSerie}`, `rm${numSerie}`];
-  
   if (isOn) {
-    // Autocompletar kg con el valor de la serie anterior
-    const kgAnterior = getVal(`kg${numSerie - 1}`);
-    setVal(`kg${numSerie}`, kgAnterior);
+    if (numSerie > 1) {
+      const kgAnterior = getVal(`kg${numSerie - 1}`);
+      setVal(`kg${numSerie}`, kgAnterior);
+    }
 
     // Habilitar la casilla de verificación de la siguiente serie
-    if (numSerie < 6) {
+    if (numSerie < 7) {
       setElementEnabled(`s${numSerie + 1}`, true);
       const siguienteRow = document.getElementById(`serie_row_${numSerie + 1}`);
       if (siguienteRow) siguienteRow.classList.remove("disabled");
     }
 
-    // Iniciar el cronómetro de descanso[cite: 1]
+    // Iniciar el cronómetro de descanso
     inicio = Date.now();
     iniciarCronometro();
   } else {
     // Deshabilitar subsiguientes
-    for (let i = numSerie; i <= 6; i++) {
+    for (let i = numSerie; i <= 7; i++) {
       if (i > numSerie) {
         setElementEnabled(`s${i}`, false);
         const switchEl = document.getElementById(`s${i}`);
@@ -282,7 +307,6 @@ function manejadorCambioSerie(numSerie, isOn) {
   }
 }
 
-// Cronómetro de Descanso (Lógica del evento Clock2.Timer)[cite: 1]
 function iniciarCronometro() {
   if (timerInterval) clearInterval(timerInterval);
 
