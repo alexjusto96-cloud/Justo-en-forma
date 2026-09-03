@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-entrenamiento-fuerza').addEventListener('click', () => {
-    window.location.href = 'EntrenamientoFurza.html';
+    window.location.href = 'EntrenamientoFuerza.html';
   });
 
   document.getElementById('btn-registrar-test').addEventListener('click', () => {
