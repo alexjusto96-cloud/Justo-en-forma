@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Entrenamientos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    .viewers-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    iframe {
+      width: 100%;
+      border: 1px solid #ccc;
+      transition: height 0.3s ease;
+    }
+
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .row > * {
+      flex: 1;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    select, input, button {
+      padding: 8px;
+      font-size: 0.9em;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Visores para Gráfico y Tabla -->
+  <div class="viewers-container">
+    <iframe id="grafico" src="about:blank" style="height: 0px;"></iframe>
+    <iframe id="tabla" src="about:blank" style="height: 0px;"></iframe>
+  </div>
+
+  <div class="form-section">
+    <!-- Fila 1: Entrenamiento -->
+    <div class="row">
+      <label>Entrenamiento:</label>
+      <select id="entrenamiento">
+        <option value=""></option>
+        <option value="Fuerza">Fuerza</option>
+        <option value="Cardio">Cardio</option>
+      </select>
+    </div>
+
+    <!-- Fila 2: Ejercicio y Modalidad -->
+    <div class="row">
+      <label>Ejercicio:</label>
+      <select id="ejercicio"></select>
+      
+      <label>Modalidad:</label>
+      <select id="modalidad2"></select>
+    </div>
+
+    <!-- Fila 3: Fecha y Últimos X Días -->
+    <div class="row">
+      <label>Fecha:</label>
+      <input type="date" id="datePicker1">
+
+      <label>Últimos X días:</label>
+      <select id="xDays">
+        <option value=""></option>
+        <option value="7">7</option>
+        <option value="14">14</option>
+        <option value="30">30</option>
+        <option value="90">90</option>
+        <option value="180">180</option>
+        <option value="365">365</option>
+      </select>
+    </div>
+
+    <!-- Fila 4: Botones de Consulta -->
+    <div class="row">
+      <button id="consultarRendimiento">Consultar rendimiento</button>
+      <button id="consultarEntrenamiento">Consultar entrenamiento</button>
+    </div>
+  </div>
+
+  <script src="consulta.js"></script>
+</body>
+</html>
