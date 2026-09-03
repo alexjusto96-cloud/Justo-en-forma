@@ -1,334 +1,191 @@
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Sesión</title>
 
   <style>
-
+    /* ==========================================
+       VARIABLES Y CONFIGURACIÓN GLOBAL
+       ========================================== */
     :root {
-
       --primary: #2563eb;
-
       --primary-hover: #1d4ed8;
-
       --bg: #f8fafc;
-
       --card-bg: #ffffff;
-
       --text: #1e293b;
-
       --border: #cbd5e1;
-
     }
 
-
+    * {
+      box-sizing: border-box;
+    }
 
     body {
-
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-      background-color: var(--bg);
-
-      color: var(--text);
-
-      margin: 0;
-
-      padding: 20px;
-
       display: flex;
-
       justify-content: center;
-
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-
-
+    /* ==========================================
+       CONTENEDOR PRINCIPAL
+       ========================================== */
     .container {
-
-      background-color: var(--card-bg);
-
-      border-radius: 12px;
-
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-
       width: 100%;
-
       max-width: 480px;
-
       padding: 24px;
-
-      box-sizing: border-box;
-
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-
-
 
     h2 {
-
       margin-top: 0;
-
       color: var(--primary);
-
       text-align: center;
-
     }
 
-
-
+    /* ==========================================
+       FORMULARIO E INPUTS
+       ========================================== */
     .form-group {
-
-      margin-bottom: 16px;
-
       display: flex;
-
       flex-direction: column;
-
+      margin-bottom: 16px;
     }
-
-
 
     label {
-
-      font-weight: 600;
-
-      font-size: 0.9rem;
-
       margin-bottom: 6px;
-
+      font-size: 0.9rem;
+      font-weight: 600;
     }
 
-
-
-    input, select, textarea {
-
+    input, 
+    select, 
+    textarea {
       padding: 10px 12px;
-
       border: 1px solid var(--border);
-
       border-radius: 6px;
-
       font-size: 1rem;
-
       outline: none;
-
-      transition: border-color 0.2s;
-
+      transition: border-color 0.2s ease;
     }
 
-
-
-    input:focus, select:focus, textarea:focus {
-
+    input:focus, 
+    select:focus, 
+    textarea:focus {
       border-color: var(--primary);
-
     }
 
-
-
+    /* Grupo de tiempo / campos dobles */
     .time-group {
-
       display: flex;
-
       align-items: center;
-
       gap: 8px;
-
     }
-
-
 
     .time-group input {
-
       flex: 1;
-
       text-align: center;
-
     }
 
-
-
-    .hidden {
-
-      display: none !important;
-
-    }
-
-
-
+    /* ==========================================
+       BOTÓN Y MENSAJES DE ESTADO
+       ========================================== */
     button {
-
       width: 100%;
-
-      padding: 12px;
-
-      background-color: var(--primary);
-
-      color: white;
-
-      border: none;
-
-      border-radius: 6px;
-
-      font-size: 1rem;
-
-      font-weight: 600;
-
-      cursor: pointer;
-
       margin-top: 10px;
-
-      transition: background-color 0.2s;
-
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background-color: var(--primary);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
     }
-
-
 
     button:hover {
-
       background-color: var(--primary-hover);
-
     }
-
-
 
     #statusMessage {
-
       margin-top: 15px;
-
-      text-align: center;
-
       font-size: 0.9rem;
-
       font-weight: 600;
-
+      text-align: center;
     }
 
+    /* Clases de utilidad */
+    .hidden {
+      display: none !important;
+    }
   </style>
-
 </head>
-
 <body>
 
-
-
-  <div class="container">
-
+  <main class="container">
     <h2>Registro de Sesión</h2>
 
     <form id="rpeForm">
-
       
-
       <!-- Modalidad (Solo Cardio) -->
-
-      <div class="form-group hidden" id="grp-modalidad">
-
+      <div id="grp-modalidad" class="form-group hidden">
         <label for="modalidad">Modalidad</label>
-
         <select id="modalidad">
-
-          
           <option value="Carrera">Carrera</option>
-
           <option value="Ciclismo">Ciclismo</option>
-
         </select>
-
       </div>
-
-
 
       <!-- Tipo de Entrenamiento / Bloque -->
-
-      <div class="form-group hidden" id="grp-tipo">
-
-        <label for="tipo" id="lbl-tipo">Tipo de Entrenamiento</label>
-
+      <div id="grp-tipo" class="form-group hidden">
+        <label id="lbl-tipo" for="tipo">Tipo de Entrenamiento</label>
         <select id="tipo">
-
-          <!-- Opciones dinámicas -->
-
+          <!-- Opciones dinámicas generadas desde JS -->
         </select>
-
       </div>
 
-
-
-      <!-- Kilometraje / Notas -->
-
-      <div class="form-group hidden" id="grp-kilometraje">
-
-        <label for="kilometraje" id="lbl-kilometraje">Kilometraje (km)</label>
-
+      <!-- Kilometraje -->
+      <div id="grp-kilometraje" class="form-group hidden">
+        <label id="lbl-kilometraje" for="kilometraje">Kilometraje (km)</label>
         <input type="text" id="kilometraje" placeholder="Ej: 10,5">
-
       </div>
-
-
 
       <!-- Pulso Medio -->
-
-      <div class="form-group hidden" id="grp-pulso">
-
+      <div id="grp-pulso" class="form-group hidden">
         <label for="pulso">Pulso Medio (ppm)</label>
-
         <input type="number" id="pulso" placeholder="Ej: 145">
-
       </div>
-
-
 
       <!-- Intensidad PP (Minutos y Segundos) -->
-
-      <div class="form-group hidden" id="grp-intensidad">
-
+      <div id="grp-intensidad" class="form-group hidden">
         <label id="lbl-inten">Intensidad PP</label>
-
         <div class="time-group">
-
           <input type="number" id="min" placeholder="Min / Watios">
-
           <span id="delimiter-seg" class="hidden">:</span>
-
           <input type="number" id="seg" class="hidden" placeholder="Seg">
-
         </div>
-
       </div>
 
-
-
-      <!-- Comentarios opcionales -->
-
+      <!-- Comentarios Opcionales -->
       <div class="form-group">
-
         <label for="comentarios">Comentarios</label>
-
         <textarea id="comentarios" rows="3" placeholder="Sensaciones, observaciones..."></textarea>
-
       </div>
-
-
 
       <button type="submit" id="btnEnviar">Enviar Registro</button>
-
     </form>
-
     
-
     <div id="statusMessage"></div>
-
-  </div>
-
-
+  </main>
 
   <script src="rpe2.js"></script>
-
 </body>
-
 </html>
