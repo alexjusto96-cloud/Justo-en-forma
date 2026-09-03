@@ -17,10 +17,10 @@
     <div style="background: #ffffff; border-radius: 16px; padding: 20px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
       <form id="rpe-form" style="display: flex; flex-direction: column; gap: 20px;">
 
-        <!-- Nombre del atleta -->
+        <!-- Nombre del atleta (Solo lectura) -->
         <div>
           <label for="nombre" style="display: block; font-weight: 600; font-size: 0.85rem; color: #475569; margin-bottom: 6px;">Nombre</label>
-          <input type="text" id="nombre" placeholder="Nombre del atleta" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #f8fafc;">
+          <input type="text" id="nombre" readonly placeholder="Nombre del atleta" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #e2e8f0; color: #64748b; cursor: not-allowed;">
         </div>
 
         <!-- Fecha y Estatus -->
@@ -62,7 +62,6 @@
         <div>
           <label for="entrenamiento" style="display: block; font-weight: 600; font-size: 0.85rem; color: #475569; margin-bottom: 6px;">Entrenamiento</label>
           <select id="entrenamiento" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; outline: none; box-sizing: border-box; background: #f8fafc; color: #0f172a; -webkit-appearance: none; appearance: none;">
-            
             <option value="Cardio">Cardio</option>
             <option value="Fuerza">Fuerza</option>
             <option value="Otro">Otro</option>
