@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function renderSeriesInputs() {
   const container = document.getElementById("seriesContainer");
+  if (!container) return;
   container.innerHTML = "";
 
   for (let i = 1; i <= 7; i++) {
@@ -78,15 +79,13 @@ function bindEvents() {
     actualizarTextoNavegacion();
   });
 
-  // Evento para sincronizar el ListPicker/Select de ejercicios
   document.getElementById("listPicker1").addEventListener("change", (e) => {
     document.getElementById("ejercicio").value = e.target.value;
   });
 
-  // Manejo de la habilitación de switches de serie (s1 -> s7)
   document.addEventListener("change", (e) => {
     const targetId = e.target.id;
-    if (targetId.match(/^s[1-7]$/)) {
+    if (targetId && targetId.match(/^s[1-7]$/)) {
       const numSerie = parseInt(targetId.replace("s", ""), 10);
       manejadorCambioSerie(numSerie, e.target.checked);
     }
@@ -106,25 +105,37 @@ function calcularRMAslider(porcentaje) {
 function inicializarValores() {
   const sliderVal = document.getElementById("slider1").value;
   document.getElementById("percentage").value = sliderVal + "%";
-  document.getElementById("rmRef").value = "100"; // Valor de referencia por defecto para ejemplo
+  document.getElementById("rmRef").value = "100";
   calcularRMAslider(sliderVal);
   
-  // Cargar histórico de ejercicios en el select si existe
-  const rawEj = TinyDB.getValue("Ejercicio", "");
-  if (rawEj) {
-    const picker = document.getElementById("listPicker1");
+  // Cargar histórico de ejercicios usando la key correcta "Ejercicios"
+  const rawEj = TinyDB.getValue("Ejercicios", "");
+  const picker = document.getElementById("listPicker1");
+  if (picker) {
     picker.innerHTML = '<option value="">-- Seleccionar --</option>';
-    const lista = rawEj.split(",");
-    lista.forEach(ej => {
-      const opt = document.createElement("option");
-      opt.value = ej.trim();
-      opt.textContent = ej.trim();
-      picker.appendChild(opt);
-    });
+    if (rawEj) {
+      // Soporta tanto si viene separado por comas como por saltos de línea o JSON stringify
+      let lista = [];
+      try {
+        lista = JSON.parse(rawEj);
+      } catch (e) {
+        lista = rawEj.includes(",") ? rawEj.split(",") : rawEj.split("\n");
+      }
+      
+      lista.forEach(ej => {
+        const valTrim = typeof ej === 'string' ? ej.trim() : ej;
+        if (valTrim) {
+          const opt = document.createElement("option");
+          opt.value = valTrim;
+          opt.textContent = valTrim;
+          picker.appendChild(opt);
+        }
+      });
+    }
   }
 }
 
-// --- LÓGICA DE EVENTOS (Traducción de los Bloques de App Inventor) ---
+// --- LÓGICA DE EVENTOS ---
 
 function ejecutarNuevoEjercicio() {
   const now = new Date();
@@ -138,7 +149,6 @@ function ejecutarNuevoEjercicio() {
   document.getElementById("ecc").value = "2";
   document.getElementById("pausaEcc").value = "1";
 
-  // Estados de habilitación de switches
   setElementEnabled("s1", true);
   document.getElementById("s1").checked = true;
   const row1 = document.getElementById(`serie_row_1`);
@@ -150,7 +160,6 @@ function ejecutarNuevoEjercicio() {
     if (row) row.classList.add("disabled");
   }
 
-  // Campos i1-i7 ReadOnly
   for (let i = 1; i <= 7; i++) {
     const field = document.getElementById(`i${i}`);
     if (field) field.readOnly = true;
@@ -158,7 +167,6 @@ function ejecutarNuevoEjercicio() {
 
   document.getElementById("label32").innerText = "";
 
-  // Reset switches
   for (let i = 2; i <= 7; i++) {
     const el = document.getElementById(`s${i}`);
     if (el) el.checked = false;
@@ -166,7 +174,6 @@ function ejecutarNuevoEjercicio() {
   const vbtEl = document.getElementById("vbt");
   if (vbtEl) vbtEl.checked = false;
 
-  // Limpiar campos de texto de todas las series y observaciones
   for (let i = 1; i <= 7; i++) {
     ["kg", "Rep", "RIR", "rec", "i", "rm"].forEach(prefix => {
       setVal(`${prefix}${i}`, "");
@@ -174,7 +181,6 @@ function ejecutarNuevoEjercicio() {
   }
   setVal("textBox1", "");
 
-  // Restablecer cronómetro
   if (timerInterval) clearInterval(timerInterval);
   document.getElementById("minutos").innerText = "0";
   document.getElementById("segundos").innerText = "00";
@@ -281,18 +287,15 @@ function manejadorCambioSerie(numSerie, isOn) {
       setVal(`kg${numSerie}`, kgAnterior);
     }
 
-    // Habilitar la casilla de verificación de la siguiente serie
     if (numSerie < 7) {
       setElementEnabled(`s${numSerie + 1}`, true);
       const siguienteRow = document.getElementById(`serie_row_${numSerie + 1}`);
       if (siguienteRow) siguienteRow.classList.remove("disabled");
     }
 
-    // Iniciar el cronómetro de descanso
     inicio = Date.now();
     iniciarCronometro();
   } else {
-    // Deshabilitar subsiguientes
     for (let i = numSerie; i <= 7; i++) {
       if (i > numSerie) {
         setElementEnabled(`s${i}`, false);
