@@ -17,8 +17,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Mostrar el nombre de usuario
   document.getElementById('user-greeting').textContent = `Usuario: ${usuario}`;
 
-  // --- PRECARGA DE DATOS ---
-  await cargarCatalogos(usuario);
+  // Injectar estilos del spinner
+  crearEstilosOverlay();
+
+  // --- PRECARGA DE DATOS CON SPINNER ---
+  toggleLoading(true);
+  try {
+    await cargarCatalogos(usuario);
+  } finally {
+    toggleLoading(false);
+  }
 
   // --- NAVEGACIÓN Y EVENTOS DE BOTONES ---
   document.getElementById('btn-rpe').addEventListener('click', () => {
@@ -57,6 +65,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'index.html';
   });
 });
+
+/**
+ * Genera dinámicamente los estilos CSS para la pantalla de carga (overlay + spinner)
+ */
+function crearEstilosOverlay() {
+  if (document.getElementById('spinner-style')) return;
+  
+  const style = document.createElement('style');
+  style.id = 'spinner-style';
+  style.innerHTML = `
+    #loadingOverlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(2px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .loading-text {
+      margin-top: 12px;
+      font-family: sans-serif;
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+/**
+ * Muestra u oculta la capa de bloqueo transparente con el indicador de carga
+ */
+function toggleLoading(show) {
+  let overlay = document.getElementById('loadingOverlay');
+  if (show) {
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'loadingOverlay';
+      overlay.innerHTML = `
+        <div class="spinner"></div>
+        <div class="loading-text">Cargando datos...</div>
+      `;
+      document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+}
 
 /**
  * Peticiones asíncronas concurrentes para precargar las 4 secciones
