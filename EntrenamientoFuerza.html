@@ -5,18 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Entrenamiento Fuerza</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.5; }
-    .form-group { margin-bottom: 12px; }
-    label { display: inline-block; width: 140px; font-weight: bold; }
-    input[type="text"], select { padding: 5px; width: 200px; }
-    .serie-row { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-    .serie-row.disabled { opacity: 0.5; pointer-events: none; }
-    .timer { font-size: 1.2em; font-weight: bold; color: #2c3e50; margin: 15px 0; }
-    button { padding: 8px 15px; margin-right: 10px; cursor: pointer; }
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 15px;
+      color: #333;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .tempo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .tempo-item {
+      display: flex;
+      flex-direction: column;
+      font-size: 12px;
+    }
+    .tempo-item select {
+      margin-top: 2px;
+    }
+    .checkbox-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+    }
+    .serie-row {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+    .serie-row.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .serie-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .serie-header h4 {
+      margin: 0;
+      font-size: 15px;
+      color: #2c3e50;
+    }
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .field-unit {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+    }
+    .field-unit input {
+      width: 100%;
+    }
+    .timer-card {
+      background: #eef2f5;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin: 15px 0;
+    }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slider-container input[type="range"] {
+      flex: 1;
+    }
+    .slider-container input[type="text"] {
+      width: 50px;
+      text-align: center;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 15px;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:active {
+      background-color: #2980b9;
+    }
+    button#fin {
+      background-color: #e74c3c;
+    }
+    button#fin:active {
+      background-color: #c0392b;
+    }
   </style>
 </head>
 <body>
 
+<div class="container">
   <h2>Registro de Entrenamiento de Fuerza</h2>
 
   <div class="form-group">
@@ -30,15 +160,47 @@
   </div>
 
   <div class="form-group">
-    <label>Tempo / Tiempos:</label><br>
-    Concéntrica: <select id="con"><option value="1">1</option></select>
-    Pausa Con.: <select id="pausaCon"><option value="1">1</option></select>
-    Excéntrica: <select id="ecc"><option value="2">2</option></select>
-    Pausa Exc.: <select id="pausaEcc"><option value="1">1</option></select>
+    <label>Tempo / Tiempos (s):</label>
+    <div class="tempo-grid">
+      <div class="tempo-item">
+        Concéntrica
+        <select id="con">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+      <div class="tempo-item">
+        Pausa Con.
+        <select id="pausaCon">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+      <div class="tempo-item">
+        Excéntrica
+        <select id="ecc">
+          <option value="1">1</option>
+          <option value="2" selected>2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+      <div class="tempo-item">
+        Pausa Exc.
+        <select id="pausaEcc">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
-    <label><input type="checkbox" id="vbt"> VBT</label>
+    <label class="checkbox-inline">
+      <input type="checkbox" id="vbt"> VBT
+    </label>
   </div>
 
   <hr>
@@ -53,15 +215,17 @@
 
   <div class="form-group">
     <label for="slider1">Porcentaje RM (%):</label>
-    <input type="range" id="slider1" min="0" max="100" value="50">
-    <input type="text" id="percentage" readonly style="width: 50px;">
+    <div class="slider-container">
+      <input type="range" id="slider1" min="0" max="100" value="50">
+      <input type="text" id="percentage" readonly>
+    </div>
   </div>
 
-  <div class="timer">
+  <div class="timer-card">
     Tiempo de Descanso: <span id="minutos">0</span>:<span id="segundos">00</span>
   </div>
 
-  <div class="form-group">
+  <div class="button-group">
     <button id="nuevoEjercicio">Nuevo Ejercicio</button>
     <button id="enviar">Enviar Registro</button>
     <button id="consultar">Consultar Entrenamientos</button>
@@ -70,7 +234,8 @@
 
   <div id="label12"></div>
   <div id="label32"></div>
+</div>
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
