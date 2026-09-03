@@ -1,8 +1,8 @@
 const SCRIPT_BASE = 'https://script.google.com/macros/s/AKfycbyPfGgRmGtJ6R_5P3NA6D7dhbT0CYW0Aw6i053H-F13PpvARKWYdV_MLxtymgmglUcd6Q/exec';
-const SCRIPT_EJERCICIOS = 'https://script.google.com/macros/s/AKfycbz5_n-8lvdLQkslE50sveRQY1qoN7jcIS2AoRxJgWBTMCJdyZg4ccV5KrzrDjJ50PiCEA/exec';
+const SCRIPT_CATALOGOS = 'https://script.google.com/macros/s/AKfycbz12fwGML23SoaowYE1m_emFaa6DSThu8ql1PX4HneMRbUjtLDR6GvYXBqcSGZ3LtaZ/exec';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Guardar URL del script base en localStorage (equivalente a TinyDB key 'script')
+  // Mantener la URL del script base original para envíos/consultas de la app
   localStorage.setItem('script', SCRIPT_BASE);
 
   // Obtener usuario activo
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Mostrar el nombre de usuario
   document.getElementById('user-greeting').textContent = `Usuario: ${usuario}`;
 
-  // --- PRECARGA DE DATOS ---
+  // --- PRECARGA DE DATOS (Usa únicamente SCRIPT_CATALOGOS) ---
   await cargarCatalogos(usuario);
 
   // --- NAVEGACIÓN Y EVENTOS DE BOTONES ---
@@ -63,43 +63,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /**
- * Peticiones asíncronas concurrentes para precargar las 4 secciones
+ * Peticiones asíncronas concurrentes usando SCRIPT_CATALOGOS exclusivamente para descargar listas
  */
 async function cargarCatalogos(usuario) {
   const nombreEnc = encodeURIComponent(usuario);
 
   await Promise.all([
-    // 1. Ejercicios (SCRIPT_EJERCICIOS)
-    fetchData(`${SCRIPT_EJERCICIOS}?nombre=${nombreEnc}&seccion=Ejercicios`, 'Ejercicio'),
+    // 1. Ejercicios
+    fetchData(`${SCRIPT_CATALOGOS}?nombre=${nombreEnc}&seccion=Ejercicios`, 'Ejercicio'),
 
-    // 2. Tipo de Carrera (SCRIPT_BASE)
-    fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeCarrera`, 'Carrera'),
+    // 2. Tipo de Carrera
+    fetchData(`${SCRIPT_CATALOGOS}?nombre=${nombreEnc}&seccion=TipoDeCarrera`, 'Carrera'),
 
-    // 3. Tipo de Ciclismo (SCRIPT_BASE)
-    fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeCiclismo`, 'Ciclismo'),
+    // 3. Tipo de Ciclismo
+    fetchData(`${SCRIPT_CATALOGOS}?nombre=${nombreEnc}&seccion=TipoDeCiclismo`, 'Ciclismo'),
 
-    // 4. Tipo de Test (SCRIPT_BASE)
-    fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeTest`, 'Test')
+    // 4. Tipo de Test
+    fetchData(`${SCRIPT_CATALOGOS}?nombre=${nombreEnc}&seccion=TipoDeTest`, 'Test')
   ]);
 }
 
 /**
- * Función genérica para descargar y almacenar datos con gestión estricta de redirecciones y errores
+ * Función genérica para descargar y almacenar datos con gestión de errores y redirecciones
  */
 async function fetchData(url, storageKey) {
   try {
     const response = await fetch(url, {
       method: 'GET',
-      redirect: 'follow' // Sigue la redirección 302 hacia script.googleusercontent.com
+      redirect: 'follow'
     });
 
     if (!response.ok) {
       throw new Error(`HTTP Error: status ${response.status}`);
     }
 
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('La respuesta del servidor no es un JSON válido');
+    }
+
     const data = await response.json();
 
-    // Comprobamos si Apps Script mandó una respuesta con error
     if (data.error) {
       console.warn(`[Apps Script Error] ${storageKey}: ${data.error}`);
       return;
@@ -109,6 +113,7 @@ async function fetchData(url, storageKey) {
       localStorage.setItem(storageKey, JSON.stringify(data.lista));
       console.log(`✓ ${storageKey} guardado con éxito (${data.lista.length} elementos)`);
     } else {
+      localStorage.setItem(storageKey, JSON.stringify([]));
       console.warn(`[Aviso] ${storageKey} devolvió una estructura sin lista:`, data);
     }
 
