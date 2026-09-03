@@ -39,10 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'Performance.html';
   });
 
-  document.getElementById('btn-consultar-performance').addEventListener('click', () => {
-    window.location.href = 'Consulta.html';
-  });
-
   document.getElementById('btn-entrenamiento-fuerza').addEventListener('click', () => {
     window.location.href = 'EntrenamientoFuerza.html';
   });
