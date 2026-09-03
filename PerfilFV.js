@@ -7,7 +7,6 @@ const TinyDB1 = {
     try {
       return JSON.parse(val);
     } catch (e) {
-      // Si el valor guardado es texto plano (ej: "ajusa"), se retorna directamente sin fallar
       return val;
     }
   }
@@ -17,6 +16,7 @@ const TinyDB1 = {
 let globalJson = "";
 let globalDate = "";
 let globalLongitud = 0;
+let listaEjerciciosGlobal = []; // Copia para realizar el filtrado de búsqueda
 const scriptUrl = "https://script.google.com/macros/s/AKfycbyPfGgRmGtJ6R_5P3NA6D7dhbT0CYW0Aw6i053H-F13PpvARKWYdV_MLxtymgmglUcd6Q/exec";
 
 // Referencias al DOM
@@ -40,25 +40,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Cargar lista 'Ejercicio' desde localStorage
   const ejercicios = TinyDB1.getValue('Ejercicio', []);
+
+  if (Array.isArray(ejercicios)) {
+    listaEjerciciosGlobal = ejercicios;
+  } else if (typeof ejercicios === 'string' && ejercicios.length > 0) {
+    listaEjerciciosGlobal = ejercicios.split(',').map(e => e.trim());
+  }
+
+  // Crear dinámicamente el campo de búsqueda sobre el listPicker1
+  crearBuscadorEjercicios();
+
+  // Poblar el desplegable por primera vez
+  renderizarOpciones(listaEjerciciosGlobal);
+});
+
+/**
+ * Crea e inserta un input de búsqueda justo encima del desplegable
+ */
+function crearBuscadorEjercicios() {
+  if (!listPicker1) return;
+
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.id = 'searchEjercicio';
+  searchInput.placeholder = '🔍 Buscar ejercicio...';
+  searchInput.style.cssText = 'width: 100%; padding: 8px; margin-bottom: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;';
+
+  // Evento de filtrado en tiempo real
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    const ejerciciosFiltrados = listaEjerciciosGlobal.filter(e => 
+      e.toLowerCase().includes(query)
+    );
+    renderizarOpciones(ejerciciosFiltrados);
+  });
+
+  // Insertar el input antes del select
+  listPicker1.parentNode.insertBefore(searchInput, listPicker1);
+}
+
+/**
+ * Renderiza las opciones del <select> basándose en un array de cadenas
+ */
+function renderizarOpciones(lista) {
+  if (!listPicker1) return;
+
   listPicker1.innerHTML = '<option value="" disabled selected>Selecciona ejercicio</option>';
 
-  if (Array.isArray(ejercicios) && ejercicios.length > 0) {
-    ejercicios.forEach(ejercicio => {
-      const option = document.createElement('option');
-      option.value = ejercicio;
-      option.textContent = ejercicio;
-      listPicker1.appendChild(option);
-    });
-  } else if (typeof ejercicios === 'string' && ejercicios.length > 0) {
-    const opciones = ejercicios.split(',').map(e => e.trim());
-    opciones.forEach(ejercicio => {
-      const option = document.createElement('option');
-      option.value = ejercicio;
-      option.textContent = ejercicio;
-      listPicker1.appendChild(option);
-    });
+  if (lista.length === 0) {
+    const option = document.createElement('option');
+    option.disabled = true;
+    option.textContent = 'Sin coincidencias';
+    listPicker1.appendChild(option);
+    return;
   }
-});
+
+  lista.forEach(ejercicio => {
+    const option = document.createElement('option');
+    option.value = ejercicio;
+    option.textContent = ejercicio;
+    listPicker1.appendChild(option);
+  });
+}
 
 // 2. Selección en desplegable -> Pasa a textBox11
 listPicker1.addEventListener('change', () => {
