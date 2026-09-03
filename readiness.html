@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro de Readiness - Justo en Forma</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e3a8a">
 </head>
 <body>
@@ -24,7 +22,15 @@
             <label for="soreness">Estado muscular</label>
             <span id="val-soreness" class="slider-value">5</span>
           </div>
-          <input type="range" id="soreness" min="0" max="10" value="5" class="slider slider-good-right">
+          <input 
+            type="range" 
+            id="soreness" 
+            min="0" 
+            max="10" 
+            value="5" 
+            data-type="good-right"
+            style="-webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 5px; outline: none;"
+          >
         </div>
 
         <!-- Energía / Fatiga (Rojo a Verde) -->
@@ -33,7 +39,15 @@
             <label for="fatiga">Energía</label>
             <span id="val-fatiga" class="slider-value">5</span>
           </div>
-          <input type="range" id="fatiga" min="0" max="10" value="5" class="slider slider-good-right">
+          <input 
+            type="range" 
+            id="fatiga" 
+            min="0" 
+            max="10" 
+            value="5" 
+            data-type="good-right"
+            style="-webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 5px; outline: none;"
+          >
         </div>
 
         <!-- Calidad de Sueño (Rojo a Verde) -->
@@ -42,7 +56,15 @@
             <label for="sueno">Calidad de sueño</label>
             <span id="val-sueno" class="slider-value">5</span>
           </div>
-          <input type="range" id="sueno" min="0" max="10" value="5" class="slider slider-good-right">
+          <input 
+            type="range" 
+            id="sueno" 
+            min="0" 
+            max="10" 
+            value="5" 
+            data-type="good-right"
+            style="-webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 5px; outline: none;"
+          >
         </div>
 
         <!-- Estrés (Verde a Rojo - Invertido) -->
@@ -51,7 +73,15 @@
             <label for="estres">Estrés</label>
             <span id="val-estres" class="slider-value">5</span>
           </div>
-          <input type="range" id="estres" min="0" max="10" value="5" class="slider slider-good-left">
+          <input 
+            type="range" 
+            id="estres" 
+            min="0" 
+            max="10" 
+            value="5" 
+            data-type="good-left"
+            style="-webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 5px; outline: none;"
+          >
         </div>
 
         <!-- Horas de Sueño -->
@@ -95,6 +125,57 @@
     </div>
   </main>
 
-  <script src="readiness.js"></script>
+  <!-- LÓGICA JAVASCRIPT COMPLETA -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const sliders = document.querySelectorAll('input[type="range"]');
+
+      // Función para pintar el fondo de cada slider y actualizar su número
+      function updateSlider(slider) {
+        const valSpan = document.getElementById(`val-${slider.id}`);
+        if (valSpan) {
+          valSpan.textContent = slider.value;
+        }
+
+        const isGoodRight = slider.getAttribute('data-type') === 'good-right';
+        
+        // Asignamos el degradado según si la derecha es buena (rojo a verde) o mala (verde a rojo)
+        if (isGoodRight) {
+          slider.style.background = 'linear-gradient(to right, #ef4444, #eab308, #22c55e)';
+        } else {
+          slider.style.background = 'linear-gradient(to right, #22c55e, #eab308, #ef4444)';
+        }
+      }
+
+      // Inicializar todos los sliders al cargar la página
+      sliders.forEach(slider => {
+        updateSlider(slider);
+
+        // Escuchar cuando el usuario arrastre el slider
+        slider.addEventListener('input', (e) => {
+          updateSlider(e.target);
+        });
+      });
+
+      // Manejo del envío del formulario
+      const form = document.getElementById('readiness-form');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const formData = {
+          soreness: document.getElementById('soreness').value,
+          fatiga: document.getElementById('fatiga').value,
+          sueno: document.getElementById('sueno').value,
+          estres: document.getElementById('estres').value,
+          horas: document.getElementById('horas').value,
+          hrv: document.getElementById('hrv').value,
+          peso: document.getElementById('peso').value,
+          observaciones: document.getElementById('observaciones').value
+        };
+
+        console.log('Datos guardados:', formData);
+      });
+    });
+  </script>
 </body>
 </html>
