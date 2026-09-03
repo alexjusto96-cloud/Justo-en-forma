@@ -21,18 +21,16 @@ const button2 = document.getElementById('button2');
 const mejorText = document.getElementById('mejorText');
 const r2Text = document.getElementById('r2Text');
 
-// 1. Inicialización (PerfilFV.Initialize)
+// 1. Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   web1Url = TinyDB1.getValue('script', '');
   webViewer1.classList.add('hidden');
 
   globalJson = TinyDB1.getValue('Usuario', '');
 
-  // Formato YYYY-M-D según bloques App Inventor
   const today = new Date();
   globalDate = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-  // Cargar ejercicios en el select
   const ejercicios = TinyDB1.getValue('Ejercicio', []);
   listPicker1.innerHTML = '<option value="" disabled selected>Elige un ejercicio</option>';
 
@@ -46,12 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 2. Evento cambio de selección (ListPicker1.AfterPicking)
+// 2. Selección de ejercicio
 listPicker1.addEventListener('change', () => {
   textBox11.value = listPicker1.value;
 });
 
-// 3. Procesar respuesta de Web1 (Web1.GotText)
+// 3. Procesar respuesta de Web1
 function handleWeb1GotText(responseContent) {
   let cleanText = responseContent
     .replace(/\{/g, '')
@@ -62,24 +60,20 @@ function handleWeb1GotText(responseContent) {
 
   globalJson = cleanText;
 
-  // Extraer "Mejor"
   mejorText.textContent = cleanText.substring(8, 19);
 
   globalLongitud = cleanText.length;
-
-  // Extraer "R2"
   const startIndex = globalLongitud - 4;
   r2Text.textContent = cleanText.substring(startIndex, startIndex + 4);
 }
 
-// 4. Guardar datos (Button2.Click)
+// 4. Guardar datos
 button2.addEventListener('click', () => {
   const selectedExercise = textBox11.value;
   const textoMejor = mejorText.textContent.trim();
   const textoR2 = r2Text.textContent.trim();
   const isChecked = checkBox1.checked;
 
-  // Web3: Formulario de Google Forms para opciones avanzadas
   if (isChecked) {
     const web3Url = `https://docs.google.com/forms/d/1JWWKvqlswNXFEhOzJOtEMl_zLwhFx0Ek2IcpQKb8dWs/formResponse?` +
       `entry.421504529=${encodeURIComponent(globalJson)}&` +
@@ -90,7 +84,6 @@ button2.addEventListener('click', () => {
     fetch(web3Url, { mode: 'no-cors' }).catch(err => console.error("Error Web3:", err));
   }
 
-  // Web2: Lógica de cargas según selección "Mejor"
   const cargasValidas = ["Cargas 1234", "Cargas 1235", "Cargas 1245", "Cargas 1345"];
 
   if (cargasValidas.includes(textoMejor)) {
