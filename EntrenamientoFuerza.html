@@ -3,344 +3,334 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entrenamiento Fuerza</title>
+  <title>Registro de Sesión</title>
+
   <style>
+    /* ==========================================
+        VARIABLES Y CONFIGURACIÓN GLOBAL
+        ========================================== */
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #cbd5e1;
+    }
+
     * {
       box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg);
+      color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    body {
-      background-color: #f4f6f8;
-      margin: 0;
-      padding: 15px;
-      color: #333;
-    }
+
+    /* ==========================================
+        CONTENEDOR PRINCIPAL
+        ========================================== */
     .container {
-      max-width: 500px;
-      margin: 0 auto;
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      position: relative;
-    }
-    .back-btn {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      font-weight: bold;
-      color: #2c3e50;
-      cursor: pointer;
-      padding: 0;
-      line-height: 1;
-    }
-    .form-group {
-      margin-bottom: 12px;
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 4px;
-      font-size: 14px;
-    }
-    input[type="text"], select {
       width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
+      max-width: 480px;
+      padding: 24px;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    input.disabled-input, input:disabled, input[readonly]:not(#percentage):not(#rmResultKg) {
-      background-color: #e9ecef !important;
-      color: #6c757d !important;
-      opacity: 1 !important;
-    }
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 4px;
-      background-color: #3498db;
-      color: white;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    button:active {
-      background-color: #2980b9;
-    }
-    button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    button#fin {
-      background-color: #e74c3c;
-    }
-    button#fin:active {
-      background-color: #c0392b;
-    }
-    .btn-secundario {
-      background-color: #ecf0f1;
-      color: #2c3e50;
-      border: 1px solid #bdc3c7;
-    }
+
     h2 {
-      text-align: center;
-      color: #2c3e50;
       margin-top: 0;
-      margin-bottom: 15px;
-    }
-    .nav-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .nav-banner button {
-      padding: 6px 12px;
-    }
-    #navTextDisplay {
-      font-size: 13px;
-      font-weight: bold;
-      color: #2c3e50;
+      color: var(--primary);
       text-align: center;
-      flex: 1;
-      padding: 0 8px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
-    /* ESTÉTICA MEJORADA: Línea de Tempo */
-    .tempo-inline {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #f8f9fa;
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid #dcdde1;
-      font-size: 12px;
-      gap: 6px;
-    }
-    .tempo-inline span {
-      font-weight: 500;
-      color: #495057;
-    }
-    .tempo-inline select {
-      width: 46px;
-      padding: 4px 2px;
-      font-size: 12px;
-      text-align: center;
-      background-color: #fff;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-    }
-    .checkbox-inline {
-      margin-bottom: 0;
-      font-weight: bold;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .timer-card {
-      background: #eef2f5;
-      border-radius: 6px;
-      padding: 10px;
-      text-align: center;
-      font-size: 1.2em;
-      font-weight: bold;
-      color: #2c3e50;
-      margin: 15px 0;
-    }
-
-    /* ESTÉTICA MEJORADA: Cálculo de Carga (% RM) */
-    .calc-card {
-      background: #f8f9fa;
-      border: 1px solid #dcdde1;
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin-bottom: 12px;
-    }
-    .calc-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .calc-row input[type="text"] {
-      text-align: center;
-      background-color: #fff;
-      font-weight: 500;
-    }
-    #rmRef {
-      width: 55px;
-    }
-    .slider-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-    }
-    .slider-container input[type="range"] {
-      flex: 1;
-      accent-color: #3498db;
-      cursor: pointer;
-    }
-    #percentage {
-      width: 50px;
-      font-size: 12px;
-      padding: 4px;
-    }
-    #rmResultKg {
-      width: 75px;
-      background-color: #e3f2fd !important;
-      color: #1565c0 !important;
-      font-weight: bold !important;
-      border: 1px solid #90caf9 !important;
-    }
-
-    .serie-row {
-      background: #fafafa;
-      border: 1px solid #e0e0e0;
-      padding: 8px;
-      margin-bottom: 6px;
-      border-radius: 6px;
-    }
-    .serie-row.disabled {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-    .grid-8col {
-      display: grid;
-      grid-template-columns: 28px 26px 1fr 1fr 1fr 1fr 1fr 1fr;
-      gap: 3px;
-      align-items: center;
-      font-size: 11px;
-    }
-    .grid-8col input[type="text"] {
-      padding: 3px;
-      font-size: 11px;
-      text-align: center;
-    }
-    .grid-header {
-      display: grid;
-      grid-template-columns: 28px 26px 1fr 1fr 1fr 1fr 1fr 1fr;
-      gap: 3px;
-      text-align: center;
-      font-size: 11px;
-      font-weight: bold;
-      color: #555;
-      margin-bottom: 4px;
-      padding: 0 4px;
-    }
-    .button-group {
+    /* ==========================================
+        FORMULARIO E INPUTS
+        ========================================== */
+    .form-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 15px;
+      margin-bottom: 16px;
     }
-    .button-group-inline {
+
+    label {
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    input, 
+    select, 
+    textarea {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    input:focus, 
+    select:focus, 
+    textarea:focus {
+      border-color: var(--primary);
+    }
+
+    /* Estilo auxiliar para los sub-elementos de tipo */
+    .sub-input {
+      margin-bottom: 8px;
+    }
+
+    /* Grupo de tiempo / campos dobles (CORREGIDO) */
+    .time-group {
       display: flex;
+      align-items: center;
       gap: 8px;
+      width: 100%;
     }
-    .button-group-inline button {
+
+    .time-group input {
       flex: 1;
+      min-width: 0; /* Impide que el input se desborde del contenedor flex */
+      text-align: center;
+    }
+
+    /* ==========================================
+        NUEVOS ESTILOS: VBT TEMPO Y CÁLCULO DE CARGA
+        ========================================== */
+    .vbt-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .vbt-checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .vbt-grid {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .vbt-field {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 45px;
+    }
+
+    .vbt-field label {
+      font-size: 0.7rem;
+      text-align: center;
+      margin-bottom: 2px;
+      color: #64748b;
+    }
+
+    .vbt-field select {
+      padding: 6px 4px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .carga-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .carga-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .carga-controls button {
+      padding: 6px 8px;
+      font-size: 0.85rem;
+      width: auto;
+      margin-top: 0;
+      flex-shrink: 0;
+    }
+
+    .carga-controls input[type="range"] {
+      flex: 1;
+      min-width: 40px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .carga-controls input[type="text"],
+    .carga-controls input[type="number"] {
+      width: 55px;
+      padding: 6px 4px;
+      text-align: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================
+        BOTÓN Y MENSAJES DE ESTADO
+        ========================================== */
+    button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background-color: var(--primary);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    button:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    #statusMessage {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Clases de utilidad */
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <button id="btnVolverMenu" class="back-btn">&larr;</button>
-  <h2>Registro de Entrenamiento de Fuerza</h2>
+  <main class="container">
+    <h2>Registro de Sesión</h2>
 
-  <div class="form-group">
-    <label for="listPicker1">Seleccionar ejercicio:</label>
-    <input type="text" id="buscadorEjercicio" placeholder="Buscar ejercicio..." style="margin-bottom: 6px;">
-    <select id="listPicker1"></select>
-  </div>
-
-  <div class="form-group">
-    <label for="ejercicio">Ejercicio:</label>
-    <input type="text" id="ejercicio" placeholder="Nombre del ejercicio">
-  </div>
-
-  <div class="form-group">
-    <button id="consultar" style="width: 100%;" class="btn-secundario">Consultar últimos entrenamientos</button>
-  </div>
-
-  <div class="nav-banner">
-    <button id="btnTextPrev" class="btn-secundario">&larr;</button>
-    <span id="navTextDisplay"></span>
-    <button id="btnTextNext" class="btn-secundario">&rarr;</button>
-  </div>
-
-  <div class="form-group tempo-inline">
-    <label class="checkbox-inline">
-      <input type="checkbox" id="vbt"> VBT
-    </label>
-    <span>Tempo:</span>
-    <span>Con</span><select id="con"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
-    <span>P.Con</span><select id="pausaCon"><option value="1">0</option><option value="2">1</option></select>
-    <span>Exc</span><select id="ecc"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
-    <span>P.Exc</span><select id="pausaEcc"><option value="1">0</option><option value="2">1</option></select>
-  </div>
-
-  <div class="timer-card">
-    Tiempo de Descanso: <span id="minutos">0</span>:<span id="segundos">00</span>
-  </div>
-
-  <!-- SECCIÓN CALCULO DE CARGA REDISEÑADA -->
-  <div class="form-group">
-    <label>Cálculo de Carga (% RM):</label>
-    <div class="calc-card">
-      <div class="calc-row">
-        <input type="text" id="rmRef" readonly placeholder="RM">
-        <span style="font-size: 12px; font-weight: bold; color: #555;">Kg</span>
-        <div class="slider-container">
-          <input type="range" id="slider1" min="0" max="100" value="50">
-          <input type="text" id="percentage" readonly>
-        </div>
-        <input type="text" id="rmResultKg" readonly placeholder="Total">
+    <form id="rpeForm">
+      
+      <!-- Modalidad (Solo Cardio) -->
+      <div id="grp-modalidad" class="form-group hidden">
+        <label for="modalidad">Modalidad</label>
+        <select id="modalidad">
+          <!-- Opciones dinámicas cargadas desde JS -->
+        </select>
       </div>
-    </div>
-  </div>
 
-  <hr>
+      <!-- Tipo de Entrenamiento / Bloque -->
+      <div id="grp-tipo" class="form-group hidden">
+        <label id="lbl-tipo" for="tipo">Tipo de Entrenamiento</label>
+        
+        <!-- 1. Buscador del ListPicker -->
+        <input type="text" id="search-tipo" class="sub-input" placeholder="🔍 Buscar entrenamiento...">
+        
+        <!-- 2. Catálogo de opciones desplegado -->
+        <select id="tipo" size="5" class="sub-input"></select>
+        
+        <!-- 3. Campo de texto final (al seleccionar toma el valor o permite escribir un tipo nuevo) -->
+        <label for="tipo-texto" style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Valor que se registrará:</label>
+        <input type="text" id="tipo-texto" placeholder="Escribe o selecciona un entrenamiento">
+      </div>
 
-  <div class="grid-header">
-    <div>Set</div>
-    <div>Nº</div>
-    <div>Kg</div>
-    <div>Int</div>
-    <div>Reps</div>
-    <div>RIR</div>
-    <div>R'</div>
-    <div>RM</div>
-  </div>
-  <div id="seriesContainer"></div>
+      <!-- Kilometraje -->
+      <div id="grp-kilometraje" class="form-group hidden">
+        <label id="lbl-kilometraje" for="kilometraje">Kilometraje (km)</label>
+        <input type="text" id="kilometraje" placeholder="Ej: 10,5">
+      </div>
 
-  <div class="form-group" style="margin-top: 10px;">
-    <label for="textBox1">Observaciones:</label>
-    <input type="text" id="textBox1">
-  </div>
+      <!-- Pulso Medio -->
+      <div id="grp-pulso" class="form-group hidden">
+        <label for="pulso">Pulso Medio (ppm)</label>
+        <input type="number" id="pulso" placeholder="Ej: 145">
+      </div>
 
-  <div class="button-group">
-    <button id="enviar">Enviar Registro</button>
-    <div class="button-group-inline">
-        <button id="nuevoEjercicio" class="btn-secundario">Nuevo Ejercicio</button>
-        <button id="fin">Finalizar el entrenamiento</button>
-    </div>
-  </div>
+      <!-- Intensidad PP (Minutos y Segundos) -->
+      <div id="grp-intensidad" class="form-group hidden">
+        <label id="lbl-inten">Intensidad PP</label>
+        <div class="time-group">
+          <input type="number" id="min" placeholder="Min / Watios">
+          <span id="delimiter-seg" class="hidden">:</span>
+          <input type="number" id="seg" class="hidden" placeholder="Seg">
+        </div>
+      </div>
 
-  <div id="label12"></div>
-  <div id="label32"></div>
-</div>
+      <!-- Ejemplo de Bloque VBT estructurado con labels arriba -->
+      <div class="vbt-wrapper">
+        <div class="vbt-checkbox-container">
+          <input type="checkbox" id="vbtCheck">
+          <label for="vbtCheck" style="margin:0;">VBT</label>
+        </div>
+        <div class="vbt-grid">
+          <div class="vbt-field">
+            <label>Con</label>
+            <select><option>1</option><option>2</option></select>
+          </div>
+          <div class="vbt-field">
+            <label>P.Con</label>
+            <select><option>0</option><option>1</option></select>
+          </div>
+          <div class="vbt-field">
+            <label>Exc</label>
+            <select><option>2</option><option>3</option></select>
+          </div>
+          <div class="vbt-field">
+            <label>P.Exc</label>
+            <select><option>0</option><option>1</option></select>
+          </div>
+        </div>
+      </div>
 
-<script src="EntrenamientoFuerza.js"></script>
+      <!-- Ejemplo de Cálculo de Carga optimizado para móvil -->
+      <div class="carga-box">
+        <label>Cálculo de Carga (% RM):</label>
+        <div class="carga-controls">
+          <button type="button">RM</button>
+          <span style="font-size: 0.85rem; font-weight: 600;">Kg</span>
+          <input type="range" min="0" max="100" value="100">
+          <input type="text" value="100%">
+          <button type="button" style="width: auto;">Total</button>
+        </div>
+      </div>
+
+      <!-- Comentarios Opcionales -->
+      <div class="form-group">
+        <label for="comentarios">Comentarios</label>
+        <textarea id="comentarios" rows="3" placeholder="Sensaciones, observaciones..."></textarea>
+      </div>
+
+      <button type="submit" id="btnEnviar">Enviar Registro</button>
+    </form>
+    
+    <div id="statusMessage"></div>
+  </main>
+
+  <script src="rpe2.js"></script>
 </body>
 </html>
