@@ -33,22 +33,6 @@ function renderSeriesInputs() {
   if (!container) return;
   container.innerHTML = "";
 
-  // Cabecera única y fija de la tabla
-  const headerRow = document.createElement("div");
-  headerRow.className = "grid-8col header-row";
-  headerRow.id = "tableHeaderRow";
-  headerRow.innerHTML = `
-    <div style="text-align:center; font-weight:bold;">Set</div>
-    <div style="text-align:center; font-weight:bold;">#</div>
-    <div style="text-align:center; font-weight:bold;">Kg</div>
-    <div style="text-align:center; font-weight:bold;" id="colHeaderI">Int</div>
-    <div style="text-align:center; font-weight:bold;">Reps</div>
-    <div style="text-align:center; font-weight:bold;" id="colHeaderRIR">RIR</div>
-    <div style="text-align:center; font-weight:bold;">R´</div>
-    <div style="text-align:center; font-weight:bold;">RM</div>
-  `;
-  container.appendChild(headerRow);
-
   for (let i = 1; i <= 7; i++) {
     const row = document.createElement("div");
     const isActiveOrNext = (i === 1 || i === 2);
@@ -130,7 +114,7 @@ function bindEvents() {
     }
   });
 
-  // Escuchar cambios en el switch VBT para actualizar cabeceras, comportamiento y limpiar campos
+  // Escuchar cambios en el switch VBT para actualizar cabeceras, placeholders y limpiar campos
   const vbtElement = document.getElementById("vbt");
   if (vbtElement) {
     vbtElement.addEventListener("change", () => {
@@ -197,11 +181,13 @@ function actualizarEncabezadosYComportamientoVBT() {
   const headerTextI = isVBTOn ? "MVP" : "Int";
   const headerTextRIR = isVBTOn ? "VL" : "RIR";
 
-  // Actualizar los textos de los headers en la tabla única
-  const colHeaderI = document.getElementById("colHeaderI");
-  const colHeaderRIR = document.getElementById("colHeaderRIR");
-  if (colHeaderI) colHeaderI.innerText = headerTextI;
-  if (colHeaderRIR) colHeaderRIR.innerText = headerTextRIR;
+  // Actualizar los textos de los headers en la cabecera fija del HTML
+  // Suponiendo el orden de los divs en .grid-header: [0]=Set, [1]=Nº, [2]=Kg, [3]=Int, [4]=Reps, [5]=RIR, [6]=R', [7]=RM
+  const gridHeader = document.querySelector(".grid-header");
+  if (gridHeader && gridHeader.children.length >= 6) {
+    gridHeader.children[3].innerText = headerTextI;
+    gridHeader.children[5].innerText = headerTextRIR;
+  }
 
   for (let i = 1; i <= 7; i++) {
     const inputI = document.getElementById(`i${i}`);
@@ -214,7 +200,6 @@ function actualizarEncabezadosYComportamientoVBT() {
       inputRIR.placeholder = headerTextRIR;
     }
 
-    // Al cambiar el estado de VBT, vaciamos tanto 'i' como 'RIR' en todas las filas activas
     const chk = document.getElementById(`s${i}`);
     if (chk && chk.checked) {
       setVal(`i${i}`, "");
@@ -392,7 +377,7 @@ function consultarEntrenamientos() {
   const payload = `tipo=entrenamientoFuerza&usuario=${usuario}&date=${dateEnc}&listpicker=${ejEnc}`;
 
   if (!scriptUrl) {
-    console.warn("URL de Apps Script no configurada en TinyDB");
+    alert("La URL de Apps Script no está configurada en TinyDB ('script').");
     return;
   }
 
@@ -405,8 +390,12 @@ function consultarEntrenamientos() {
   .then(data => {
     calendar = 0;
     console.log("Consulta realizada:", data);
+    alert("Respuesta de consulta: " + data);
   })
-  .catch(err => console.error("Error al consultar:", err));
+  .catch(err => {
+    console.error("Error al consultar:", err);
+    alert("Error de red al consultar. Revisa la consola.");
+  });
 }
 
 function finalizarEntrenamiento() {
@@ -440,7 +429,7 @@ function actualizarEstadosFilas() {
         }
       });
 
-      // El campo RM siempre permanece bloqueado y usa la clase nativa de desactivado (gris claro)
+      // El campo RM siempre permanece bloqueado con el gris claro estándar
       const inputRM = document.getElementById(`rm${i}`);
       if (inputRM) {
         inputRM.disabled = !isOn;
@@ -464,7 +453,7 @@ function actualizarEstadosFilas() {
             inputI.classList.remove("disabled-input");
             inputI.style.backgroundColor = "";
           } else {
-            // Cuando VBT está OFF, se bloquea y se le aplica la clase disabled-input para que use el mismo gris claro de RM
+            // Cuando VBT está OFF, 'i' se bloquea y adopta la clase 'disabled-input' (gris claro idéntico al RM)
             inputI.readOnly = true;
             inputI.classList.add("disabled-input");
             inputI.style.backgroundColor = ""; 
@@ -476,17 +465,18 @@ function actualizarEstadosFilas() {
       // Campo RIR / VL
       const inputRIR = document.getElementById(`RIR${i}`);
       if (inputRIR) {
+        inputRIR.disabled = !isOn;
         if (!isOn) {
+          inputRIR.value = "";
           inputRIR.style.backgroundColor = "";
           inputRIR.classList.remove("disabled-input");
         } else {
           if (!isVBTOn) {
-            // Si VBT está OFF, RIR está habilitado normalmente
+            // Cuando VBT está OFF, RIR está activo con normalidad
             inputRIR.readOnly = false;
             inputRIR.classList.remove("disabled-input");
             inputRIR.style.backgroundColor = "";
           } else {
-            // Si VBT está ON, VL actúa como valor calculado/bloqueado o según requerimiento (en este caso usa disabled-input si aplica)
             inputRIR.style.backgroundColor = "";
           }
         }
