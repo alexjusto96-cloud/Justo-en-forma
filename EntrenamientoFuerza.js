@@ -386,9 +386,14 @@ function ejecutarNuevoEjercicio() {
 }
 
 function enviarFormularioGoogle() {
-  const usuario = TinyDB.getValue("Usuario");
+  const usuario = TinyDB.getValue("Usuario") || "";
   const vbtVal = document.getElementById("vbt").checked ? "TRUE" : "FALSE";
   
+  // Base de tu Google Form terminada en /formResponse o /viewform
+  // Usamos /viewform si quieres que se abra precargado en el navegador, 
+  // o /formResponse si prefieres enviarlo en segundo plano mediante un enlace directo.
+  const BASE_FORM_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktWrd4r6GO_uS-qcI/viewform";
+
   const params = new URLSearchParams({
     "entry.1052562463": usuario,
     "entry.2002526298": fecha,
@@ -437,18 +442,16 @@ function enviarFormularioGoogle() {
     "entry.408397467": getVal("rm6")
   });
 
-  fetch(FORM_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: params
-  })
-    .then(() => alert("Registro enviado con éxito"))
-    .catch(err => console.error("Error al enviar:", err));
-}
+  // Genera el enlace completo con todas las respuestas inyectadas
+  const enlaceGenerado = `${BASE_FORM_URL}?${params.toString()}`;
 
+  // Opciones: puedes abrirlo automáticamente en una pestaña nueva o mostrarlo
+  window.open(enlaceGenerado, "_blank");
+  
+  // O si prefieres que se cree un botón o alerta con el enlace:
+  console.log("Enlace generado:", enlaceGenerado);
+}
+ 
 function consultarEntrenamientos() {
   const scriptUrl = TinyDB.getValue("script");
   const usuario = encodeURIComponent(TinyDB.getValue("Usuario"));
