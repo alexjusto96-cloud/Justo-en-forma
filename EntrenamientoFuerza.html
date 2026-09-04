@@ -39,60 +39,79 @@
       border-radius: 4px;
       font-size: 14px;
     }
-    .tempo-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+
+    /* ESTILOS ORIGINALES (Botones azules, tarjetas grises) */
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #3498db; /* Azul original */
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
     }
-    .tempo-item {
+    button:active {
+      background-color: #2980b9; /* Azul oscuro original */
+    }
+    button#fin {
+      background-color: #e74c3c; /* Rojo original */
+    }
+    button#fin:active {
+      background-color: #c0392b;
+    }
+    /* Estilo para botones secundarios tipo maqueta pero con color original */
+    .btn-secundario {
+      background-color: #ecf0f1; /* Gris claro */
+      color: #2c3e50;
+      border: 1px solid #bdc3c7;
+    }
+
+    /* Estilos cabecera original */
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    /* Estilos reorganizados para coincidir con la estructura de la maqueta */
+    .nav-banner {
       display: flex;
-      flex-direction: column;
-      font-size: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
     }
-    .tempo-item select {
-      margin-top: 2px;
+    .nav-banner button {
+      padding: 6px 12px;
     }
-    .checkbox-inline {
+    #navTextDisplay {
+      font-size: 14px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    /* Tempo en línea (agrupado) */
+    .tempo-inline {
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 12px;
+      background: #fafafa;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      flex-wrap: wrap;
+    }
+    .tempo-inline select {
+      width: auto;
+      padding: 4px;
+    }
+    .checkbox-inline {
+      margin-bottom: 0;
       font-weight: bold;
     }
-    .serie-row {
-      background: #fafafa;
-      border: 1px solid #e0e0e0;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-    }
-    .serie-row.disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-    .serie-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .serie-header h4 {
-      margin: 0;
-      font-size: 15px;
-      color: #2c3e50;
-    }
-    .grid-8col {
-      display: grid;
-      grid-template-columns: 40px 45px 1fr 1fr 1fr 1fr 1fr 1fr;
-      gap: 4px;
-      align-items: center;
-      margin-bottom: 6px;
-      font-size: 12px;
-    }
-    .grid-8col input[type="text"] {
-      padding: 4px;
-      font-size: 12px;
-      text-align: center;
-    }
+
     .timer-card {
       background: #eef2f5;
       border-radius: 6px;
@@ -103,6 +122,7 @@
       color: #2c3e50;
       margin: 15px 0;
     }
+
     .slider-container {
       display: flex;
       align-items: center;
@@ -115,39 +135,26 @@
       width: 55px;
       text-align: center;
     }
+
     .calc-row {
       display: flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 12px;
     }
-    .calc-row input[type="text"] {
-      text-align: center;
-    }
+
     .button-group {
       display: flex;
       flex-direction: column;
       gap: 8px;
       margin-top: 15px;
     }
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 4px;
-      background-color: #3498db;
-      color: white;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
+    .button-group-inline {
+      display: flex;
+      gap: 8px;
     }
-    button:active {
-      background-color: #2980b9;
-    }
-    button#fin {
-      background-color: #e74c3c;
-    }
-    button#fin:active {
-      background-color: #c0392b;
+    .button-group-inline button {
+      flex: 1;
     }
   </style>
 </head>
@@ -156,70 +163,42 @@
 <div class="container">
   <h2>Registro de Entrenamiento de Fuerza</h2>
 
+  <!-- 1. Selección de Ejercicio -->
   <div class="form-group">
     <label for="listPicker1">Histórico Ejercicios:</label>
     <select id="listPicker1"></select>
   </div>
 
-  <div class="form-group">
-    <label for="ejercicio">Ejercicio:</label>
-    <input type="text" id="ejercicio">
+  <!-- 2. Navegación de Texto (Flechas) -->
+  <div class="nav-banner">
+    <button id="btnTextPrev" class="btn-secundario">&larr;</button>
+    <span id="navTextDisplay">Texto 1 de 3</span>
+    <button id="btnTextNext" class="btn-secundario">&rarr;</button>
   </div>
 
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-    <button id="btnTextPrev" style="padding: 6px 12px;">&larr;</button>
-    <span id="navTextDisplay" style="font-size: 14px; font-weight: bold; color: #2c3e50;">Texto 1 de 3</span>
-    <button id="btnTextNext" style="padding: 6px 12px;">&rarr;</button>
+  <!-- 3. Botón Consultar -->
+  <div class="form-group">
+    <button id="consultar" style="width: 100%;" class="btn-secundario">Consultar últimos entrenamientos</button>
   </div>
 
-  <div class="form-group">
-    <label>Tempo / Tiempos (s):</label>
-    <div class="tempo-grid">
-      <div class="tempo-item">
-        Concéntrica
-        <select id="con">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </select>
-      </div>
-      <div class="tempo-item">
-        Pausa Con.
-        <select id="pausaCon">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </select>
-      </div>
-      <div class="tempo-item">
-        Excéntrica
-        <select id="ecc">
-          <option value="1">1</option>
-          <option value="2" selected>2</option>
-          <option value="3">3</option>
-        </select>
-      </div>
-      <div class="tempo-item">
-        Pausa Exc.
-        <select id="pausaEcc">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
+  <!-- 4. VBT y Tempo (En línea) -->
+  <div class="form-group tempo-inline">
     <label class="checkbox-inline">
       <input type="checkbox" id="vbt"> VBT
     </label>
+    <span>Tempo (s):</span>
+    Con: <select id="con"><option value="1">1</option></select>
+    PausaCon: <select id="pausaCon"><option value="1">1</option></select>
+    Exc: <select id="ecc"><option value="2" selected>2</option></select>
+    PausaExc: <select id="pausaEcc"><option value="1">1</option></select>
   </div>
 
+  <!-- 5. Temporizador de Descanso -->
   <div class="timer-card">
     Tiempo de Descanso: <span id="minutos">0</span>:<span id="segundos">00</span>
   </div>
 
+  <!-- 6. Cálculo de Carga -->
   <div class="form-group">
     <label>Cálculo de Carga (% RM):</label>
     <div class="calc-row">
@@ -235,23 +214,26 @@
 
   <hr>
 
-  <!-- CONTENEDOR DEL GRID DE SERIES (1 a 7) -->
+  <!-- 7. Contenedor de Series (Dinámico) -->
+  <!-- Nota: Este contenedor se llenará vía JS, pero debe estar aquí posicionado -->
   <div id="seriesContainer"></div>
 
+  <!-- 8. Observaciones -->
   <div class="form-group">
     <label for="textBox1">Observaciones:</label>
     <input type="text" id="textBox1">
   </div>
 
+  <!-- 9. Botones de Acción -->
   <div class="button-group">
-    <button id="consultar">Consultar últimos entrenamientos</button>
-    <button id="nuevoEjercicio">Nuevo Ejercicio</button>
     <button id="enviar">Enviar Registro</button>
-    <button id="fin">Finalizar el entrenamiento</button>
+    <!-- Botones inferiores en línea como en la maqueta -->
+    <div class="button-group-inline">
+        <button id="nuevoEjercicio" class="btn-secundario">Nuevo Ejercicio</button>
+        <button id="fin">Finalizar el entrenamiento</button>
+    </div>
   </div>
 
-  <div id="label12"></div>
-  <div id="label32"></div>
 </div>
 
 <script src="app.js"></script>
