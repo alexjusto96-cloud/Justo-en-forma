@@ -22,6 +22,20 @@
       padding: 15px;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .back-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      font-weight: bold;
+      color: #2c3e50;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
     }
     .form-group {
       margin-bottom: 12px;
@@ -202,6 +216,7 @@
 <body>
 
 <div class="container">
+  <button id="btnVolverMenu" class="back-btn">&larr;</button>
   <h2>Registro de Entrenamiento de Fuerza</h2>
 
   <div class="form-group">
@@ -215,14 +230,14 @@
     <input type="text" id="ejercicio" placeholder="Nombre del ejercicio">
   </div>
 
-  <div class="nav-banner">
-    <button id="btnTextPrev" class="btn-secundario">&larr;</button>
-    <span id="navTextDisplay">Texto 1 de 3</span>
-    <button id="btnTextNext" class="btn-secundario">&rarr;</button>
-  </div>
-
   <div class="form-group">
     <button id="consultar" style="width: 100%;" class="btn-secundario">Consultar últimos entrenamientos</button>
+  </div>
+
+  <div class="nav-banner">
+    <button id="btnTextPrev" class="btn-secundario">&larr;</button>
+    <span id="navTextDisplay"></span>
+    <button id="btnTextNext" class="btn-secundario">&rarr;</button>
   </div>
 
   <div class="form-group tempo-inline">
