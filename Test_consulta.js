@@ -73,18 +73,12 @@ function cargarSelectsTest() {
   console.log("✓ Opciones fijas y dinámicas de Test cargadas en los desplegables correctamente.");
 }
 
-// 4. Lógica del Botón Enviar (Consulta de Gráfica)
-document.getElementById("btnEnviar").addEventListener("click", async () => {
+// 4. Lógica del Botón Enviar (Redirección tras 2 segundos)
+document.getElementById("btnEnviar").addEventListener("click", () => {
   const mensajeEl = document.getElementById("mensaje-loading");
-  const canvas = document.getElementById("canvasGrafica");
 
-  const usuario = localStorage.getItem('Usuario') || sessionStorage.getItem('usuarioLogueado');
-  const dias = document.getElementById("selectDias").value;
+  // Validación básica del campo obligatorio
   const t1 = document.getElementById("test1").value;
-  const lat1 = document.getElementById("lateralidad1").value;
-  const t2 = document.getElementById("test2").value;
-  const lat2 = document.getElementById("lateralidad2").value;
-
   if (!t1) {
     alert("Comprueba los campos obligatorios (Variable 1)");
     document.getElementById("test1").style.borderColor = "#ff0000";
@@ -92,115 +86,14 @@ document.getElementById("btnEnviar").addEventListener("click", async () => {
   }
   document.getElementById("test1").style.borderColor = "#ccc";
 
-  // Construcción de etiquetas según la lógica de lateralidad (idéntico a App Inventor)
-  const dato4 = lat1 === "BILATERAL" ? t1 : `${t1}${lat1}`;
-  const dato5 = t2 ? (lat2 === "BILATERAL" ? t2 : `${t2}${lat2}`) : "";
-  
-  // Obtener fecha actual en formato YYYY-MM-DD
-  const fechaHoy = new Date().toISOString().split('T')[0];
-
-  // Recuperar la URL del script
-  const paramsUrl = new URLSearchParams(window.location.search);
-  const scriptUrl = paramsUrl.get("script") || localStorage.getItem('script');
-
-  if (!scriptUrl) {
-    mensajeEl.innerText = "Error: No se encontró la URL del Apps Script.";
-    return;
+  // Mostrar mensaje de carga mientras espera
+  if (mensajeEl) {
+    mensajeEl.style.display = "block";
+    mensajeEl.innerText = "Redirigiendo en 2 segundos...";
   }
 
-  mensajeEl.style.display = "block";
-  mensajeEl.innerText = "Cargando datos de la consulta...";
-
-  try {
-    const bodyData = new URLSearchParams({
-      tipo: "cincoDatos",
-      dato1: usuario,
-      dato2: fechaHoy,
-      dato3: dias,
-      dato4: dato4,
-      dato5: dato5
-    });
-
-    const urlConsulta = `${scriptUrl}?accion=graficaTest&t=${Date.now()}`;
-    const respuesta = await fetch(urlConsulta, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: bodyData.toString()
-    });
-
-    if (!respuesta.ok) {
-      throw new Error(`HTTP Error: ${respuesta.status}`);
-    }
-
-    const data = await respuesta.json();
-
-    if (!Array.isArray(data) || data.length < 2) {
-      mensajeEl.innerText = "No se encontraron datos para los parámetros seleccionados.";
-      if (miGrafico) miGrafico.destroy();
-      return;
-    }
-
-    mensajeEl.style.display = "none";
-
-    const cabeceras = data[0];
-    const filas = data.slice(1);
-
-    const fechas = filas.map(f => f[0]);
-    const valoresVar1 = filas.map(f => f[1]);
-    const valoresVar2 = filas.map(f => f[2]);
-
-    const labelVar1 = cabeceras[1] || t1;
-    const labelVar2 = cabeceras[2] || t2;
-
-    const ctx = canvas.getContext("2d");
-    if (miGrafico) {
-      miGrafico.destroy();
-    }
-
-    miGrafico = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: fechas,
-        datasets: [
-          {
-            label: labelVar1,
-            data: valoresVar1,
-            borderColor: "#0288D1",
-            backgroundColor: "rgba(2, 136, 209, 0.15)",
-            borderWidth: 2,
-            pointRadius: 4,
-            tension: 0.2,
-            fill: true
-          },
-          ...(t2 && valoresVar2.some(v => v !== undefined && v !== "") ? [{
-            label: labelVar2,
-            data: valoresVar2,
-            borderColor: "#D32F2F",
-            backgroundColor: "rgba(211, 47, 47, 0.15)",
-            borderWidth: 2,
-            pointRadius: 4,
-            tension: 0.2,
-            fill: true
-          }] : [])
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: "top" }
-        },
-        scales: {
-          x: { title: { display: true, text: "Fecha" }, grid: { display: false } },
-          y: { title: { display: true, text: "Valor" }, beginAtZero: false }
-        }
-      }
-    });
-
-  } catch (err) {
-    console.error("Error cargando la gráfica:", err);
-    mensajeEl.innerText = "Ocurrió un error al cargar la gráfica.";
-  }
+  // Esperar 2 segundos (2000 milisegundos) y redirigir
+  setTimeout(() => {
+    window.location.href = "https://alexjusto96-cloud.github.io/Gr-fico-TEST/";
+  }, 2000);
 });
