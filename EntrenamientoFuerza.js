@@ -409,17 +409,17 @@ function consultarEntrenamientos() {
     calendar = 0;
     console.log("Consulta realizada:", data);
 
-    // Dividir los resultados devueltos (separados por saltos de línea o barras según prefieras, aquí por saltos o fragmentos)
-    // Asignamos hasta 3 bloques de texto a las posiciones del banner
-    let lineas = data.split('\n').filter(l => l.trim() !== "");
+    // Separar usando el delimitador exacto "|||" que devuelve el Apps Script
+    // para que cada celda (F2, F3, F4) mantenga sus saltos internos intactos
+    let partes = data.split("|||");
     
     textosNavegacion = [
-      lineas[0] || "Sin registros recientes",
-      lineas[1] || "Sin registros intermedios",
-      lineas[2] || "Sin registros antiguos"
+      partes[0] || "Sin registros recientes",
+      partes[1] || "Sin registros intermedios",
+      partes[2] || "Sin registros antiguos"
     ];
 
-    currentTextIndex = 0; // Volver al principio del banner
+    currentTextIndex = 0; // Volver al texto 1 del banner
     actualizarTextoNavegacion();
   })
   .catch(err => {
