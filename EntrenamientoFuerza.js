@@ -33,6 +33,27 @@ function renderSeriesInputs() {
   if (!container) return;
   container.innerHTML = "";
 
+  // Cabecera dinámica para las columnas de intensidad y RIR/VL
+  const vbtEl = document.getElementById("vbt");
+  const isVBTOn = vbtEl && vbtEl.checked;
+  const headerI = isVBTOn ? "MVP" : "Int";
+  const headerRIR = isVBTOn ? "VL" : "RIR";
+
+  const headerRow = document.createElement("div");
+  headerRow.className = "grid-8col header-row";
+  headerRow.id = "tableHeaderRow";
+  headerRow.innerHTML = `
+    <div style="text-align:center; font-weight:bold;">Set</div>
+    <div style="text-align:center; font-weight:bold;">#</div>
+    <div style="text-align:center; font-weight:bold;">Kg</div>
+    <div style="text-align:center; font-weight:bold;" id="colHeaderI">${headerI}</div>
+    <div style="text-align:center; font-weight:bold;">Reps</div>
+    <div style="text-align:center; font-weight:bold;" id="colHeaderRIR">${headerRIR}</div>
+    <div style="text-align:center; font-weight:bold;">R´</div>
+    <div style="text-align:center; font-weight:bold;">RM</div>
+  `;
+  container.appendChild(headerRow);
+
   for (let i = 1; i <= 7; i++) {
     const row = document.createElement("div");
     const isActiveOrNext = (i === 1 || i === 2);
@@ -44,9 +65,9 @@ function renderSeriesInputs() {
         <div><input type="checkbox" id="s${i}" ${i === 1 ? 'checked' : ''} ${i > 2 ? 'disabled' : ''}></div>
         <div style="text-align:center; font-weight:bold;">${i}</div>
         <div><input type="text" id="kg${i}" placeholder="Kg" inputmode="decimal"></div>
-        <div><input type="text" id="i${i}" placeholder="Int" inputmode="decimal"></div>
+        <div><input type="text" id="i${i}" placeholder="${headerI}" inputmode="decimal"></div>
         <div><input type="text" id="Rep${i}" placeholder="Reps" inputmode="numeric"></div>
-        <div><input type="text" id="RIR${i}" placeholder="RIR" inputmode="decimal"></div>
+        <div><input type="text" id="RIR${i}" placeholder="${headerRIR}" inputmode="decimal"></div>
         <div><input type="text" id="rec${i}" placeholder="R´" inputmode="numeric"></div>
         <div><input type="text" id="rm${i}" placeholder="RM" readonly inputmode="decimal" class="disabled-input"></div>
       </div>
@@ -114,7 +135,7 @@ function bindEvents() {
     }
   });
 
-  // Escuchar cambios en el switch VBT para actualizar cabeceras y comportamiento de los campos 'i' y 'RIR'
+  // Escuchar cambios en el switch VBT para actualizar cabeceras, placeholders y limpiar campos
   const vbtElement = document.getElementById("vbt");
   if (vbtElement) {
     vbtElement.addEventListener("change", () => {
@@ -178,26 +199,31 @@ function actualizarEncabezadosYComportamientoVBT() {
   const vbtEl = document.getElementById("vbt");
   const isVBTOn = vbtEl && vbtEl.checked;
 
-  // Actualizar los placeholders / textos dinámicos de las cabeceras de columnas o inputs según corresponda
+  const headerTextI = isVBTOn ? "MVP" : "Int";
+  const headerTextRIR = isVBTOn ? "VL" : "RIR";
+
+  // Actualizar los textos de los headers en la tabla si existen
+  const colHeaderI = document.getElementById("colHeaderI");
+  const colHeaderRIR = document.getElementById("colHeaderRIR");
+  if (colHeaderI) colHeaderI.innerText = headerTextI;
+  if (colHeaderRIR) colHeaderRIR.innerText = headerTextRIR;
+
   for (let i = 1; i <= 7; i++) {
     const inputI = document.getElementById(`i${i}`);
     const inputRIR = document.getElementById(`RIR${i}`);
     
     if (inputI) {
-      inputI.placeholder = isVBTOn ? "MVP" : "Int";
+      inputI.placeholder = headerTextI;
     }
     if (inputRIR) {
-      inputRIR.placeholder = isVBTOn ? "VL" : "RIR";
+      inputRIR.placeholder = headerTextRIR;
     }
-  }
 
-  // Al cambiar VBT, si se activa (ON), limpiamos los valores de 'i' en las filas activas para dejarlos en blanco y editables
-  if (isVBTOn) {
-    for (let i = 1; i <= 7; i++) {
-      const chk = document.getElementById(`s${i}`);
-      if (chk && chk.checked) {
-        setVal(`i${i}`, "");
-      }
+    // Al cambiar el estado de VBT, vaciamos tanto 'i' como 'RIR' en todas las filas activas
+    const chk = document.getElementById(`s${i}`);
+    if (chk && chk.checked) {
+      setVal(`i${i}`, "");
+      setVal(`RIR${i}`, "");
     }
   }
 }
@@ -419,14 +445,14 @@ function actualizarEstadosFilas() {
         }
       });
 
-      // El campo RM siempre permanece bloqueado y con fondo grisáceo
+      // El campo RM siempre permanece bloqueado y con estilo estándar
       const inputRM = document.getElementById(`rm${i}`);
       if (inputRM) {
         inputRM.disabled = !isOn;
         inputRM.readOnly = true;
         if (!isOn) inputRM.value = "";
         inputRM.classList.add("disabled-input");
-        inputRM.style.backgroundColor = "#e9ecef";
+        inputRM.style.backgroundColor = ""; 
       }
 
       const inputI = document.getElementById(`i${i}`);
@@ -443,7 +469,7 @@ function actualizarEstadosFilas() {
           } else {
             inputI.readOnly = true;
             inputI.classList.add("disabled-input");
-            inputI.style.backgroundColor = "#e9ecef";
+            inputI.style.backgroundColor = ""; 
             calcularIntensidadAutomatica(i);
           }
         }
