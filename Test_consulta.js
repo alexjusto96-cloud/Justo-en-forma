@@ -1,5 +1,17 @@
 let miGrafico = null;
 
+// Lista fija obligatoria extraída de los bloques de App Inventor
+const VALORES_FIJOS_TEST = [
+  "HOOPER INDEX",
+  "PESO",
+  "ESTADO MUSCULAR",
+  "ESTADO MENTAL",
+  "ENERGÍA",
+  "CALIDAD DE SUEÑO",
+  "HORAS DE SUEÑO",
+  "HRV"
+];
+
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Validar usuario activo
   const usuario = localStorage.getItem('Usuario') || sessionStorage.getItem('usuarioLogueado');
@@ -9,52 +21,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   document.getElementById("usuario-display").textContent = `Usuario: ${usuario}`;
 
-  // 2. Cargar los elementos del Test guardados en localStorage (precargados en el menú)
+  // 2. Cargar los elementos combinados (LocalStorage 'Test' + Valores Fijos)
   cargarSelectsTest();
 
   // 3. Botón Menú Principal
   document.getElementById("btnMenu").addEventListener("click", () => {
-    window.location.href = "Menu_principal.html"; // Ajusta el nombre de tu archivo de menú si difiere
+    window.location.href = "Menu_principal.html";
   });
 });
 
 /**
- * Rellena los selectores de Test 1 y Test 2 con la lista almacenada en localStorage
+ * Rellena los selectores uniendo los datos de localStorage con los 8 valores fijos obligatorios.
  */
 function cargarSelectsTest() {
   const select1 = document.getElementById("test1");
   const select2 = document.getElementById("test2");
 
+  // Recoger los tests guardados en localStorage o iniciar array vacío
+  let listaDinamica = [];
   try {
     const testGuardadosJson = localStorage.getItem('Test');
-    
-    if (!testGuardadosJson) {
-      console.warn("No se encontró la lista 'Test' en localStorage. Asegúrate de pasar por el menú principal.");
-      return;
-    }
-
-    const listaTests = JSON.parse(testGuardadosJson);
-
-    if (Array.isArray(listaTests)) {
-      listaTests.forEach(item => {
-        // Asegurar compatibilidad tanto si es un array de strings como si es un objeto
-        const valorItem = typeof item === 'object' ? (item.nombre || item.valor || Object.values(item)[0]) : item;
-
-        const opt1 = document.createElement("option");
-        opt1.value = valorItem;
-        opt1.textContent = valorItem;
-        select1.appendChild(opt1);
-
-        const opt2 = document.createElement("option");
-        opt2.value = valorItem;
-        opt2.textContent = valorItem;
-        select2.appendChild(opt2);
-      });
-      console.log("✓ Opciones de Test cargadas en los desplegables correctamente.");
+    if (testGuardadosJson) {
+      const parsed = JSON.parse(testGuardadosJson);
+      if (Array.isArray(parsed)) {
+        listaDinamica = parsed.map(item => 
+          typeof item === 'object' ? (item.nombre || item.valor || Object.values(item)[0]) : item
+        );
+      }
     }
   } catch (err) {
     console.error("Error al parsear la lista 'Test' del localStorage:", err);
   }
+
+  // Combinar los valores fijos y los dinámicos, filtrando duplicados
+  const opcionesTotales = [...new Set([...VALORES_FIJOS_TEST, ...listaDinamica])];
+
+  opcionesTotales.forEach(valorItem => {
+    if (!valorItem) return;
+
+    const opt1 = document.createElement("option");
+    opt1.value = valorItem;
+    opt1.textContent = valorItem;
+    select1.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = valorItem;
+    opt2.textContent = valorItem;
+    select2.appendChild(opt2);
+  });
+
+  console.log("✓ Opciones fijas y dinámicas de Test cargadas en los desplegables correctamente.");
 }
 
 // 4. Lógica del Botón Enviar (Consulta de Gráfica)
@@ -83,7 +99,7 @@ document.getElementById("btnEnviar").addEventListener("click", async () => {
   // Obtener fecha actual en formato YYYY-MM-DD
   const fechaHoy = new Date().toISOString().split('T')[0];
 
-  // Recuperar la URL del script (desde la URL o de localStorage)
+  // Recuperar la URL del script
   const paramsUrl = new URLSearchParams(window.location.search);
   const scriptUrl = paramsUrl.get("script") || localStorage.getItem('script');
 
@@ -96,7 +112,6 @@ document.getElementById("btnEnviar").addEventListener("click", async () => {
   mensajeEl.innerText = "Cargando datos de la consulta...";
 
   try {
-    // Petición POST idéntica a la que hacía el bloque Web de App Inventor
     const bodyData = new URLSearchParams({
       tipo: "cincoDatos",
       dato1: usuario,
