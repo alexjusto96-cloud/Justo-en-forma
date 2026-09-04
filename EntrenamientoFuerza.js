@@ -394,7 +394,11 @@ function enviarFormularioGoogle() {
     if (!vbtElement) {
       console.error("❌ ERROR CRÍTICO: No se encuentra el elemento con id 'vbt' en el DOM.");
     }
-    const vbtVal = vbtElement && vbtElement.checked ? "TRUE" : "FALSE";
+    
+    // --- MODIFICACIÓN AQUÍ ---
+    // Si está checked se envía "VBT", si no, se envía un string vacío ("")
+    const vbtVal = (vbtElement && vbtElement.checked) ? "VBT" : "";
+    // -------------------------
     
     const ejercicioEl = document.getElementById("ejercicio");
     if (!ejercicioEl || !ejercicioEl.value.trim()) {
@@ -403,12 +407,12 @@ function enviarFormularioGoogle() {
 
     const FORM_RESPONSE_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktWrd4r6GO_uS-qcI/formResponse";
 
-    // Objeto con todos los campos
+    // Objeto con todos los campos (el resto sigue exactamente igual)
     const datos = {
       "entry.1052562463": usuario,
       "entry.2002526298": fecha,
       "entry.1315747589": ejercicioEl ? ejercicioEl.value : "",
-      "entry.9949262": vbtVal,
+      "entry.9949262": vbtVal, // <--- Aquí se utilizará la variable modificada
       "entry.1445063449": getVal("con"),
       "entry.2132618651": getVal("pausaCon"),
       "entry.1198689613": getVal("ecc"),
@@ -451,7 +455,7 @@ function enviarFormularioGoogle() {
       "entry.30846413": getVal("rm5"),
       "entry.408397467": getVal("rm6")
     };
-
+    
     // Auditoría individual en consola de cada campo que se va a enviar
     console.table(datos);
 
