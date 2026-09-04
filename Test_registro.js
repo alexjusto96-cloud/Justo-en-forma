@@ -15,11 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const anio = hoy.getFullYear();
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
-    inputFecha.value = `${anio}-${mes}-${mes ? mes : ''}-${dia}`.replace(/--/g, '-'); // Asegurar formato limpio y robusto
     inputFecha.value = `${anio}-${mes}-${dia}`;
 
     // 3. Cargar elementos del Test desde localStorage (precargados en el menú principal)
     const selectTest = document.getElementById('test-select');
+    const inputResultadoPre = document.getElementById('resultado-pre');
     const listaTestJSON = localStorage.getItem('Test');
     
     if (listaTestJSON) {
@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Sincronizar la selección del desplegable con el textbox editable (Resultado_PRE)
+    selectTest.addEventListener('change', () => {
+        inputResultadoPre.value = selectTest.value;
+    });
+
     // 4. Lógica de selección Bilateral / Unilateral (Equivalente al bloque AfterPicking de UniMulti)
     const selectUniMulti = document.getElementById('unimulti');
     const selectLateralidad = document.getElementById('lateralidad');
@@ -47,10 +52,12 @@ document.addEventListener('DOMContentLoaded', () => {
             selectLateralidad.classList.add('hidden');
             selectLateralidad.disabled = true;
             selectTest.disabled = false;
+            inputResultadoPre.disabled = false;
         } else if (seleccion === 'Unilateral') {
             selectLateralidad.classList.remove('hidden');
             selectLateralidad.disabled = false;
             selectTest.disabled = false;
+            inputResultadoPre.disabled = false;
         }
     });
 
@@ -78,11 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
             inputFecha.classList.remove('error');
         }
 
-        if (!selectTest.value.trim()) {
-            selectTest.classList.add('error');
+        if (!inputResultadoPre.value.trim()) {
+            inputResultadoPre.classList.add('error');
             hayError = true;
         } else {
-            selectTest.classList.remove('error');
+            inputResultadoPre.classList.remove('error');
         }
 
         if (!inputResultado.value.trim()) {
@@ -99,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Obtener lateralidad si aplica
         const lateralidadVal = selectUniMulti.value === 'Unilateral' ? selectLateralidad.value : '';
-        const testSeleccionado = selectTest.value;
+        const testSeleccionado = inputResultadoPre.value; // Se envía el valor del textbox editable
 
         // Construir URL del Google Form idéntica al bloque App Inventor
         const formID = '1FAIpQLSeRxOtwwOBM4TpviGO3f0WolnSy18VBjjZIe_EY-cvYAnJu_A';
