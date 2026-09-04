@@ -385,74 +385,122 @@ function ejecutarNuevoEjercicio() {
   document.getElementById("label12").innerText = "";
 }
 function enviarFormularioGoogle() {
-  const usuario = TinyDB.getValue("Usuario") || "";
-  const vbtVal = document.getElementById("vbt").checked ? "TRUE" : "FALSE";
+  console.group("🔍 [Controlador de Problemas] - Iniciando envío de formulario");
   
-  // Usamos el endpoint oficial de envío por POST
-  const FORM_RESPONSE_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktWrd4r6GO_uS-qcI/formResponse";
+  try {
+    const usuario = TinyDB.getValue("Usuario") || "";
+    const vbtElement = document.getElementById("vbt");
+    
+    if (!vbtElement) {
+      console.error("❌ ERROR CRÍTICO: No se encuentra el elemento con id 'vbt' en el DOM.");
+    }
+    const vbtVal = vbtElement && vbtElement.checked ? "TRUE" : "FALSE";
+    
+    const ejercicioEl = document.getElementById("ejercicio");
+    if (!ejercicioEl || !ejercicioEl.value.trim()) {
+      console.warn("⚠️ ADVERTENCIA: El campo 'ejercicio' está vacío.");
+    }
 
-  const params = new URLSearchParams({
-    "entry.1052562463": usuario,
-    "entry.2002526298": fecha,
-    "entry.1315747589": document.getElementById("ejercicio").value,
-    "entry.9949262": vbtVal,
-    "entry.1445063449": document.getElementById("con").value,
-    "entry.2132618651": document.getElementById("pausaCon").value,
-    "entry.1198689613": document.getElementById("ecc").value,
-    "entry.2062861622": document.getElementById("pausaEcc").value,
-    "entry.631342381": getVal("kg1"),
-    "entry.1743166598": getVal("i1"),
-    "entry.189884999": getVal("Rep1"),
-    "entry.164706516": getVal("RIR1"),
-    "entry.297841540": getVal("rec1"),
-    "entry.1579682820": getVal("kg2"),
-    "entry.1209305030": getVal("i2"),
-    "entry.676283789": getVal("Rep2"),
-    "entry.1940734848": getVal("RIR2"),
-    "entry.1689760695": getVal("rec2"),
-    "entry.34824846": getVal("kg3"),
-    "entry.528917915": getVal("i3"),
-    "entry.788505499": getVal("Rep3"),
-    "entry.1498087804": getVal("RIR3"),
-    "entry.1917477661": getVal("rec3"),
-    "entry.910847423": getVal("kg4"),
-    "entry.831909719": getVal("i4"),
-    "entry.1951974537": getVal("Rep4"),
-    "entry.424157927": getVal("RIR4"),
-    "entry.1976325897": getVal("rec4"),
-    "entry.2004267982": getVal("kg5"),
-    "entry.207883616": getVal("i5"),
-    "entry.1594603315": getVal("Rep5"),
-    "entry.1303875824": getVal("RIR5"),
-    "entry.1101581192": getVal("rec5"),
-    "entry.1166189654": getVal("kg6"),
-    "entry.1135214150": getVal("i6"),
-    "entry.1557441991": getVal("Rep6"),
-    "entry.301613450": getVal("RIR6"),
-    "entry.490439673": getVal("rec6"),
-    "entry.636191433": getVal("textBox1"),
-    "entry.1607583138": getVal("rm1"),
-    "entry.337634217": getVal("rm2"),
-    "entry.975920808": getVal("rm3"),
-    "entry.810637765": getVal("rm4"),
-    "entry.30846413": getVal("rm5"),
-    "entry.408397467": getVal("rm6")
-  });
+    const FORM_RESPONSE_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktWrd4r6GO_uS-qcI/formResponse";
 
-  // Realizamos la petición idéntica al PostText con cabecera form-urlencoded
-  fetch(FORM_RESPONSE_URL, {
-    method: "POST",
-    mode: "no-cors", // Necesario para evitar bloqueos de CORS al impactar directamente en Google Forms
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params.toString()
-  })
-  .then(() => {
-    alert("Entrenamiento enviado correctamente al formulario.");
-  })
-  .catch(err => {
-    console.error("Error al enviar el formulario:", err);
-    alert("Hubo un error al enviar los datos.");
-  });
+    // Objeto con todos los campos
+    const datos = {
+      "entry.1052562463": usuario,
+      "entry.2002526298": fecha,
+      "entry.1315747589": ejercicioEl ? ejercicioEl.value : "",
+      "entry.9949262": vbtVal,
+      "entry.1445063449": getVal("con"),
+      "entry.2132618651": getVal("pausaCon"),
+      "entry.1198689613": getVal("ecc"),
+      "entry.2062861622": getVal("pausaEcc"),
+      "entry.631342381": getVal("kg1"),
+      "entry.1743166598": getVal("i1"),
+      "entry.189884999": getVal("Rep1"),
+      "entry.164706516": getVal("RIR1"),
+      "entry.297841540": getVal("rec1"),
+      "entry.1579682820": getVal("kg2"),
+      "entry.1209305030": getVal("i2"),
+      "entry.676283789": getVal("Rep2"),
+      "entry.1940734848": getVal("RIR2"),
+      "entry.1689760695": getVal("rec2"),
+      "entry.34824846": getVal("kg3"),
+      "entry.528917915": getVal("i3"),
+      "entry.788505499": getVal("Rep3"),
+      "entry.1498087804": getVal("RIR3"),
+      "entry.1917477661": getVal("rec3"),
+      "entry.910847423": getVal("kg4"),
+      "entry.831909719": getVal("i4"),
+      "entry.1951974537": getVal("Rep4"),
+      "entry.424157927": getVal("RIR4"),
+      "entry.1976325897": getVal("rec4"),
+      "entry.2004267982": getVal("kg5"),
+      "entry.207883616": getVal("i5"),
+      "entry.1594603315": getVal("Rep5"),
+      "entry.1303875824": getVal("RIR5"),
+      "entry.1101581192": getVal("rec5"),
+      "entry.1166189654": getVal("kg6"),
+      "entry.1135214150": getVal("i6"),
+      "entry.1557441991": getVal("Rep6"),
+      "entry.301613450": getVal("RIR6"),
+      "entry.490439673": getVal("rec6"),
+      "entry.636191433": getVal("textBox1"),
+      "entry.1607583138": getVal("rm1"),
+      "entry.337634217": getVal("rm2"),
+      "entry.975920808": getVal("rm3"),
+      "entry.810637765": getVal("rm4"),
+      "entry.30846413": getVal("rm5"),
+      "entry.408397467": getVal("rm6")
+    };
+
+    // Auditoría individual en consola de cada campo que se va a enviar
+    console.table(datos);
+
+    // Verificamos si algún elemento del DOM requerido devolvió un error al buscarse
+    for (const [key, value] of Object.entries(datos)) {
+      if (value === undefined) {
+        console.error(`🚨 FALLO DETECTADO: El campo asociado a la clave de Google Forms '${key}' devolvió 'undefined'. Revisa los IDs de tus inputs en el HTML.`);
+      }
+    }
+
+    // Creamos el formulario dinámico
+    const form = document.createElement("form");
+    form.action = FORM_RESPONSE_URL;
+    form.method = "POST";
+    form.target = "hidden_iframe";
+
+    for (const [key, value] of Object.entries(datos)) {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = value !== null ? value : "";
+      form.appendChild(input);
+    }
+
+    let iframe = document.getElementById("hidden_iframe");
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.id = "hidden_iframe";
+      iframe.name = "hidden_iframe";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+      console.info("ℹ️ Creado iframe oculto para el envío.");
+    }
+
+    document.body.appendChild(form);
+    console.info("🚀 Enviando formulario mediante submit del DOM...");
+    form.submit();
+    document.body.removeChild(form);
+
+    console.log("✅ Proceso de envío ejecutado sin excepciones en JS.");
+    alert("Entrenamiento enviado correctamente.");
+
+  } catch (error) {
+    console.error("🔥 EXCEPCIÓN CAPTURADA EN EL CONTROLADOR DE PROBLEMAS:");
+    console.error(error);
+    alert("Hubo un fallo crítico en el script. Revisa la consola para ver el detalle.");
+  } finally {
+    console.groupEnd();
+  }
 }
 function consultarEntrenamientos() {
   const scriptUrl = TinyDB.getValue("script");
