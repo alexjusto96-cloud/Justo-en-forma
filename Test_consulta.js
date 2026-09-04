@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnMenu = document.getElementById("btnMenu") || document.getElementById("btnAtras");
   if (btnMenu) {
     btnMenu.addEventListener("click", () => {
-      window.location.href = "Menu_principal.html";
+      window.location.href = "menu_principal.html";
     });
   }
 });
