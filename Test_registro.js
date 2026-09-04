@@ -1,139 +1,135 @@
-document.addEventListener("DOMContentLoaded", () => {
-  // Elementos del DOM
-  const inputNombre = document.getElementById("nombre");
-  const inputFecha = document.getElementById("fecha");
-  const selectUniMulti = document.getElementById("uniMulti");
-  const groupLateralidad = document.getElementById("group-lateralidad");
-  const selectLateralidad = document.getElementById("lateralidad");
-  const selectTest = document.getElementById("test");
-  const inputResultadoPRE = document.getElementById("resultadoPRE");
-  const inputResultado = document.getElementById("resultado");
-  const inputObservaciones = document.getElementById("observaciones");
-  const btnEnviar = document.getElementById("btnEnviar");
-  const btnMenu = document.getElementById("btnMenu");
-  const divNotificador = document.getElementById("notificador");
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Obtener usuario activo (coherente con el menú principal)
+    const usuario = localStorage.getItem('Usuario') || sessionStorage.getItem('usuarioLogueado');
+    if (!usuario) {
+        window.location.href = 'index.html';
+        return;
+    }
 
-  // Obtener usuario activo unificando localStorage y sessionStorage
-  const usuarioActivo = localStorage.getItem("Usuario") || sessionStorage.getItem("usuarioLogueado") || "";
-  
-  // Si no hay usuario o no se pasó por el menú principal (verificando que existan las listas base), se redirige
-  const testsGuardados = JSON.parse(localStorage.getItem("Test") || "[]");
-  if (!usuarioActivo || testsGuardados.length === 0) {
-    window.location.href = 'index.html';
-    return;
-  }
+    const inputNombre = document.getElementById('nombre');
+    inputNombre.value = usuario;
 
-  inputNombre.value = usuarioActivo;
-  inputNombre.style.backgroundColor = "#ffffff";
+    // 2. Inicializar Fecha actual (Formato YYYY-MM-DD compatible con input type="date")
+    const inputFecha = document.getElementById('fecha');
+    const hoy = new Date();
+    const anio = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    inputFecha.value = `${anio}-${mes}-${mes ? mes : ''}-${dia}`.replace(/--/g, '-'); // Asegurar formato limpio y robusto
+    inputFecha.value = `${anio}-${mes}-${dia}`;
 
-  // Cargar la fecha actual (YYYY-MM-DD)
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, '0');
-  const day = String(hoy.getDate()).padStart(2, '0');
-  inputFecha.value = `${year}-${month}-${day}`;
-
-  // Cargar opciones en el select de TEST desde localStorage
-  selectTest.innerHTML = '<option value="" disabled selected>Selecciona test</option>';
-  testsGuardados.forEach(item => {
-    const opt = document.createElement("option");
-    opt.value = item;
-    opt.textContent = item;
-    selectTest.appendChild(opt);
-  });
-
-  // Evento UniMulti
-  selectUniMulti.addEventListener("change", () => {
-    selectTest.value = "";
-    inputResultadoPRE.value = "";
+    // 3. Cargar elementos del Test desde localStorage (precargados en el menú principal)
+    const selectTest = document.getElementById('test-select');
+    const listaTestJSON = localStorage.getItem('Test');
     
-    const seleccion = selectUniMulti.value;
-
-    if (seleccion === "Bilateral") {
-      selectLateralidad.disabled = true;
-      groupLateralidad.classList.add("hidden");
-      selectLateralidad.value = "";
-      selectTest.disabled = false;
-      inputResultadoPRE.disabled = false;
-    } else if (seleccion === "Unilateral") {
-      selectLateralidad.disabled = false;
-      groupLateralidad.classList.remove("hidden");
-      selectTest.disabled = false;
-      inputResultadoPRE.disabled = false;
-    }
-  });
-
-  // Evento TEST
-  selectTest.addEventListener("change", () => {
-    inputResultadoPRE.value = selectTest.value;
-  });
-
-  // Evento Botón Enviar
-  btnEnviar.addEventListener("click", () => {
-    let valido = true;
-
-    // Validación Nombre
-    if (inputNombre.value.trim() === "") {
-      inputNombre.style.backgroundColor = "#ff0000";
-      valido = false;
-    } else {
-      inputNombre.style.backgroundColor = "#ffffff";
+    if (listaTestJSON) {
+        try {
+            const listaTest = JSON.parse(listaTestJSON);
+            listaTest.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                selectTest.appendChild(option);
+            });
+        } catch (e) {
+            console.error('Error al parsear la lista de Test desde localStorage:', e);
+        }
     }
 
-    // Validación Fecha
-    if (inputFecha.value.trim() === "") {
-      inputFecha.style.backgroundColor = "#ff0000";
-      valido = false;
-    } else {
-      inputFecha.style.backgroundColor = "#ffffff";
-    }
+    // 4. Lógica de selección Bilateral / Unilateral (Equivalente al bloque AfterPicking de UniMulti)
+    const selectUniMulti = document.getElementById('unimulti');
+    const selectLateralidad = document.getElementById('lateralidad');
 
-    // Validación Resultado_PRE (Corregido el color al elemento correcto)
-    if (inputResultadoPRE.value.trim() === "") {
-      inputResultadoPRE.style.backgroundColor = "#ff0000";
-      valido = false;
-    } else {
-      inputResultadoPRE.style.backgroundColor = "#ffffff";
-    }
-
-    // Validación Resultado
-    if (inputResultado.value.trim() === "") {
-      inputResultado.style.backgroundColor = "#ff0000";
-      valido = false;
-    } else {
-      inputResultado.style.backgroundColor = "#ffffff";
-    }
-
-    if (!valido) {
-      alert("Comprueba los campos obligatorios");
-      return;
-    }
-
-    // Envío a Google Forms
-    const baseUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeRxOtwwOBM4TpviGO3f0WolnSy18VBjjZIe_EY-cvYAnJu_A/formResponse";
-    
-    const params = new URLSearchParams({
-      "entry.1605752120": inputNombre.value,
-      "entry.118908139": inputFecha.value,
-      "entry.335892241": inputResultadoPRE.value,
-      "entry.1540418146": selectLateralidad.value || "",
-      "entry.1648244417": inputResultado.value,
-      "entry.1814970791": inputObservaciones.value
+    selectUniMulti.addEventListener('change', () => {
+        const seleccion = selectUniMulti.value;
+        if (seleccion === 'Bilateral') {
+            selectLateralidad.value = '';
+            selectLateralidad.classList.add('hidden');
+            selectLateralidad.disabled = true;
+            selectTest.disabled = false;
+        } else if (seleccion === 'Unilateral') {
+            selectLateralidad.classList.remove('hidden');
+            selectLateralidad.disabled = false;
+            selectTest.disabled = false;
+        }
     });
 
-    const fullUrl = `${baseUrl}?${params.toString()}`;
+    // 5. Botón Enviar / Registrar (Equivalente al bloque Click de Enviar)
+    const btnEnviar = document.getElementById('enviar');
+    const inputResultado = document.getElementById('resultado');
+    const inputObservaciones = document.getElementById('observaciones');
+    const lblNotificador = document.getElementById('notificador-lbl');
 
-    fetch(fullUrl, { method: "GET", mode: "no-cors" })
-      .then(() => {
-        divNotificador.textContent = "Respuestas enviadas correctamente";
-      })
-      .catch(() => {
-        divNotificador.textContent = "Respuestas enviadas correctamente";
-      });
-  });
+    btnEnviar.addEventListener('click', async () => {
+        let hayError = false;
 
-  // Evento Botón Menú
-  btnMenu.addEventListener("click", () => {
-    window.location.href = "menu_principal.html";
-  });
+        // Validación de campos obligatorios con marcado visual en rojo
+        if (!inputNombre.value.trim()) {
+            inputNombre.classList.add('error');
+            hayError = true;
+        } else {
+            inputNombre.classList.remove('error');
+        }
+
+        if (!inputFecha.value.trim()) {
+            inputFecha.classList.add('error');
+            hayError = true;
+        } else {
+            inputFecha.classList.remove('error');
+        }
+
+        if (!selectTest.value.trim()) {
+            selectTest.classList.add('error');
+            hayError = true;
+        } else {
+            selectTest.classList.remove('error');
+        }
+
+        if (!inputResultado.value.trim()) {
+            inputResultado.classList.add('error');
+            hayError = true;
+        } else {
+            inputResultado.classList.remove('error');
+        }
+
+        if (hayError) {
+            alert('Comprueba los campos obligatorios');
+            return;
+        }
+
+        // Obtener lateralidad si aplica
+        const lateralidadVal = selectUniMulti.value === 'Unilateral' ? selectLateralidad.value : '';
+        const testSeleccionado = selectTest.value;
+
+        // Construir URL del Google Form idéntica al bloque App Inventor
+        const formID = '1FAIpQLSeRxOtwwOBM4TpviGO3f0WolnSy18VBjjZIe_EY-cvYAnJu_A';
+        const urlGoogleForm = `https://docs.google.com/forms/d/e/${formID}/formResponse?` +
+            `entry.1605752120=${encodeURIComponent(inputNombre.value)}` +
+            `&entry.118908139=${encodeURIComponent(inputFecha.value)}` +
+            `&entry.335892241=${encodeURIComponent(testSeleccionado)}` +
+            `&entry.1540418146=${encodeURIComponent(lateralidadVal)}` +
+            `&entry.1648244417=${encodeURIComponent(inputResultado.value)}` +
+            `&entry.1814970791=${encodeURIComponent(inputObservaciones.value)}`;
+
+        try {
+            // Envío mediante no-cors debido a restricciones de políticas de Google Forms
+            await fetch(urlGoogleForm, {
+                method: 'GET',
+                mode: 'no-cors'
+            });
+            lblNotificador.textContent = 'Respuestas enviadas correctamente';
+            
+            // Limpiar campos numéricos/resultados tras envío exitoso
+            inputResultado.value = '';
+            inputObservaciones.value = '';
+        } catch (err) {
+            console.error('Error al enviar los datos:', err);
+            alert('Hubo un error al enviar el registro.');
+        }
+    });
+
+    // 6. Botón Menú Principal
+    document.getElementById('btn-menu').addEventListener('click', () => {
+        window.location.href = 'menu_principal.html';
+    });
 });
