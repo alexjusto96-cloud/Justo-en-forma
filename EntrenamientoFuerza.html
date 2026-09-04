@@ -40,34 +40,32 @@
       font-size: 14px;
     }
 
-    /* ESTILOS ORIGINALES (Botones azules, tarjetas grises) */
+    /* Botones */
     button {
       padding: 10px;
       border: none;
       border-radius: 4px;
-      background-color: #3498db; /* Azul original */
+      background-color: #3498db;
       color: white;
       font-weight: bold;
       font-size: 14px;
       cursor: pointer;
     }
     button:active {
-      background-color: #2980b9; /* Azul oscuro original */
+      background-color: #2980b9;
     }
     button#fin {
-      background-color: #e74c3c; /* Rojo original */
+      background-color: #e74c3c;
     }
     button#fin:active {
       background-color: #c0392b;
     }
-    /* Estilo para botones secundarios tipo maqueta pero con color original */
     .btn-secundario {
-      background-color: #ecf0f1; /* Gris claro */
+      background-color: #ecf0f1;
       color: #2c3e50;
       border: 1px solid #bdc3c7;
     }
 
-    /* Estilos cabecera original */
     h2 {
       text-align: center;
       color: #2c3e50;
@@ -75,7 +73,6 @@
       margin-bottom: 15px;
     }
 
-    /* Estilos reorganizados para coincidir con la estructura de la maqueta */
     .nav-banner {
       display: flex;
       align-items: center;
@@ -91,25 +88,30 @@
       color: #2c3e50;
     }
 
-    /* Tempo en línea (agrupado) */
+    /* Tempo compacto para que quepa en una sola línea */
     .tempo-inline {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 12px;
+      gap: 4px;
+      font-size: 11px;
       background: #fafafa;
       padding: 8px;
       border-radius: 6px;
       border: 1px solid #e0e0e0;
-      flex-wrap: wrap;
+      justify-content: space-between;
     }
     .tempo-inline select {
-      width: auto;
-      padding: 4px;
+      width: 42px;
+      padding: 3px;
+      font-size: 11px;
     }
     .checkbox-inline {
       margin-bottom: 0;
       font-weight: bold;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .timer-card {
@@ -141,6 +143,42 @@
       align-items: center;
       gap: 6px;
       margin-bottom: 12px;
+    }
+
+    /* Estilos para las filas de series generadas por JS */
+    .serie-row {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      padding: 8px;
+      margin-bottom: 6px;
+      border-radius: 6px;
+    }
+    .serie-row.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .grid-8col {
+      display: grid;
+      grid-template-columns: 28px 26px 1fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 3px;
+      align-items: center;
+      font-size: 11px;
+    }
+    .grid-8col input[type="text"] {
+      padding: 3px;
+      font-size: 11px;
+      text-align: center;
+    }
+    .grid-header {
+      display: grid;
+      grid-template-columns: 28px 26px 1fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 3px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 4px;
+      padding: 0 4px;
     }
 
     .button-group {
@@ -181,16 +219,16 @@
     <button id="consultar" style="width: 100%;" class="btn-secundario">Consultar últimos entrenamientos</button>
   </div>
 
-  <!-- 4. VBT y Tempo (En línea) -->
+  <!-- 4. VBT y Tempo (Ajustado en línea) -->
   <div class="form-group tempo-inline">
     <label class="checkbox-inline">
       <input type="checkbox" id="vbt"> VBT
     </label>
-    <span>Tempo (s):</span>
-    Con: <select id="con"><option value="1">1</option></select>
-    PausaCon: <select id="pausaCon"><option value="1">1</option></select>
-    Exc: <select id="ecc"><option value="2" selected>2</option></select>
-    PausaExc: <select id="pausaEcc"><option value="1">1</option></select>
+    <span>Tempo:</span>
+    <span>Con</span><select id="con"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+    <span>P.Con</span><select id="pausaCon"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+    <span>Exc</span><select id="ecc"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
+    <span>P.Exc</span><select id="pausaEcc"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
   </div>
 
   <!-- 5. Temporizador de Descanso -->
@@ -214,12 +252,21 @@
 
   <hr>
 
-  <!-- 7. Contenedor de Series (Dinámico) -->
-  <!-- Nota: Este contenedor se llenará vía JS, pero debe estar aquí posicionado -->
+  <!-- 7. Cabecera y Contenedor de Series -->
+  <div class="grid-header">
+    <div>Set</div>
+    <div>Nº</div>
+    <div>Kg</div>
+    <div>Int</div>
+    <div>Reps</div>
+    <div>RIR</div>
+    <div>R'</div>
+    <div>RM</div>
+  </div>
   <div id="seriesContainer"></div>
 
   <!-- 8. Observaciones -->
-  <div class="form-group">
+  <div class="form-group" style="margin-top: 10px;">
     <label for="textBox1">Observaciones:</label>
     <input type="text" id="textBox1">
   </div>
@@ -227,15 +274,16 @@
   <!-- 9. Botones de Acción -->
   <div class="button-group">
     <button id="enviar">Enviar Registro</button>
-    <!-- Botones inferiores en línea como en la maqueta -->
     <div class="button-group-inline">
         <button id="nuevoEjercicio" class="btn-secundario">Nuevo Ejercicio</button>
         <button id="fin">Finalizar el entrenamiento</button>
     </div>
   </div>
 
+  <div id="label12"></div>
+  <div id="label32"></div>
 </div>
 
-<script src="app.js"></script>
+<script src="EntrenamientoFuerza.js"></script>
 </body>
 </html>
