@@ -235,11 +235,6 @@ function calcularRM(numSerie) {
 
       const usuario = TinyDB.getValue("Usuario") || "";
       
-      // Orden corregido para que el Apps Script los coloque en sus columnas exactas:
-      // valor1 -> Columna A (usuario)
-      // valor2 -> Columna B (ejercicio)
-      // texto1 -> Columna C (kg)
-      // texto2 -> Columna D (intensidad / VMP)
       const payload = `tipo=consultaRM&valor1=${encodeURIComponent(usuario)}&valor2=${encodeURIComponent(ejercicioVal)}&texto1=${encodeURIComponent(kgStr)}&texto2=${encodeURIComponent(iStr)}`;
 
       fetch(scriptUrl, {
@@ -391,8 +386,8 @@ function ejecutarNuevoEjercicio() {
 }
 
 function enviarFormularioGoogle() {
-  const usuario = encodeURIComponent(TinyDB.getValue("Usuario"));
-  const vbtVal = encodeURIComponent(document.getElementById("vbt").checked ? "TRUE" : "FALSE");
+  const usuario = TinyDB.getValue("Usuario");
+  const vbtVal = document.getElementById("vbt").checked ? "TRUE" : "FALSE";
   
   const params = new URLSearchParams({
     "entry.1052562463": usuario,
@@ -442,7 +437,12 @@ function enviarFormularioGoogle() {
     "entry.408397467": getVal("rm6")
   });
 
-  fetch(`${FORM_URL}?${params.toString()}`, { mode: 'no-cors' })
+  fetch(FORM_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString()
+  })
     .then(() => alert("Registro enviado con éxito"))
     .catch(err => console.error("Error al enviar:", err));
 }
