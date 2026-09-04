@@ -44,7 +44,7 @@ function renderSeriesInputs() {
         <div><input type="checkbox" id="s${i}" ${i === 1 ? 'checked' : ''} ${i > 2 ? 'disabled' : ''}></div>
         <div style="text-align:center; font-weight:bold;">${i}</div>
         <div><input type="text" id="kg${i}" placeholder="Kg"></div>
-        <div><input type="text" id="i${i}" placeholder="Int" readonly></div>
+        <div><input type="text" id="i${i}" placeholder="Int"></div>
         <div><input type="text" id="Rep${i}" placeholder="Reps"></div>
         <div><input type="text" id="RIR${i}" placeholder="RIR"></div>
         <div><input type="text" id="rec${i}" placeholder="R´"></div>
@@ -54,6 +54,7 @@ function renderSeriesInputs() {
     container.appendChild(row);
   }
   actualizarEstadosFilas();
+  actualizarEncabezadosYComportamientoVBT();
 }
 
 function bindEvents() {
@@ -113,11 +114,87 @@ function bindEvents() {
     }
   });
 
+  // Escuchar cambios en el switch VBT para actualizar cabeceras y comportamiento de los campos 'i' y 'RIR'
+  const vbtElement = document.getElementById("vbt");
+  if (vbtElement) {
+    vbtElement.addEventListener("change", () => {
+      actualizarEncabezadosYComportamientoVBT();
+      actualizarEstadosFilas();
+    });
+  }
+
+  // Escuchar cambios en Reps o RIR para calcular automáticamente 'i' si VBT está OFF
+  for (let i = 1; i <= 7; i++) {
+    const repInput = document.getElementById(`Rep${i}`);
+    const rirInput = document.getElementById(`RIR${i}`);
+    
+    if (repInput) {
+      repInput.addEventListener("input", () => calcularIntensidadAutomatica(i));
+    }
+    if (rirInput) {
+      rirInput.addEventListener("input", () => calcularIntensidadAutomatica(i));
+    }
+  }
+
   // Escuchar cambios en los inputs de RM para actualizar el valor máximo de referencia
   for (let i = 1; i <= 7; i++) {
     const rmInput = document.getElementById(`rm${i}`);
     if (rmInput) {
       rmInput.addEventListener("input", actualizarMaximoRM);
+    }
+  }
+}
+
+function calcularIntensidadAutomatica(numSerie) {
+  const vbtEl = document.getElementById("vbt");
+  const isVBTOn = vbtEl && vbtEl.checked;
+  
+  // Si VBT está ON, la intensidad se introduce manualmente, no se calcula
+  if (isVBTOn) return;
+
+  const repsVal = parseFloat(getVal(`Rep${numSerie}`)) || 0;
+  const rirVal = parseFloat(getVal(`RIR${numSerie}`)) || 0;
+  const suma = repsVal + rirVal;
+
+  setVal(`i${numSerie}`, suma > 0 ? suma : "");
+}
+
+function actualizarEncabezadosYComportamientoVBT() {
+  const vbtEl = document.getElementById("vbt");
+  const isVBTOn = vbtEl && vbtEl.checked;
+
+  // Buscamos los elementos de cabecera de la tabla (por posición o clase/ID si estuvieran definidos, 
+  // aquí seleccionamos por los textos típicos o cabeceras de la rejilla de 8 columnas)
+  const headers = document.querySelectorAll(".grid-8col, tr, th"); 
+  // Como alternativa robusta, buscamos los elementos del DOM que representan los títulos de columna Int y RIR.
+  // Suponiendo que los headers están en una estructura común, localizamos los divs/th correspondientes a las columnas 4 y 6:
+  const headerContainer = document.querySelector(".serie-row")?.previousElementSibling; 
+  
+  // Si tenemos una fila de cabecera general con los títulos:
+  // Actualizamos el texto de los headers de Int y RIR dinámicamente si disponemos de sus selectores o clases.
+  // Buscamos contenedores de texto de cabecera si los hubiera:
+  const thInt = document.getElementById("headerInt") || document.querySelector("div[data-header='int']");
+  const thRir = document.getElementById("headerRir") || document.querySelector("div[data-header='rir']");
+
+  if (thInt) thInt.textContent = isVBTOn ? "MVP" : "Int";
+  if (thRir) thRir.textContent = isVBTOn ? "VL" : "RIR";
+
+  // También aplicamos el bloqueo/desbloqueo de 'i' según VBT en las filas activas
+  for (let i = 1; i <= 7; i++) {
+    const chk = document.getElementById(`s${i}`);
+    const isRowOn = chk && chk.checked;
+    const inputI = document.getElementById(`i${i}`);
+    
+    if (inputI && isRowOn) {
+      if (isVBTOn) {
+        inputI.readOnly = false;
+        inputI.classList.remove("disabled-input");
+      } else {
+        inputI.readOnly = true;
+        inputI.classList.add("disabled-input");
+        // Recalcular al pasar a OFF por si acaso
+        calcularIntensidadAutomatica(i);
+      }
     }
   }
 }
@@ -199,11 +276,13 @@ function ejecutarNuevoEjercicio() {
     if (el) el.checked = (i === 1);
   }
 
+  const vbtEl = document.getElementById("vbt");
+  if (vbtEl) vbtEl.checked = false;
+
+  actualizarEncabezadosYComportamientoVBT();
   actualizarEstadosFilas();
 
   document.getElementById("label32").innerText = "";
-  const vbtEl = document.getElementById("vbt");
-  if (vbtEl) vbtEl.checked = false;
 
   for (let i = 1; i <= 7; i++) {
     ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
@@ -313,14 +392,14 @@ function finalizarEntrenamiento() {
 }
 
 function actualizarEstadosFilas() {
+  const vbtEl = document.getElementById("vbt");
+  const isVBTOn = vbtEl && vbtEl.checked;
+
   for (let i = 1; i <= 7; i++) {
     const chk = document.getElementById(`s${i}`);
     const row = document.getElementById(`serie_row_${i}`);
     
     // Regla en cascada:
-    // Una fila está activa (desbloqueada y con su switch habilitable) si:
-    // - Es la primera fila (i === 1)
-    // - O si la fila inmediatamente anterior (i - 1) tiene su switch ON.
     const filaAnteriorOn = (i > 1 && document.getElementById(`s${i - 1}`).checked);
     const esActiva = (i === 1 || filaAnteriorOn);
 
@@ -328,15 +407,35 @@ function actualizarEstadosFilas() {
       if (chk) chk.disabled = false;
       if (row) row.classList.remove("disabled");
 
-      // Si el switch de esta fila está ON, los inputs se habilitan. Si está OFF, se desactivan y limpian.
       const isOn = chk && chk.checked;
-      ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
+      
+      // Habilitar/deshabilitar según esté el switch de la serie (ON/OFF)
+      ["kg", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
           inputEl.disabled = !isOn;
           if (!isOn) inputEl.value = "";
         }
       });
+
+      // Control específico para el campo 'i' (Intensidad / MVP)
+      const inputI = document.getElementById(`i${i}`);
+      if (inputI) {
+        inputI.disabled = !isOn;
+        if (!isOn) {
+          inputI.value = "";
+        } else {
+          // Si la fila está ON, depende de VBT
+          if (isVBTOn) {
+            inputI.readOnly = false;
+            inputI.classList.remove("disabled-input");
+          } else {
+            inputI.readOnly = true;
+            inputI.classList.add("disabled-input");
+            calcularIntensidadAutomatica(i);
+          }
+        }
+      }
     } else {
       if (chk) {
         chk.disabled = true;
@@ -344,7 +443,7 @@ function actualizarEstadosFilas() {
       }
       if (row) row.classList.add("disabled");
       
-      // Desactivar y limpiar todos los inputs de la fila inactiva (incluyendo 'i')
+      // Desactivar y limpiar todos los inputs de la fila inactiva
       ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
