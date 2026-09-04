@@ -127,11 +127,8 @@ function bindEvents() {
   document.addEventListener("input", (e) => {
     const target = e.target;
     if (target && target.tagName === "INPUT" && target.type === "text" && !target.readOnly && !target.disabled) {
-      // Expresión regular que permite dígitos y opcionalmente un punto o coma decimal
       let val = target.value;
-      // Reemplazar comas por puntos para consistencia numérica
       val = val.replace(/,/g, '.');
-      // Filtrar caracteres no numéricos permitiendo solo un punto decimal
       const filtered = val.replace(/[^0-9.]/g, '');
       const parts = filtered.split('.');
       if (parts.length > 2) {
@@ -155,7 +152,7 @@ function bindEvents() {
     }
   }
 
-  // Escuchar cambios en los inputs de RM para actualizar el valor máximo de referencia (aunque sean calculados o de solo lectura)
+  // Escuchar cambios en los inputs de RM para actualizar el valor máximo de referencia
   for (let i = 1; i <= 7; i++) {
     const rmInput = document.getElementById(`rm${i}`);
     if (rmInput) {
@@ -181,26 +178,25 @@ function actualizarEncabezadosYComportamientoVBT() {
   const vbtEl = document.getElementById("vbt");
   const isVBTOn = vbtEl && vbtEl.checked;
 
-  // Actualizar los textos de los encabezados (buscando los elementos de la rejilla o por posición de columnas)
-  const headerRow = document.querySelector(".grid-8col");
-  if (headerRow) {
-    // Si tenemos una estructura clara o podemos localizar las celdas de cabecera/títulos
+  // Actualizar los placeholders / textos dinámicos de las cabeceras de columnas o inputs según corresponda
+  for (let i = 1; i <= 7; i++) {
+    const inputI = document.getElementById(`i${i}`);
+    const inputRIR = document.getElementById(`RIR${i}`);
+    
+    if (inputI) {
+      inputI.placeholder = isVBTOn ? "MVP" : "Int";
+    }
+    if (inputRIR) {
+      inputRIR.placeholder = isVBTOn ? "VL" : "RIR";
+    }
   }
 
-  // Forzar la actualización inmediata de la disponibilidad del campo 'i' en todas las filas activas
-  for (let i = 1; i <= 7; i++) {
-    const chk = document.getElementById(`s${i}`);
-    const isRowOn = chk && chk.checked;
-    const inputI = document.getElementById(`i${i}`);
-    
-    if (inputI && isRowOn) {
-      if (isVBTOn) {
-        inputI.readOnly = false;
-        inputI.classList.remove("disabled-input");
-      } else {
-        inputI.readOnly = true;
-        inputI.classList.add("disabled-input");
-        calcularIntensidadAutomatica(i);
+  // Al cambiar VBT, si se activa (ON), limpiamos los valores de 'i' en las filas activas para dejarlos en blanco y editables
+  if (isVBTOn) {
+    for (let i = 1; i <= 7; i++) {
+      const chk = document.getElementById(`s${i}`);
+      if (chk && chk.checked) {
+        setVal(`i${i}`, "");
       }
     }
   }
@@ -415,7 +411,6 @@ function actualizarEstadosFilas() {
 
       const isOn = chk && chk.checked;
       
-      // Habilitar/deshabilitar campos generales de la serie
       ["kg", "Rep", "RIR", "rec"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
@@ -424,28 +419,31 @@ function actualizarEstadosFilas() {
         }
       });
 
-      // El campo RM siempre permanece bloqueado (readOnly y con estilo visual grisáceo)
+      // El campo RM siempre permanece bloqueado y con fondo grisáceo
       const inputRM = document.getElementById(`rm${i}`);
       if (inputRM) {
         inputRM.disabled = !isOn;
         inputRM.readOnly = true;
         if (!isOn) inputRM.value = "";
         inputRM.classList.add("disabled-input");
+        inputRM.style.backgroundColor = "#e9ecef";
       }
 
-      // Control específico y riguroso para el campo 'i' (Intensidad / MVP)
       const inputI = document.getElementById(`i${i}`);
       if (inputI) {
         inputI.disabled = !isOn;
         if (!isOn) {
           inputI.value = "";
+          inputI.style.backgroundColor = "";
         } else {
           if (isVBTOn) {
             inputI.readOnly = false;
             inputI.classList.remove("disabled-input");
+            inputI.style.backgroundColor = "";
           } else {
             inputI.readOnly = true;
             inputI.classList.add("disabled-input");
+            inputI.style.backgroundColor = "#e9ecef";
             calcularIntensidadAutomatica(i);
           }
         }
@@ -457,12 +455,12 @@ function actualizarEstadosFilas() {
       }
       if (row) row.classList.add("disabled");
       
-      // Desactivar y limpiar todos los inputs de la fila inactiva
       ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
           inputEl.disabled = true;
           inputEl.value = "";
+          inputEl.style.backgroundColor = "";
         }
       });
     }
