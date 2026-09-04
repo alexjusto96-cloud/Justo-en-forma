@@ -234,12 +234,13 @@ function calcularRM(numSerie) {
       }
 
       const usuario = TinyDB.getValue("Usuario") || "";
-      // Orden corregido para que mapee correctamente en el Apps Script:
-      // texto1 -> A2 (usuario)
-      // texto2 -> B2 (ejercicio)
-      // valor1 -> C2 (kg)
-      // valor2 -> D2 (intensidad)
-      const payload = `tipo=consultaRM&valor1=${encodeURIComponent(kgStr)}&valor2=${encodeURIComponent(iStr)}&texto1=${encodeURIComponent(usuario)}&texto2=${encodeURIComponent(ejercicioVal)}`;
+      
+      // Orden corregido para que el Apps Script los coloque en sus columnas exactas:
+      // valor1 -> Columna A (usuario)
+      // valor2 -> Columna B (ejercicio)
+      // texto1 -> Columna C (kg)
+      // texto2 -> Columna D (intensidad / VMP)
+      const payload = `tipo=consultaRM&valor1=${encodeURIComponent(usuario)}&valor2=${encodeURIComponent(ejercicioVal)}&texto1=${encodeURIComponent(kgStr)}&texto2=${encodeURIComponent(iStr)}`;
 
       fetch(scriptUrl, {
         method: "POST",
