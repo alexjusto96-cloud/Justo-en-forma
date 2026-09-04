@@ -17,18 +17,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Mostrar el nombre de usuario
   document.getElementById('user-greeting').textContent = `Usuario: ${usuario}`;
 
-  // --- PRECARGA DE DATOS CON SPINNER ---
+  // --- COMPROBACIÓN Y PRECARGA CONDICIONAL ---
   const spinner = document.getElementById('loading-spinner');
   
+  // Verificamos si ya existen las 4 listas principales en localStorage
+  const listasExisten = localStorage.getItem('Ejercicio') && 
+                        localStorage.getItem('Carrera') && 
+                        localStorage.getItem('Ciclismo') && 
+                        localStorage.getItem('Test');
+
   try {
-    await cargarCatalogos(usuario);
+    if (!listasExisten) {
+      // Si falta alguna lista (viene del index o se borró el caché), cargamos con spinner
+      await cargarCatalogos(usuario);
+    } else {
+      // Si ya existen (viene de otra pantalla interna), ocultamos el spinner de inmediato sin llamadas extra
+      if (spinner) {
+        spinner.classList.add('hidden');
+      }
+      console.log('✓ Catálogos cargados desde caché local (sin llamadas de red).');
+    }
   } catch (err) {
     console.error('Error general durante la precarga:', err);
-  } finally {
-    // Ocultar el spinner de forma garantizada al terminar las peticiones
-    if (spinner) {
-      spinner.classList.add('hidden');
-    }
+    if (spinner) spinner.classList.add('hidden');
   }
 
   // --- NAVEGACIÓN Y EVENTOS DE BOTONES ---
@@ -62,9 +73,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'Test_consulta.html';
   });
 
-  // LogOut
+  // LogOut (limpia también las listas para asegurar datos frescos al volver a entrar)
   document.getElementById('btn-logout').addEventListener('click', () => {
     sessionStorage.removeItem('usuarioLogueado');
+    localStorage.removeItem('Ejercicio');
+    localStorage.removeItem('Carrera');
+    localStorage.removeItem('Ciclismo');
+    localStorage.removeItem('Test');
     window.location.href = 'index.html';
   });
 });
@@ -73,21 +88,29 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Peticiones asíncronas concurrentes para precargar las 4 secciones
  */
 async function cargarCatalogos(usuario) {
+  const spinner = document.getElementById('loading-spinner');
   const nombreEnc = encodeURIComponent(usuario);
 
-  await Promise.all([
-    // 1. Ejercicios (SCRIPT_EJERCICIOS)
-    fetchData(`${SCRIPT_EJERCICIOS}?nombre=${nombreEnc}&seccion=Ejercicios`, 'Ejercicio'),
+  try {
+    await Promise.all([
+      // 1. Ejercicios (SCRIPT_EJERCICIOS)
+      fetchData(`${SCRIPT_EJERCICIOS}?nombre=${nombreEnc}&seccion=Ejercicios`, 'Ejercicio'),
 
-    // 2. Tipo de Carrera (SCRIPT_BASE)
-    fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeCarrera`, 'Carrera'),
+      // 2. Tipo de Carrera (SCRIPT_BASE)
+      fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeCarrera`, 'Carrera'),
 
-    // 3. Tipo de Ciclismo (SCRIPT_BASE)
-    fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeCiclismo`, 'Ciclismo'),
+      // 3. Tipo de Ciclismo (SCRIPT_BASE)
+      fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeCiclismo`, 'Ciclismo'),
 
-    // 4. Tipo de Test (SCRIPT_BASE)
-    fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeTest`, 'Test')
-  ]);
+      // 4. Tipo de Test (SCRIPT_BASE)
+      fetchData(`${SCRIPT_BASE}?nombre=${nombreEnc}&seccion=TipoDeTest`, 'Test')
+    ]);
+  } finally {
+    // Ocultar el spinner de forma garantizada al terminar las peticiones
+    if (spinner) {
+      spinner.classList.add('hidden');
+    }
+  }
 }
 
 /**
