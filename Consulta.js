@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
   globalName = TinyDB.getValue("Usuario", "");
   inicializarFecha();
   bindEvents();
+  
+  // Limpiar selección inicial por defecto sin opción vacía y forzar estado
+  document.getElementById("entrenamiento").selectedIndex = -1;
   actualizarEstadoSelects();
 });
 
@@ -54,8 +57,8 @@ function alSeleccionarEntrenamiento() {
   const selectEjercicio = document.getElementById("ejercicio");
   const selectModalidad = document.getElementById("modalidad2");
 
-  selectEjercicio.innerHTML = '<option value=""></option>';
-  selectModalidad.innerHTML = '<option value=""></option>';
+  selectEjercicio.innerHTML = "";
+  selectModalidad.innerHTML = "";
 
   if (entrenamientoVal === "Fuerza") {
     const ejerciciosGuardados = JSON.parse(TinyDB.getValue("Ejercicio", "[]"));
@@ -63,6 +66,10 @@ function alSeleccionarEntrenamiento() {
   } else if (entrenamientoVal === "Cardio") {
     poblarSelect(selectEjercicio, ["Carrera", "Ciclismo"]);
   }
+
+  // Dejar deseleccionados los inferiores al cambiar el superior
+  selectEjercicio.selectedIndex = -1;
+  selectModalidad.selectedIndex = -1;
 
   actualizarEstadoSelects();
 }
@@ -73,11 +80,11 @@ function alSeleccionarEjercicio() {
   const ejercicioVal = document.getElementById("ejercicio").value;
   const selectModalidad = document.getElementById("modalidad2");
 
-  selectModalidad.innerHTML = '<option value=""></option>';
+  selectModalidad.innerHTML = "";
 
   if (entrenamientoVal === "Fuerza") {
-    const modalidadesFuerza = JSON.parse(TinyDB.getValue("ModalidadFuerza", "[]"));
-    poblarSelect(selectModalidad, modalidadesFuerza);
+    // Modalidades específicas para Fuerza independientemente del ejercicio escogido
+    poblarSelect(selectModalidad, ["1:1:1:1", "1:1:2:1", "1:1:1:0"]);
   } else if (entrenamientoVal === "Cardio") {
     if (ejercicioVal === "Carrera") {
       const opcionesCarrera = JSON.parse(TinyDB.getValue("Carrera", "[]"));
@@ -87,6 +94,9 @@ function alSeleccionarEjercicio() {
       poblarSelect(selectModalidad, opcionesCiclismo);
     }
   }
+
+  // Dejar deseleccionado el inferior al cambiar este nivel
+  selectModalidad.selectedIndex = -1;
 
   actualizarEstadoSelects();
 }
