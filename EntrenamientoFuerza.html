@@ -54,6 +54,10 @@
     button:active {
       background-color: #2980b9;
     }
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
     button#fin {
       background-color: #e74c3c;
     }
@@ -83,9 +87,15 @@
       padding: 6px 12px;
     }
     #navTextDisplay {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       color: #2c3e50;
+      text-align: center;
+      flex: 1;
+      padding: 0 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Tempo compacto para que quepa en una sola línea */
@@ -201,32 +211,27 @@
 <div class="container">
   <h2>Registro de Entrenamiento de Fuerza</h2>
 
-  <!-- 1. Selección de Ejercicio (con buscador integrado) -->
   <div class="form-group">
     <label for="listPicker1">Seleccionar ejercicio:</label>
     <input type="text" id="buscadorEjercicio" placeholder="Buscar ejercicio..." style="margin-bottom: 6px;">
     <select id="listPicker1"></select>
   </div>
 
-  <!-- TextBox editable para el ejercicio -->
   <div class="form-group">
     <label for="ejercicio">Ejercicio:</label>
     <input type="text" id="ejercicio" placeholder="Nombre del ejercicio">
   </div>
 
-  <!-- 2. Navegación de Texto (Flechas) -->
   <div class="nav-banner">
     <button id="btnTextPrev" class="btn-secundario">&larr;</button>
     <span id="navTextDisplay">Texto 1 de 3</span>
     <button id="btnTextNext" class="btn-secundario">&rarr;</button>
   </div>
 
-  <!-- 3. Botón Consultar -->
   <div class="form-group">
     <button id="consultar" style="width: 100%;" class="btn-secundario">Consultar últimos entrenamientos</button>
   </div>
 
-  <!-- 4. VBT y Tempo -->
   <div class="form-group tempo-inline">
     <label class="checkbox-inline">
       <input type="checkbox" id="vbt"> VBT
@@ -238,12 +243,10 @@
     <span>P.Exc</span><select id="pausaEcc"><option value="1">0</option><option value="2">1</option></select>
   </div>
 
-  <!-- 5. Temporizador de Descanso -->
   <div class="timer-card">
     Tiempo de Descanso: <span id="minutos">0</span>:<span id="segundos">00</span>
   </div>
 
-  <!-- 6. Cálculo de Carga -->
   <div class="form-group">
     <label>Cálculo de Carga (% RM):</label>
     <div class="calc-row">
@@ -259,7 +262,6 @@
 
   <hr>
 
-  <!-- 7. Cabecera y Contenedor de Series -->
   <div class="grid-header">
     <div>Set</div>
     <div>Nº</div>
@@ -272,13 +274,11 @@
   </div>
   <div id="seriesContainer"></div>
 
-  <!-- 8. Observaciones -->
   <div class="form-group" style="margin-top: 10px;">
     <label for="textBox1">Observaciones:</label>
     <input type="text" id="textBox1">
   </div>
 
-  <!-- 9. Botones de Acción -->
   <div class="button-group">
     <button id="enviar">Enviar Registro</button>
     <div class="button-group-inline">
