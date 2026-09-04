@@ -5,7 +5,7 @@ async function cargarYRenderizarGrafica() {
   const canvas = document.getElementById("canvasGrafica");
 
   try {
-    // 1. Obtener los parámetros enviados por URL desde App Inventor
+    // 1. Obtener los parámetros enviados por URL desde la pantalla anterior
     const params = new URLSearchParams(window.location.search);
     const scriptUrl = params.get("script");
 
@@ -33,7 +33,6 @@ async function cargarYRenderizarGrafica() {
     mensajeEl.style.display = "none";
 
     // 3. Formatear la matriz recibida
-    // Asume la primera fila como cabecera (Fecha, Variable 1, Variable 2)
     const cabeceras = data[0];
     const filas = data.slice(1);
 
