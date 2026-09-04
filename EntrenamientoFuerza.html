@@ -112,21 +112,31 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
+    /* ESTÉTICA MEJORADA: Línea de Tempo */
     .tempo-inline {
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      background: #fafafa;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #e0e0e0;
       justify-content: space-between;
+      background: #f8f9fa;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #dcdde1;
+      font-size: 12px;
+      gap: 6px;
+    }
+    .tempo-inline span {
+      font-weight: 500;
+      color: #495057;
     }
     .tempo-inline select {
-      width: 42px;
-      padding: 3px;
-      font-size: 11px;
+      width: 46px;
+      padding: 4px 2px;
+      font-size: 12px;
+      text-align: center;
+      background-color: #fff;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
     }
     .checkbox-inline {
       margin-bottom: 0;
@@ -136,6 +146,7 @@
       align-items: center;
       gap: 4px;
     }
+
     .timer-card {
       background: #eef2f5;
       border-radius: 6px;
@@ -146,24 +157,52 @@
       color: #2c3e50;
       margin: 15px 0;
     }
-    .slider-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .slider-container input[type="range"] {
-      flex: 1;
-    }
-    .slider-container input[type="text"] {
-      width: 55px;
-      text-align: center;
+
+    /* ESTÉTICA MEJORADA: Cálculo de Carga (% RM) */
+    .calc-card {
+      background: #f8f9fa;
+      border: 1px solid #dcdde1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
     }
     .calc-row {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 12px;
+      gap: 8px;
     }
+    .calc-row input[type="text"] {
+      text-align: center;
+      background-color: #fff;
+      font-weight: 500;
+    }
+    #rmRef {
+      width: 55px;
+    }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .slider-container input[type="range"] {
+      flex: 1;
+      accent-color: #3498db;
+      cursor: pointer;
+    }
+    #percentage {
+      width: 50px;
+      font-size: 12px;
+      padding: 4px;
+    }
+    #rmResultKg {
+      width: 75px;
+      background-color: #e3f2fd !important;
+      color: #1565c0 !important;
+      font-weight: bold !important;
+      border: 1px solid #90caf9 !important;
+    }
+
     .serie-row {
       background: #fafafa;
       border: 1px solid #e0e0e0;
@@ -255,16 +294,19 @@
     Tiempo de Descanso: <span id="minutos">0</span>:<span id="segundos">00</span>
   </div>
 
+  <!-- SECCIÓN CALCULO DE CARGA REDISEÑADA -->
   <div class="form-group">
     <label>Cálculo de Carga (% RM):</label>
-    <div class="calc-row">
-      <input type="text" id="rmRef" readonly style="width: 60px;" placeholder="RM">
-      <span>Kg</span>
-      <div class="slider-container" style="flex:1;">
-        <input type="range" id="slider1" min="0" max="100" value="50">
-        <input type="text" id="percentage" readonly>
+    <div class="calc-card">
+      <div class="calc-row">
+        <input type="text" id="rmRef" readonly placeholder="RM">
+        <span style="font-size: 12px; font-weight: bold; color: #555;">Kg</span>
+        <div class="slider-container">
+          <input type="range" id="slider1" min="0" max="100" value="50">
+          <input type="text" id="percentage" readonly>
+        </div>
+        <input type="text" id="rmResultKg" readonly placeholder="Total">
       </div>
-      <input type="text" id="rmResultKg" readonly style="width: 70px;" placeholder="Total">
     </div>
   </div>
 
