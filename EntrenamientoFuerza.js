@@ -22,11 +22,20 @@ const FORM_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktW
 
 // --- INICIALIZACIÓN DOM ---
 document.addEventListener("DOMContentLoaded", () => {
+  generarFechaActual();
   renderSeriesInputs();
   bindEvents();
   inicializarValores();
   actualizarTextoNavegacion();
 });
+
+function generarFechaActual() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  fecha = `${year}-${month}-${day}`;
+}
 
 function renderSeriesInputs() {
   const container = document.getElementById("seriesContainer");
@@ -182,7 +191,6 @@ function actualizarEncabezadosYComportamientoVBT() {
   const headerTextRIR = isVBTOn ? "VL" : "RIR";
 
   // Actualizar los textos de los headers en la cabecera fija del HTML
-  // Suponiendo el orden de los divs en .grid-header: [0]=Set, [1]=Nº, [2]=Kg, [3]=Int, [4]=Reps, [5]=RIR, [6]=R', [7]=RM
   const gridHeader = document.querySelector(".grid-header");
   if (gridHeader && gridHeader.children.length >= 6) {
     gridHeader.children[3].innerText = headerTextI;
@@ -268,8 +276,7 @@ function inicializarValores() {
 // --- LÓGICA DE EVENTOS ---
 
 function ejecutarNuevoEjercicio() {
-  const now = new Date();
-  fecha = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+  generarFechaActual();
 
   const picker = document.getElementById("listPicker1");
   if (picker) picker.value = "";
