@@ -35,15 +35,13 @@ function renderSeriesInputs() {
 
   for (let i = 1; i <= 7; i++) {
     const row = document.createElement("div");
-    row.className = `serie-row ${i > 1 ? "disabled" : ""}`;
+    const isActiveOrNext = (i === 1 || i === 2);
+    row.className = `serie-row ${!isActiveOrNext ? "disabled" : ""}`;
     row.id = `serie_row_${i}`;
     
     row.innerHTML = `
-      <div class="serie-header" style="margin-bottom: 4px;">
-        <h4 style="font-size: 13px;">Serie ${i}</h4>
-      </div>
       <div class="grid-8col">
-        <div><input type="checkbox" id="s${i}" ${i === 1 ? 'checked' : ''} ${i > 1 ? 'disabled' : ''}></div>
+        <div><input type="checkbox" id="s${i}" ${i === 1 ? 'checked' : ''} ${i > 2 ? 'disabled' : ''}></div>
         <div style="text-align:center; font-weight:bold;">${i}</div>
         <div><input type="text" id="kg${i}" placeholder="Kg"></div>
         <div><input type="text" id="i${i}" placeholder="Int" readonly></div>
@@ -55,6 +53,7 @@ function renderSeriesInputs() {
     `;
     container.appendChild(row);
   }
+  actualizarEstadosFilas();
 }
 
 function bindEvents() {
@@ -80,7 +79,7 @@ function bindEvents() {
   });
 
   document.getElementById("listPicker1").addEventListener("change", (e) => {
-    document.getElementById("Ejercicio").value = e.target.value;
+    document.getElementById("ejercicio").value = e.target.value;
   });
 
   document.addEventListener("change", (e) => {
@@ -90,6 +89,14 @@ function bindEvents() {
       manejadorCambioSerie(numSerie, e.target.checked);
     }
   });
+
+  // Escuchar cambios en los inputs de RM para actualizar el valor máximo de referencia
+  for (let i = 1; i <= 7; i++) {
+    const rmInput = document.getElementById(`rm${i}`);
+    if (rmInput) {
+      rmInput.addEventListener("input", actualizarMaximoRM);
+    }
+  }
 }
 
 function actualizarTextoNavegacion() {
@@ -102,19 +109,33 @@ function calcularRMAslider(porcentaje) {
   document.getElementById("rmResultKg").value = resultado;
 }
 
+function actualizarMaximoRM() {
+  let maxRM = 0;
+  for (let i = 1; i <= 7; i++) {
+    const val = parseFloat(getVal(`rm${i}`)) || 0;
+    if (val > maxRM) {
+      maxRM = val;
+    }
+  }
+  const rmRefEl = document.getElementById("rmRef");
+  if (rmRefEl) {
+    rmRefEl.value = maxRM > 0 ? maxRM : "";
+  }
+  const sliderVal = document.getElementById("slider1").value;
+  calcularRMAslider(sliderVal);
+}
+
 function inicializarValores() {
   const sliderVal = document.getElementById("slider1").value;
   document.getElementById("percentage").value = sliderVal + "%";
-  document.getElementById("rmRef").value = "100";
+  document.getElementById("rmRef").value = "";
   calcularRMAslider(sliderVal);
   
-  // Cargar histórico de ejercicios usando la key correcta "Ejercicios"
   const rawEj = TinyDB.getValue("Ejercicios", "");
   const picker = document.getElementById("listPicker1");
   if (picker) {
     picker.innerHTML = '<option value="">-- Seleccionar --</option>';
     if (rawEj) {
-      // Soporta tanto si viene separado por comas como por saltos de línea o JSON stringify
       let lista = [];
       try {
         lista = JSON.parse(rawEj);
@@ -149,16 +170,12 @@ function ejecutarNuevoEjercicio() {
   document.getElementById("ecc").value = "2";
   document.getElementById("pausaEcc").value = "1";
 
-  setElementEnabled("s1", true);
-  document.getElementById("s1").checked = true;
-  const row1 = document.getElementById(`serie_row_1`);
-  if (row1) row1.classList.remove("disabled");
-
-  for (let i = 2; i <= 7; i++) {
-    setElementEnabled(`s${i}`, false);
-    const row = document.getElementById(`serie_row_${i}`);
-    if (row) row.classList.add("disabled");
+  for (let i = 1; i <= 7; i++) {
+    const el = document.getElementById(`s${i}`);
+    if (el) el.checked = (i === 1);
   }
+
+  actualizarEstadosFilas();
 
   for (let i = 1; i <= 7; i++) {
     const field = document.getElementById(`i${i}`);
@@ -166,11 +183,6 @@ function ejecutarNuevoEjercicio() {
   }
 
   document.getElementById("label32").innerText = "";
-
-  for (let i = 2; i <= 7; i++) {
-    const el = document.getElementById(`s${i}`);
-    if (el) el.checked = false;
-  }
   const vbtEl = document.getElementById("vbt");
   if (vbtEl) vbtEl.checked = false;
 
@@ -187,6 +199,7 @@ function ejecutarNuevoEjercicio() {
   
   document.getElementById("slider1").value = 50;
   document.getElementById("percentage").value = "50%";
+  document.getElementById("rmRef").value = "";
   calcularRMAslider(50);
   document.getElementById("label12").innerText = "";
 }
@@ -280,34 +293,57 @@ function finalizarEntrenamiento() {
   window.location.href = "RPE.html";
 }
 
+function actualizarEstadosFilas() {
+  let ultimaActivaIndex = 0;
+  for (let i = 1; i <= 7; i++) {
+    const chk = document.getElementById(`s${i}`);
+    if (chk && chk.checked) {
+      ultimaActivaIndex = i;
+    }
+  }
+
+  for (let i = 1; i <= 7; i++) {
+    const chk = document.getElementById(`s${i}`);
+    const row = document.getElementById(`serie_row_${i}`);
+    
+    if (i === 1) {
+      if (chk) {
+        chk.disabled = false;
+        chk.checked = true;
+      }
+      if (row) row.classList.remove("disabled");
+    } else if (i <= ultimaActivaIndex + 1) {
+      if (chk) chk.disabled = false;
+      if (row) row.classList.remove("disabled");
+    } else {
+      if (chk) {
+        chk.disabled = true;
+        chk.checked = false;
+      }
+      if (row) row.classList.add("disabled");
+    }
+  }
+}
+
 function manejadorCambioSerie(numSerie, isOn) {
   if (isOn) {
     if (numSerie > 1) {
       const kgAnterior = getVal(`kg${numSerie - 1}`);
       setVal(`kg${numSerie}`, kgAnterior);
     }
-
-    if (numSerie < 7) {
-      setElementEnabled(`s${numSerie + 1}`, true);
-      const siguienteRow = document.getElementById(`serie_row_${numSerie + 1}`);
-      if (siguienteRow) siguienteRow.classList.remove("disabled");
-    }
-
     inicio = Date.now();
     iniciarCronometro();
   } else {
     for (let i = numSerie; i <= 7; i++) {
       if (i > numSerie) {
-        setElementEnabled(`s${i}`, false);
         const switchEl = document.getElementById(`s${i}`);
         if (switchEl) switchEl.checked = false;
-        
-        const row = document.getElementById(`serie_row_${i}`);
-        if (row) row.classList.add("disabled");
       }
       ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => setVal(`${prefix}${i}`, ""));
     }
+    actualizarMaximoRM();
   }
+  actualizarEstadosFilas();
 }
 
 function iniciarCronometro() {
