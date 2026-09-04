@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Consulta - PWA</title>
+  <title>Test Consulta - Gráfica</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * {
@@ -19,7 +19,7 @@
       align-items: center;
       padding: 10px;
     }
-    .form-card {
+    .form-card, .chart-card {
       width: 100%;
       max-width: 800px;
       background: #ffffff;
@@ -68,13 +68,13 @@
     button.btn-enviar:hover {
       background-color: #0277bd;
     }
-    .chart-card {
-      width: 100%;
-      max-width: 800px;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    button.btn-menu {
+      background-color: #757575;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
     }
     .chart-container {
       position: relative;
@@ -91,8 +91,10 @@
 </head>
 <body>
 
-  <!-- Panel de Controles (Espejo de App Inventor) -->
+  <!-- Panel de Controles -->
   <div class="form-card">
+    <div id="usuario-display" style="font-size: 12px; color: #666; margin-bottom: 10px; font-weight: bold;"></div>
+
     <div class="input-group">
       <label>Últimos X días</label>
       <select id="selectDias">
@@ -109,14 +111,6 @@
       <div class="row">
         <select id="test1">
           <option value="" disabled selected>Selecciona Test 1</option>
-          <option value="HOOPER INDEX">HOOPER INDEX</option>
-          <option value="PESO">PESO</option>
-          <option value="ESTADO MUSCULAR">ESTADO MUSCULAR</option>
-          <option value="ESTADO MENTAL">ESTADO MENTAL</option>
-          <option value="ENERGÍA">ENERGÍA</option>
-          <option value="CALIDAD DE SUEÑO">CALIDAD DE SUEÑO</option>
-          <option value="HORAS DE SUEÑO">HORAS DE SUEÑO</option>
-          <option value="HRV">HRV</option>
         </select>
         <select id="lateralidad1" class="lateralidad">
           <option value="BILATERAL">BILATERAL</option>
@@ -130,15 +124,7 @@
       <label>Variable 2</label>
       <div class="row">
         <select id="test2">
-          <option value="" disabled selected>Selecciona Test 2</option>
-          <option value="HOOPER INDEX">HOOPER INDEX</option>
-          <option value="PESO">PESO</option>
-          <option value="ESTADO MUSCULAR">ESTADO MUSCULAR</option>
-          <option value="ESTADO MENTAL">ESTADO MENTAL</option>
-          <option value="ENERGÍA">ENERGÍA</option>
-          <option value="CALIDAD DE SUEÑO">CALIDAD DE SUEÑO</option>
-          <option value="HORAS DE SUEÑO">HORAS DE SUEÑO</option>
-          <option value="HRV">HRV</option>
+          <option value="" disabled selected>Selecciona Test 2 (Opcional)</option>
         </select>
         <select id="lateralidad2" class="lateralidad">
           <option value="BILATERAL">BILATERAL</option>
@@ -149,6 +135,7 @@
     </div>
 
     <button class="btn-enviar" id="btnEnviar">Enviar</button>
+    <button class="btn-menu" id="btnMenu">Menú principal</button>
   </div>
 
   <!-- Contenedor de la Gráfica -->
