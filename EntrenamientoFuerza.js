@@ -33,12 +33,7 @@ function renderSeriesInputs() {
   if (!container) return;
   container.innerHTML = "";
 
-  // Cabecera dinámica para las columnas de intensidad y RIR/VL
-  const vbtEl = document.getElementById("vbt");
-  const isVBTOn = vbtEl && vbtEl.checked;
-  const headerI = isVBTOn ? "MVP" : "Int";
-  const headerRIR = isVBTOn ? "VL" : "RIR";
-
+  // Cabecera única y fija de la tabla
   const headerRow = document.createElement("div");
   headerRow.className = "grid-8col header-row";
   headerRow.id = "tableHeaderRow";
@@ -46,9 +41,9 @@ function renderSeriesInputs() {
     <div style="text-align:center; font-weight:bold;">Set</div>
     <div style="text-align:center; font-weight:bold;">#</div>
     <div style="text-align:center; font-weight:bold;">Kg</div>
-    <div style="text-align:center; font-weight:bold;" id="colHeaderI">${headerI}</div>
+    <div style="text-align:center; font-weight:bold;" id="colHeaderI">Int</div>
     <div style="text-align:center; font-weight:bold;">Reps</div>
-    <div style="text-align:center; font-weight:bold;" id="colHeaderRIR">${headerRIR}</div>
+    <div style="text-align:center; font-weight:bold;" id="colHeaderRIR">RIR</div>
     <div style="text-align:center; font-weight:bold;">R´</div>
     <div style="text-align:center; font-weight:bold;">RM</div>
   `;
@@ -65,9 +60,9 @@ function renderSeriesInputs() {
         <div><input type="checkbox" id="s${i}" ${i === 1 ? 'checked' : ''} ${i > 2 ? 'disabled' : ''}></div>
         <div style="text-align:center; font-weight:bold;">${i}</div>
         <div><input type="text" id="kg${i}" placeholder="Kg" inputmode="decimal"></div>
-        <div><input type="text" id="i${i}" placeholder="${headerI}" inputmode="decimal"></div>
+        <div><input type="text" id="i${i}" placeholder="Int" inputmode="decimal"></div>
         <div><input type="text" id="Rep${i}" placeholder="Reps" inputmode="numeric"></div>
-        <div><input type="text" id="RIR${i}" placeholder="${headerRIR}" inputmode="decimal"></div>
+        <div><input type="text" id="RIR${i}" placeholder="RIR" inputmode="decimal"></div>
         <div><input type="text" id="rec${i}" placeholder="R´" inputmode="numeric"></div>
         <div><input type="text" id="rm${i}" placeholder="RM" readonly inputmode="decimal" class="disabled-input"></div>
       </div>
@@ -135,7 +130,7 @@ function bindEvents() {
     }
   });
 
-  // Escuchar cambios en el switch VBT para actualizar cabeceras, placeholders y limpiar campos
+  // Escuchar cambios en el switch VBT para actualizar cabeceras, comportamiento y limpiar campos
   const vbtElement = document.getElementById("vbt");
   if (vbtElement) {
     vbtElement.addEventListener("change", () => {
@@ -202,7 +197,7 @@ function actualizarEncabezadosYComportamientoVBT() {
   const headerTextI = isVBTOn ? "MVP" : "Int";
   const headerTextRIR = isVBTOn ? "VL" : "RIR";
 
-  // Actualizar los textos de los headers en la tabla si existen
+  // Actualizar los textos de los headers en la tabla única
   const colHeaderI = document.getElementById("colHeaderI");
   const colHeaderRIR = document.getElementById("colHeaderRIR");
   if (colHeaderI) colHeaderI.innerText = headerTextI;
@@ -445,7 +440,7 @@ function actualizarEstadosFilas() {
         }
       });
 
-      // El campo RM siempre permanece bloqueado y con estilo estándar
+      // El campo RM siempre permanece bloqueado y usa la clase nativa de desactivado (gris claro)
       const inputRM = document.getElementById(`rm${i}`);
       if (inputRM) {
         inputRM.disabled = !isOn;
@@ -455,18 +450,21 @@ function actualizarEstadosFilas() {
         inputRM.style.backgroundColor = ""; 
       }
 
+      // Campo 'i' (Intensidad / MVP)
       const inputI = document.getElementById(`i${i}`);
       if (inputI) {
         inputI.disabled = !isOn;
         if (!isOn) {
           inputI.value = "";
           inputI.style.backgroundColor = "";
+          inputI.classList.remove("disabled-input");
         } else {
           if (isVBTOn) {
             inputI.readOnly = false;
             inputI.classList.remove("disabled-input");
             inputI.style.backgroundColor = "";
           } else {
+            // Cuando VBT está OFF, se bloquea y se le aplica la clase disabled-input para que use el mismo gris claro de RM
             inputI.readOnly = true;
             inputI.classList.add("disabled-input");
             inputI.style.backgroundColor = ""; 
@@ -474,6 +472,26 @@ function actualizarEstadosFilas() {
           }
         }
       }
+
+      // Campo RIR / VL
+      const inputRIR = document.getElementById(`RIR${i}`);
+      if (inputRIR) {
+        if (!isOn) {
+          inputRIR.style.backgroundColor = "";
+          inputRIR.classList.remove("disabled-input");
+        } else {
+          if (!isVBTOn) {
+            // Si VBT está OFF, RIR está habilitado normalmente
+            inputRIR.readOnly = false;
+            inputRIR.classList.remove("disabled-input");
+            inputRIR.style.backgroundColor = "";
+          } else {
+            // Si VBT está ON, VL actúa como valor calculado/bloqueado o según requerimiento (en este caso usa disabled-input si aplica)
+            inputRIR.style.backgroundColor = "";
+          }
+        }
+      }
+
     } else {
       if (chk) {
         chk.disabled = true;
@@ -487,6 +505,7 @@ function actualizarEstadosFilas() {
           inputEl.disabled = true;
           inputEl.value = "";
           inputEl.style.backgroundColor = "";
+          inputEl.classList.remove("disabled-input");
         }
       });
     }
