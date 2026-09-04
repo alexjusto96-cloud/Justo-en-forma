@@ -131,7 +131,6 @@ function bindEvents() {
   const vbtElement = document.getElementById("vbt");
   if (vbtElement) {
     vbtElement.addEventListener("change", () => {
-      // Al cambiar el switch de VBT, se ponen todos los RM en blanco
       for (let i = 1; i <= 6; i++) {
         setVal(`rm${i}`, "");
       }
@@ -169,12 +168,18 @@ function bindEvents() {
     
     if (repInput) repInput.addEventListener("input", () => {
       calcularIntensidadAutomatica(i);
+      calcularRM(i);
     });
     if (rirInput) rirInput.addEventListener("input", () => {
       calcularIntensidadAutomatica(i);
+      calcularRM(i);
     });
-    if (kgInput) kgInput.addEventListener("input", () => calcularRM(i));
-    if (iInput) iInput.addEventListener("input", () => calcularRM(i));
+    if (kgInput) kgInput.addEventListener("input", () => {
+      calcularRM(i);
+    });
+    if (iInput) iInput.addEventListener("input", () => {
+      calcularRM(i);
+    });
   }
 }
 
@@ -184,12 +189,18 @@ function calcularIntensidadAutomatica(numSerie) {
   
   if (isVBTOn) return;
 
-  const repsVal = parseFloat(getVal(`Rep${numSerie}`)) || 0;
-  const rirVal = parseFloat(getVal(`RIR${numSerie}`)) || 0;
-  const suma = repsVal + rirVal;
+  const repsStr = getVal(`Rep${numSerie}`).trim();
+  const rirStr = getVal(`RIR${numSerie}`).trim();
 
-  setVal(`i${numSerie}`, suma > 0 ? suma : "");
-  calcularRM(numSerie);
+  // Si VBT está off, no calcular I hasta que Rep o RIR sean <> ""
+  if (repsStr !== "" || rirStr !== "") {
+    const repsVal = parseFloat(repsStr) || 0;
+    const rirVal = parseFloat(rirStr) || 0;
+    const suma = repsVal + rirVal;
+    setVal(`i${numSerie}`, suma > 0 ? suma : "");
+  } else {
+    setVal(`i${numSerie}`, "");
+  }
 }
 
 function calcularRM(numSerie) {
@@ -201,7 +212,7 @@ function calcularRM(numSerie) {
   const ejercicioVal = document.getElementById("ejercicio").value.trim();
 
   if (!isVBTOn) {
-    // VBT OFF: Se calcula solo si Kg y I son distintos de ""
+    // VBT OFF: el RM se calcula solo si Kg y I es distinto de ""
     if (kgStr !== "" && iStr !== "") {
       const kgVal = parseFloat(kgStr);
       const iVal = parseFloat(iStr);
@@ -216,7 +227,7 @@ function calcularRM(numSerie) {
     }
     actualizarMaximoRM();
   } else {
-    // VBT ON: Se calcula si ejercicio <> "", kg <> "", y MVP (i) <> ""
+    // VBT ON: no calcular RM hasta que Kg, MVP (i) y Ejercicio sean <> ""
     if (ejercicioVal !== "" && kgStr !== "" && iStr !== "") {
       const scriptUrl = TinyDB.getValue("script");
       if (!scriptUrl) {
@@ -296,7 +307,8 @@ function actualizarTextoNavegacion() {
 function calcularRMAslider(porcentaje) {
   const rmVal = parseFloat(document.getElementById("rmRef").value) || 0;
   const resultado = (rmVal * (porcentaje / 100)).toFixed(1);
-  document.getElementById("rmResultKg").value = resultado;
+  // Añadir "Kg" después del producto del max RM x %
+  document.getElementById("rmResultKg").value = (rmVal > 0 ? resultado + " Kg" : "");
 }
 
 function actualizarMaximoRM() {
