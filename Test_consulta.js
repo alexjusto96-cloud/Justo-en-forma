@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
   
-  // Soportar tanto el estilo original como el nuevo diseño estético
   const userDisplayEl = document.getElementById("usuario-display") || document.getElementById("user-display");
   if (userDisplayEl) {
     userDisplayEl.textContent = usuario;
@@ -84,16 +83,23 @@ function cargarSelectsTest() {
   console.log("✓ Opciones fijas y dinámicas de Test cargadas en los desplegables correctamente.");
 }
 
-// 4. Lógica del Botón Enviar (Carga de 1 solo Iframe unificado con diseño estético)
+// 4. Lógica del Botón Enviar (Ejecuta el Fetch al Sheet + Carga el Visor Iframe)
 const btnEnviar = document.getElementById("btnEnviar") || document.getElementById("btnSiguiente");
 if (btnEnviar) {
-  btnEnviar.addEventListener("click", () => {
+  btnEnviar.addEventListener("click", async () => {
     const mensajeEl = document.getElementById("mensaje-loading");
+
+    // Recoger los valores de la interfaz
+    const usuario = localStorage.getItem('Usuario') || sessionStorage.getItem('usuarioLogueado');
+    const dias = document.getElementById("selectDias") ? document.getElementById("selectDias").value : "7";
+    const t1 = document.getElementById("test1") ? document.getElementById("test1").value : "";
+    const lat1 = document.getElementById("lateralidad1") ? document.getElementById("lateralidad1").value : "BILATERAL";
+    const t2 = document.getElementById("test2") ? document.getElementById("test2").value : "";
+    const lat2 = document.getElementById("lateralidad2") ? document.getElementById("lateralidad2").value : "BILATERAL";
 
     // Validación básica del campo obligatorio
     const test1El = document.getElementById("test1");
     if (test1El) {
-      const t1 = test1El.value;
       if (!t1) {
         alert("Comprueba los campos obligatorios (Variable 1)");
         test1El.style.borderColor = "#ff0000";
@@ -102,8 +108,24 @@ if (btnEnviar) {
       test1El.style.borderColor = "#cbd5e1";
     }
 
-    // Mostrar mensaje de carga mientras espera
-    const mainContainer = document.querySelector("main > div") || document.body;
+    // Construcción de etiquetas según la lógica de lateralidad
+    const dato4 = lat1 === "BILATERAL" ? t1 : `${t1}${lat1}`;
+    const dato5 = t2 ? (lat2 === "BILATERAL" ? t2 : `${t2}${lat2}`) : "";
+    
+    // Obtener fecha actual en formato YYYY-MM-DD
+    const fechaHoy = new Date().toISOString().split('T')[0];
+
+    // Recuperar la URL del script (desde la URL o el localStorage)
+    const paramsUrl = new URLSearchParams(window.location.search);
+    const scriptUrl = paramsUrl.get("script") || localStorage.getItem('script');
+
+    if (!scriptUrl) {
+      alert("Error: No se encontró la URL del Apps Script.");
+      return;
+    }
+
+    // Mostrar mensaje de carga mientras se procesa
+    const mainContainer = document.getElementById("containerIframe") || document.body;
     let loadingContainer = mensajeEl;
     if (!loadingContainer) {
       loadingContainer = document.createElement("div");
@@ -115,9 +137,33 @@ if (btnEnviar) {
       mainContainer.appendChild(loadingContainer);
     }
     loadingContainer.style.display = "block";
-    loadingContainer.innerText = "Cargando gráfica en 2 segundos...";
+    loadingContainer.innerText = "Procesando datos y cargando visor...";
 
-    // Esperar 2 segundos y cargar el iframe unificado
+    try {
+      // 1. Ejecutar la petición POST en segundo plano hacia el Google Sheet
+      const bodyData = new URLSearchParams({
+        tipo: "cincoDatos",
+        dato1: usuario,
+        dato2: fechaHoy,
+        dato3: dias,
+        dato4: dato4,
+        dato5: dato5
+      });
+
+      const urlConsulta = `${scriptUrl}?accion=graficaTest&t=${Date.now()}`;
+      
+      // Lanzamos el fetch de forma asíncrona para que el Sheet reciba y procese la info
+      fetch(urlConsulta, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: bodyData.toString()
+      }).catch(err => console.error("Error en la petición al sheet:", err));
+
+    } catch (err) {
+      console.error("Error al preparar la petición:", err);
+    }
+
+    // 2. Esperar 2 segundos y desplegar el visor iframe limpio en pantalla
     setTimeout(() => {
       loadingContainer.style.display = "none";
 
@@ -125,7 +171,7 @@ if (btnEnviar) {
       const randomNum = Math.floor(Math.random() * 10000);
       const urlDestino = `https://alexjusto96-cloud.github.io/Gr-fico-TEST/?t=${randomNum}`;
 
-      // Comprobar si ya existe el único iframe creado, si no, crearlo con estilos limpios
+      // Comprobar si ya existe el único iframe creado, si no, crearlo dentro del contenedor
       let iframeViewer = document.getElementById("webViewerFrame");
       if (!iframeViewer) {
         iframeViewer = document.createElement("iframe");
@@ -137,14 +183,14 @@ if (btnEnviar) {
         iframeViewer.style.marginTop = "20px";
         iframeViewer.style.boxShadow = "0 4px 12px rgba(0,0,0,0.05)";
 
-        // Insertar el visor único dentro del contenedor principal
-        mainContainer.appendChild(iframeViewer);
+        const targetContainer = document.getElementById("containerIframe") || mainContainer;
+        targetContainer.appendChild(iframeViewer);
       }
 
       // Asignar la URL con el parámetro aleatorio al visor único
       iframeViewer.src = urlDestino;
       
-      // Desplazarse suavemente hacia la gráfica integrada
+      // Desplazarse suavemente hacia la zona del visor
       iframeViewer.scrollIntoView({ behavior: 'smooth' });
     }, 2000);
   });
