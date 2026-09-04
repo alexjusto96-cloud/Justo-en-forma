@@ -130,13 +130,15 @@ function bindEvents() {
     vbtElement.addEventListener("change", () => {
       actualizarEncabezadosYComportamientoVBT();
       actualizarEstadosFilas();
+      for (let i = 1; i <= 6; i++) {
+        calcularRM(i);
+      }
     });
   }
 
   document.addEventListener("input", (e) => {
     const target = e.target;
     if (target && target.tagName === "INPUT" && target.type === "text" && !target.readOnly && !target.disabled) {
-      // Excepción para el textbox de observaciones para permitir texto libre
       if (target.id === "textBox1" || target.id === "ejercicio" || target.id === "buscadorEjercicio") return;
 
       let val = target.value;
@@ -154,14 +156,19 @@ function bindEvents() {
   for (let i = 1; i <= 6; i++) {
     const repInput = document.getElementById(`Rep${i}`);
     const rirInput = document.getElementById(`RIR${i}`);
+    const kgInput = document.getElementById(`kg${i}`);
+    const iInput = document.getElementById(`i${i}`);
     
-    if (repInput) repInput.addEventListener("input", () => calcularIntensidadAutomatica(i));
-    if (rirInput) rirInput.addEventListener("input", () => calcularIntensidadAutomatica(i));
-  }
-
-  for (let i = 1; i <= 6; i++) {
-    const rmInput = document.getElementById(`rm${i}`);
-    if (rmInput) rmInput.addEventListener("input", actualizarMaximoRM);
+    if (repInput) repInput.addEventListener("input", () => {
+      calcularIntensidadAutomatica(i);
+      calcularRM(i);
+    });
+    if (rirInput) rirInput.addEventListener("input", () => {
+      calcularIntensidadAutomatica(i);
+      calcularRM(i);
+    });
+    if (kgInput) kgInput.addEventListener("input", () => calcularRM(i));
+    if (iInput) iInput.addEventListener("input", () => calcularRM(i));
   }
 }
 
@@ -176,6 +183,60 @@ function calcularIntensidadAutomatica(numSerie) {
   const suma = repsVal + rirVal;
 
   setVal(`i${numSerie}`, suma > 0 ? suma : "");
+  calcularRM(numSerie);
+}
+
+function calcularRM(numSerie) {
+  const vbtEl = document.getElementById("vbt");
+  const isVBTOn = vbtEl && vbtEl.checked;
+
+  const kgVal = parseFloat(getVal(`kg${numSerie}`)) || 0;
+  const iVal = parseFloat(getVal(`i${numSerie}`)) || 0;
+
+  if (kgVal <= 0) {
+    setVal(`rm${numSerie}`, "");
+    actualizarMaximoRM();
+    return;
+  }
+
+  if (!isVBTOn) {
+    // VBT OFF: nRM = nkg x (nI)^0.1
+    if (iVal > 0) {
+      const rmCalculado = kgVal * Math.pow(iVal, 0.1);
+      setVal(`rm${numSerie}`, rmCalculado.toFixed(2));
+    } else {
+      setVal(`rm${numSerie}`, "");
+    }
+    actualizarMaximoRM();
+  } else {
+    // VBT ON: Petición HTTP al Apps Script siguiendo la estructura de bloques
+    const scriptUrl = TinyDB.getValue("script");
+    if (!scriptUrl) return;
+
+    const usuario = encodeURIComponent(TinyDB.getValue("Usuario") || "");
+    const ejercicio = encodeURIComponent(document.getElementById("ejercicio").value || "");
+    const kg = encodeURIComponent(kgVal);
+    const intensidad = encodeURIComponent(iVal);
+    const repes = encodeURIComponent(getVal(`Rep${numSerie}`));
+    const rirVal = encodeURIComponent(getVal(`RIR${numSerie}`));
+    const recVal = encodeURIComponent(getVal(`rec${numSerie}`));
+
+    const payload = `tipo=calculoRM&serie=${numSerie}&usuario=${usuario}&ejercicio=${ejercicio}&kg=${kg}&i=${intensidad}&rep=${repes}&rir=${rirVal}&rec=${recVal}`;
+
+    fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: payload
+    })
+    .then(response => response.text())
+    .then(data => {
+      setVal(`rm${numSerie}`, data.trim());
+      actualizarMaximoRM();
+    })
+    .catch(err => {
+      console.error("Error al calcular RM con VBT:", err);
+    });
+  }
 }
 
 function actualizarEncabezadosYComportamientoVBT() {
@@ -504,6 +565,7 @@ function manejadorCambioSerie(numSerie, isOn) {
     }
     inicio = Date.now();
     iniciarCronometro();
+    calcularRM(numSerie);
   } else {
     for (let i = numSerie; i <= 6; i++) {
       if (i > numSerie) {
