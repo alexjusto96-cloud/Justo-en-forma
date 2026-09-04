@@ -1,4 +1,3 @@
-// --- VARIABLES GLOBALES Y DE ESTADO ---
 let dia1 = "";
 let dia2 = "";
 let dia3 = "";
@@ -12,7 +11,6 @@ let timerInterval = null;
 let currentTextIndex = 0;
 let textosNavegacion = ["Texto informativo 1", "Texto informativo 2", "Texto informativo 3"];
 
-// Simulación de Almacenamiento Local (sustituye a TinyDB)
 const TinyDB = {
   getValue: (key, defaultValue = "") => localStorage.getItem(key) || defaultValue,
   storeValue: (key, value) => localStorage.setItem(key, value)
@@ -20,7 +18,6 @@ const TinyDB = {
 
 const FORM_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktWrd4r6GO_uS-qcI/formResponse";
 
-// --- INICIALIZACIÓN DOM ---
 document.addEventListener("DOMContentLoaded", () => {
   generarFechaActual();
   renderSeriesInputs();
@@ -42,7 +39,7 @@ function renderSeriesInputs() {
   if (!container) return;
   container.innerHTML = "";
 
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 6; i++) {
     const row = document.createElement("div");
     const isActiveOrNext = (i === 1 || i === 2);
     row.className = `serie-row ${!isActiveOrNext ? "disabled" : ""}`;
@@ -96,7 +93,6 @@ function bindEvents() {
     document.getElementById("ejercicio").value = e.target.value;
   });
 
-  // --- BUSCADOR PARA EL LISTPICKER ---
   const buscadorInput = document.getElementById("buscadorEjercicio");
   if (buscadorInput) {
     buscadorInput.addEventListener("input", (e) => {
@@ -107,9 +103,7 @@ function bindEvents() {
       const opciones = picker.options;
       for (let i = 0; i < opciones.length; i++) {
         const textoOption = opciones[i].textContent.toLowerCase();
-        if (i === 0) {
-          continue; 
-        }
+        if (i === 0) continue; 
         if (textoOption.includes(filtro)) {
           opciones[i].style.display = "";
         } else {
@@ -121,13 +115,12 @@ function bindEvents() {
 
   document.addEventListener("change", (e) => {
     const targetId = e.target.id;
-    if (targetId && targetId.match(/^s[1-7]$/)) {
+    if (targetId && targetId.match(/^s[1-6]$/)) {
       const numSerie = parseInt(targetId.replace("s", ""), 10);
       manejadorCambioSerie(numSerie, e.target.checked);
     }
   });
 
-  // Escuchar cambios en el switch VBT para actualizar cabeceras, placeholders y limpiar campos
   const vbtElement = document.getElementById("vbt");
   if (vbtElement) {
     vbtElement.addEventListener("change", () => {
@@ -136,7 +129,6 @@ function bindEvents() {
     });
   }
 
-  // Validación estricta para permitir solo valores numéricos (números y punto decimal) en inputs de texto
   document.addEventListener("input", (e) => {
     const target = e.target;
     if (target && target.tagName === "INPUT" && target.type === "text" && !target.readOnly && !target.disabled) {
@@ -152,25 +144,17 @@ function bindEvents() {
     }
   });
 
-  // Escuchar cambios en Reps o RIR para calcular automáticamente 'i' si VBT está OFF
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 6; i++) {
     const repInput = document.getElementById(`Rep${i}`);
     const rirInput = document.getElementById(`RIR${i}`);
     
-    if (repInput) {
-      repInput.addEventListener("input", () => calcularIntensidadAutomatica(i));
-    }
-    if (rirInput) {
-      rirInput.addEventListener("input", () => calcularIntensidadAutomatica(i));
-    }
+    if (repInput) repInput.addEventListener("input", () => calcularIntensidadAutomatica(i));
+    if (rirInput) rirInput.addEventListener("input", () => calcularIntensidadAutomatica(i));
   }
 
-  // Escuchar cambios en los inputs de RM para actualizar el valor máximo de referencia
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 6; i++) {
     const rmInput = document.getElementById(`rm${i}`);
-    if (rmInput) {
-      rmInput.addEventListener("input", actualizarMaximoRM);
-    }
+    if (rmInput) rmInput.addEventListener("input", actualizarMaximoRM);
   }
 }
 
@@ -194,23 +178,18 @@ function actualizarEncabezadosYComportamientoVBT() {
   const headerTextI = isVBTOn ? "MVP" : "Int";
   const headerTextRIR = isVBTOn ? "VL" : "RIR";
 
-  // Actualizar los textos de los headers en la cabecera fija del HTML
   const gridHeader = document.querySelector(".grid-header");
   if (gridHeader && gridHeader.children.length >= 6) {
     gridHeader.children[3].innerText = headerTextI;
     gridHeader.children[5].innerText = headerTextRIR;
   }
 
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 6; i++) {
     const inputI = document.getElementById(`i${i}`);
     const inputRIR = document.getElementById(`RIR${i}`);
     
-    if (inputI) {
-      inputI.placeholder = headerTextI;
-    }
-    if (inputRIR) {
-      inputRIR.placeholder = headerTextRIR;
-    }
+    if (inputI) inputI.placeholder = headerTextI;
+    if (inputRIR) inputRIR.placeholder = headerTextRIR;
 
     const chk = document.getElementById(`s${i}`);
     if (chk && chk.checked) {
@@ -223,7 +202,6 @@ function actualizarEncabezadosYComportamientoVBT() {
 function actualizarTextoNavegacion() {
   document.getElementById("navTextDisplay").innerText = textosNavegacion[currentTextIndex];
   
-  // Actualizar estado visual de los botones de navegación (bloqueo en extremos)
   const btnPrev = document.getElementById("btnTextPrev");
   const btnNext = document.getElementById("btnTextNext");
   
@@ -239,16 +217,12 @@ function calcularRMAslider(porcentaje) {
 
 function actualizarMaximoRM() {
   let maxRM = 0;
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 6; i++) {
     const val = parseFloat(getVal(`rm${i}`)) || 0;
-    if (val > maxRM) {
-      maxRM = val;
-    }
+    if (val > maxRM) maxRM = val;
   }
   const rmRefEl = document.getElementById("rmRef");
-  if (rmRefEl) {
-    rmRefEl.value = maxRM > 0 ? maxRM : "";
-  }
+  if (rmRefEl) rmRefEl.value = maxRM > 0 ? maxRM : "";
   const sliderVal = document.getElementById("slider1").value;
   calcularRMAslider(sliderVal);
 }
@@ -284,8 +258,6 @@ function inicializarValores() {
   }
 }
 
-// --- LÓGICA DE EVENTOS ---
-
 function ejecutarNuevoEjercicio() {
   generarFechaActual();
 
@@ -298,7 +270,7 @@ function ejecutarNuevoEjercicio() {
   document.getElementById("ecc").value = "2";
   document.getElementById("pausaEcc").value = "1";
 
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 6; i++) {
     const el = document.getElementById(`s${i}`);
     if (el) el.checked = (i === 1);
   }
@@ -311,10 +283,8 @@ function ejecutarNuevoEjercicio() {
 
   document.getElementById("label32").innerText = "";
 
-  for (let i = 1; i <= 7; i++) {
-    ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
-      setVal(`${prefix}${i}`, "");
-    });
+  for (let i = 1; i <= 6; i++) {
+    ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => setVal(`${prefix}${i}`, ""));
   }
   setVal("textBox1", "");
 
@@ -407,16 +377,12 @@ function consultarEntrenamientos() {
   .then(response => response.text())
   .then(data => {
     calendar = 0;
-    console.log("Consulta realizada:", data);
-
     let partes = data.split("|||");
-    
     textosNavegacion = [
       partes[0] || "Sin registros recientes",
       partes[1] || "Sin registros intermedios",
       partes[2] || "Sin registros antiguos"
     ];
-
     currentTextIndex = 0;
     actualizarTextoNavegacion();
   })
@@ -436,7 +402,7 @@ function actualizarEstadosFilas() {
   const vbtEl = document.getElementById("vbt");
   const isVBTOn = vbtEl && vbtEl.checked;
 
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 6; i++) {
     const chk = document.getElementById(`s${i}`);
     const row = document.getElementById(`serie_row_${i}`);
     
@@ -462,17 +428,14 @@ function actualizarEstadosFilas() {
         }
       });
 
-      // El campo RM siempre permanece bloqueado con la clase disabled-input
       const inputRM = document.getElementById(`rm${i}`);
       if (inputRM) {
         inputRM.disabled = !isOn;
         inputRM.readOnly = true;
         if (!isOn) inputRM.value = "";
         inputRM.classList.add("disabled-input");
-        inputRM.style.backgroundColor = ""; 
       }
 
-      // Campo 'i' (Intensidad / MVP)
       const inputI = document.getElementById(`i${i}`);
       if (inputI) {
         inputI.disabled = !isOn;
@@ -491,7 +454,6 @@ function actualizarEstadosFilas() {
         }
       }
 
-      // Campo RIR / VL
       const inputRIR = document.getElementById(`RIR${i}`);
       if (inputRIR) {
         inputRIR.disabled = !isOn;
@@ -515,7 +477,6 @@ function actualizarEstadosFilas() {
       }
       if (row) row.classList.add("disabled");
       
-      // Aseguramos que toda la fila inactiva aplique la clase disabled-input uniformemente
       ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
@@ -537,7 +498,7 @@ function manejadorCambioSerie(numSerie, isOn) {
     inicio = Date.now();
     iniciarCronometro();
   } else {
-    for (let i = numSerie; i <= 7; i++) {
+    for (let i = numSerie; i <= 6; i++) {
       if (i > numSerie) {
         const switchEl = document.getElementById(`s${i}`);
         if (switchEl) switchEl.checked = false;
@@ -563,7 +524,6 @@ function iniciarCronometro() {
   }, 1000);
 }
 
-// --- UTILIDADES ---
 function getVal(id) {
   const el = document.getElementById(id);
   return el ? el.value : "";
@@ -572,9 +532,4 @@ function getVal(id) {
 function setVal(id, val) {
   const el = document.getElementById(id);
   if (el) el.value = val;
-}
-
-function setElementEnabled(id, enabled) {
-  const el = document.getElementById(id);
-  if (el) el.disabled = !enabled;
 }
