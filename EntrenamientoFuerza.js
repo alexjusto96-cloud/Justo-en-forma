@@ -545,7 +545,7 @@ function consultarEntrenamientos() {
 function finalizarEntrenamiento() {
   last = "Fuerza";
   TinyDB.storeValue("Last", last);
-  window.location.href = "rpe2.html";
+  window.location.href = "rpe.html";
 }
 
 function actualizarEstadosFilas() {
