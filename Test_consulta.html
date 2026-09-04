@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Consulta - Gráfica</title>
+  <title>Test Consulta - PWA</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * {
@@ -19,6 +19,55 @@
       align-items: center;
       padding: 10px;
     }
+    .form-card {
+      width: 100%;
+      max-width: 800px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 15px;
+    }
+    .input-group {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+    select, button {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+    }
+    select {
+      flex: 2;
+    }
+    .lateralidad {
+      flex: 1;
+    }
+    button.btn-enviar {
+      background-color: #0288D1;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    button.btn-enviar:hover {
+      background-color: #0277bd;
+    }
     .chart-card {
       width: 100%;
       max-width: 800px;
@@ -30,7 +79,7 @@
     .chart-container {
       position: relative;
       width: 100%;
-      height: 70vh;
+      height: 60vh;
     }
     #mensaje-loading {
       text-align: center;
@@ -42,14 +91,74 @@
 </head>
 <body>
 
+  <!-- Panel de Controles (Espejo de App Inventor) -->
+  <div class="form-card">
+    <div class="input-group">
+      <label>Últimos X días</label>
+      <select id="selectDias">
+        <option value="7">7</option>
+        <option value="30">30</option>
+        <option value="90">90</option>
+        <option value="180">180</option>
+        <option value="365">365</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Variable 1</label>
+      <div class="row">
+        <select id="test1">
+          <option value="" disabled selected>Selecciona Test 1</option>
+          <option value="HOOPER INDEX">HOOPER INDEX</option>
+          <option value="PESO">PESO</option>
+          <option value="ESTADO MUSCULAR">ESTADO MUSCULAR</option>
+          <option value="ESTADO MENTAL">ESTADO MENTAL</option>
+          <option value="ENERGÍA">ENERGÍA</option>
+          <option value="CALIDAD DE SUEÑO">CALIDAD DE SUEÑO</option>
+          <option value="HORAS DE SUEÑO">HORAS DE SUEÑO</option>
+          <option value="HRV">HRV</option>
+        </select>
+        <select id="lateralidad1" class="lateralidad">
+          <option value="BILATERAL">BILATERAL</option>
+          <option value="IZQ">IZQ</option>
+          <option value="DCH">DCH</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Variable 2</label>
+      <div class="row">
+        <select id="test2">
+          <option value="" disabled selected>Selecciona Test 2</option>
+          <option value="HOOPER INDEX">HOOPER INDEX</option>
+          <option value="PESO">PESO</option>
+          <option value="ESTADO MUSCULAR">ESTADO MUSCULAR</option>
+          <option value="ESTADO MENTAL">ESTADO MENTAL</option>
+          <option value="ENERGÍA">ENERGÍA</option>
+          <option value="CALIDAD DE SUEÑO">CALIDAD DE SUEÑO</option>
+          <option value="HORAS DE SUEÑO">HORAS DE SUEÑO</option>
+          <option value="HRV">HRV</option>
+        </select>
+        <select id="lateralidad2" class="lateralidad">
+          <option value="BILATERAL">BILATERAL</option>
+          <option value="IZQ">IZQ</option>
+          <option value="DCH">DCH</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-enviar" id="btnEnviar">Enviar</button>
+  </div>
+
+  <!-- Contenedor de la Gráfica -->
   <div class="chart-card">
-    <div id="mensaje-loading">Cargando datos de la consulta...</div>
+    <div id="mensaje-loading">Configura los parámetros y pulsa Enviar.</div>
     <div class="chart-container">
       <canvas id="canvasGrafica"></canvas>
     </div>
   </div>
 
-  <!-- Vinculación con el archivo JavaScript externo -->
   <script src="Test_consulta.js"></script>
 </body>
 </html>
