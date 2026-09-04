@@ -33,7 +33,7 @@ function inicializarFecha() {
 function bindEvents() {
   document.getElementById("entrenamiento").addEventListener("change", alSeleccionarEntrenamiento);
   document.getElementById("ejercicio").addEventListener("change", alSeleccionarEjercicio);
-  document.getElementById("consultar_entrenamiento").addEventListener("click", ejecutarConsultaEntrenamiento);
+  document.getElementById("consultarEntrenamiento").addEventListener("click", ejecutarConsultaEntrenamiento);
   document.getElementById("consultarRendimiento").addEventListener("click", ejecutarConsultaRendimiento);
 }
 
