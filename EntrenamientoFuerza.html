@@ -112,30 +112,45 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .tempo-inline {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
+    
+    /* MEJORA: Bloque de Tempo rediseñado en Grid */
+    .tempo-card {
       background: #fafafa;
-      padding: 8px;
+      padding: 10px;
       border-radius: 6px;
       border: 1px solid #e0e0e0;
-      justify-content: space-between;
-    }
-    .tempo-inline select {
-      width: 42px;
-      padding: 3px;
-      font-size: 11px;
-    }
-    .checkbox-inline {
-      margin-bottom: 0;
-      font-weight: bold;
       font-size: 12px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
+    .tempo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .tempo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+    .tempo-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .tempo-item span {
+      font-size: 10px;
+      color: #555;
+      font-weight: bold;
+    }
+    .tempo-item select {
+      width: 100%;
+      padding: 4px;
+      font-size: 12px;
+      text-align: center;
+    }
+
     .timer-card {
       background: #eef2f5;
       border-radius: 6px;
@@ -146,24 +161,49 @@
       color: #2c3e50;
       margin: 15px 0;
     }
+
+    /* MEJORA: Cálculo de Carga optimizado y limpio */
+    .calc-card {
+      background: #fafafa;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+    }
+    .calc-inputs-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
     .slider-container {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex: 1;
     }
     .slider-container input[type="range"] {
       flex: 1;
     }
     .slider-container input[type="text"] {
-      width: 55px;
+      width: 50px;
       text-align: center;
     }
-    .calc-row {
+    .calc-results-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .calc-field {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 12px;
+      gap: 4px;
+      flex: 1;
     }
+    .calc-field input {
+      text-align: center;
+    }
+
     .serie-row {
       background: #fafafa;
       border: 1px solid #e0e0e0;
@@ -240,31 +280,56 @@
     <button id="btnTextNext" class="btn-secundario">&rarr;</button>
   </div>
 
-  <div class="form-group tempo-inline">
-    <label class="checkbox-inline">
-      <input type="checkbox" id="vbt"> VBT
-    </label>
-    <span>Tempo:</span>
-    <span>Con</span><select id="con"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
-    <span>P.Con</span><select id="pausaCon"><option value="1">0</option><option value="2">1</option></select>
-    <span>Exc</span><select id="ecc"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
-    <span>P.Exc</span><select id="pausaEcc"><option value="1">0</option><option value="2">1</option></select>
+  <!-- MEJORA: Estructura visual clara para Tempo y VBT -->
+  <div class="form-group tempo-card">
+    <div class="tempo-header">
+      <label class="checkbox-inline" style="margin:0;">
+        <input type="checkbox" id="vbt"> Modo VBT
+      </label>
+      <span style="font-size: 11px; color: #666;">Configuración de Tempo</span>
+    </div>
+    <div class="tempo-grid">
+      <div class="tempo-item">
+        <span>Con</span>
+        <select id="con"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+      </div>
+      <div class="tempo-item">
+        <span>P.Con</span>
+        <select id="pausaCon"><option value="1">0</option><option value="2">1</option></select>
+      </div>
+      <div class="tempo-item">
+        <span>Exc</span>
+        <select id="ecc"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
+      </div>
+      <div class="tempo-item">
+        <span>P.Exc</span>
+        <select id="pausaEcc"><option value="1">0</option><option value="2">1</option></select>
+      </div>
+    </div>
   </div>
 
   <div class="timer-card">
     Tiempo de Descanso: <span id="minutos">0</span>:<span id="segundos">00</span>
   </div>
 
-  <div class="form-group">
-    <label>Cálculo de Carga (% RM):</label>
-    <div class="calc-row">
-      <input type="text" id="rmRef" readonly style="width: 60px;" placeholder="RM">
-      <span>Kg</span>
-      <div class="slider-container" style="flex:1;">
+  <!-- MEJORA: Bloque de Carga (% RM) más ordenado y compacto -->
+  <div class="form-group calc-card">
+    <label style="margin-bottom: 6px;">Cálculo de Carga (% RM):</label>
+    <div class="calc-inputs-top">
+      <div class="slider-container">
         <input type="range" id="slider1" min="0" max="100" value="50">
         <input type="text" id="percentage" readonly>
       </div>
-      <input type="text" id="rmResultKg" readonly style="width: 70px;" placeholder="Total">
+    </div>
+    <div class="calc-results-bottom">
+      <div class="calc-field">
+        <span style="font-size:11px; font-weight:bold;">RM Ref:</span>
+        <input type="text" id="rmRef" readonly placeholder="RM"> <span style="font-size:11px;">Kg</span>
+      </div>
+      <div class="calc-field" style="justify-content: flex-end;">
+        <span style="font-size:11px; font-weight:bold;">Total:</span>
+        <input type="text" id="rmResultKg" readonly placeholder="Total"> <span style="font-size:11px;">Kg</span>
+      </div>
     </div>
   </div>
 
