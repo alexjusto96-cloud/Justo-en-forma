@@ -94,7 +94,7 @@ function bindEvents() {
       for (let i = 0; i < opciones.length; i++) {
         const textoOption = opciones[i].textContent.toLowerCase();
         if (i === 0) {
-          continue; // Mantener la opción por defecto visible
+          continue; 
         }
         if (textoOption.includes(filtro)) {
           opciones[i].style.display = "";
@@ -157,7 +157,7 @@ function inicializarValores() {
   const rawEj = TinyDB.getValue("Ejercicio", "");
   const picker = document.getElementById("listPicker1");
   if (picker) {
-    picker.innerHTML = '<option value="">-- Seleccionar --</option>';
+    picker.innerHTML = ''; // Eliminada la opción por defecto "-- Seleccionar --"
     if (rawEj) {
       let lista = [];
       try {
@@ -357,6 +357,8 @@ function manejadorCambioSerie(numSerie, isOn) {
     inicio = Date.now();
     iniciarCronometro();
   } else {
+    // Si se desmarca la fila n, limpiamos los datos de esta y las posteriores,
+    // pero permitimos que la siguiente fila (n+1) mantenga su switch habilitado (off) y el resto de su fila en blanco.
     for (let i = numSerie; i <= 7; i++) {
       if (i > numSerie) {
         const switchEl = document.getElementById(`s${i}`);
