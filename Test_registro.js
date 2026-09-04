@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputNombre = document.getElementById('nombre');
     inputNombre.value = usuario;
 
+    // Actualizar el indicador visual del header con el usuario activo
+    const userDisplay = document.getElementById('user-display');
+    if (userDisplay) {
+        userDisplay.textContent = usuario;
+    }
+
     // 2. Inicializar Fecha actual (Formato YYYY-MM-DD compatible con input type="date")
     const inputFecha = document.getElementById('fecha');
     const hoy = new Date();
@@ -39,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sincronizar la selección del desplegable con el textbox editable (Resultado_PRE)
     selectTest.addEventListener('change', () => {
         inputResultadoPre.value = selectTest.value;
+        inputResultadoPre.classList.remove('error');
     });
 
     // 4. Lógica de selección Bilateral / Unilateral (Equivalente al bloque AfterPicking de UniMulti)
@@ -47,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     selectUniMulti.addEventListener('change', () => {
         const seleccion = selectUniMulti.value;
+        selectUniMulti.classList.remove('error');
         if (seleccion === 'Bilateral') {
             selectLateralidad.value = '';
             selectLateralidad.classList.add('hidden');
@@ -70,33 +78,41 @@ document.addEventListener('DOMContentLoaded', () => {
     btnEnviar.addEventListener('click', async () => {
         let hayError = false;
 
-        // Validación de campos obligatorios con marcado visual en rojo
+        // Validación de campos obligatorios con marcado visual en rojo adaptado al nuevo diseño
         if (!inputNombre.value.trim()) {
-            inputNombre.classList.add('error');
+            inputNombre.style.borderColor = '#ef4444';
+            inputNombre.style.backgroundColor = '#fef2f2';
             hayError = true;
         } else {
-            inputNombre.classList.remove('error');
+            inputNombre.style.borderColor = '#cbd5e1';
+            inputNombre.style.backgroundColor = '#e2e8f0';
         }
 
         if (!inputFecha.value.trim()) {
-            inputFecha.classList.add('error');
+            inputFecha.style.borderColor = '#ef4444';
+            inputFecha.style.backgroundColor = '#fef2f2';
             hayError = true;
         } else {
-            inputFecha.classList.remove('error');
+            inputFecha.style.borderColor = '#cbd5e1';
+            inputFecha.style.backgroundColor = '#f8fafc';
         }
 
         if (!inputResultadoPre.value.trim()) {
-            inputResultadoPre.classList.add('error');
+            inputResultadoPre.style.borderColor = '#ef4444';
+            inputResultadoPre.style.backgroundColor = '#fef2f2';
             hayError = true;
         } else {
-            inputResultadoPre.classList.remove('error');
+            inputResultadoPre.style.borderColor = '#cbd5e1';
+            inputResultadoPre.style.backgroundColor = '#f8fafc';
         }
 
         if (!inputResultado.value.trim()) {
-            inputResultado.classList.add('error');
+            inputResultado.style.borderColor = '#ef4444';
+            inputResultado.style.backgroundColor = '#fef2f2';
             hayError = true;
         } else {
-            inputResultado.classList.remove('error');
+            inputResultado.style.borderColor = '#cbd5e1';
+            inputResultado.style.backgroundColor = '#f8fafc';
         }
 
         if (hayError) {
@@ -129,6 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Limpiar campos numéricos/resultados tras envío exitoso
             inputResultado.value = '';
             inputObservaciones.value = '';
+            inputResultadoPre.value = '';
+            selectTest.selectedIndex = 0;
         } catch (err) {
             console.error('Error al enviar los datos:', err);
             alert('Hubo un error al enviar el registro.');
