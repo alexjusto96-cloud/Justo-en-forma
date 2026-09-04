@@ -82,6 +82,29 @@ function bindEvents() {
     document.getElementById("ejercicio").value = e.target.value;
   });
 
+  // --- BUSCADOR PARA EL LISTPICKER ---
+  const buscadorInput = document.getElementById("buscadorEjercicio");
+  if (buscadorInput) {
+    buscadorInput.addEventListener("input", (e) => {
+      const filtro = e.target.value.toLowerCase();
+      const picker = document.getElementById("listPicker1");
+      if (!picker) return;
+
+      const opciones = picker.options;
+      for (let i = 0; i < opciones.length; i++) {
+        const textoOption = opciones[i].textContent.toLowerCase();
+        if (i === 0) {
+          continue; // Mantener la opción por defecto visible
+        }
+        if (textoOption.includes(filtro)) {
+          opciones[i].style.display = "";
+        } else {
+          opciones[i].style.display = "none";
+        }
+      }
+    });
+  }
+
   document.addEventListener("change", (e) => {
     const targetId = e.target.id;
     if (targetId && targetId.match(/^s[1-7]$/)) {
@@ -131,7 +154,7 @@ function inicializarValores() {
   document.getElementById("rmRef").value = "";
   calcularRMAslider(sliderVal);
   
-  const rawEj = TinyDB.getValue("Ejercicios", "");
+  const rawEj = TinyDB.getValue("Ejercicio", "");
   const picker = document.getElementById("listPicker1");
   if (picker) {
     picker.innerHTML = '<option value="">-- Seleccionar --</option>';
