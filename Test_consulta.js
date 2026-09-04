@@ -73,7 +73,7 @@ function cargarSelectsTest() {
   console.log("✓ Opciones fijas y dinámicas de Test cargadas en los desplegables correctamente.");
 }
 
-// 4. Lógica del Botón Enviar (Redirección tras 2 segundos)
+// 4. Lógica del Botón Enviar (Carga de WebViewer en Iframe tras 2 segundos)
 document.getElementById("btnEnviar").addEventListener("click", () => {
   const mensajeEl = document.getElementById("mensaje-loading");
 
@@ -89,11 +89,35 @@ document.getElementById("btnEnviar").addEventListener("click", () => {
   // Mostrar mensaje de carga mientras espera
   if (mensajeEl) {
     mensajeEl.style.display = "block";
-    mensajeEl.innerText = "Redirigiendo en 2 segundos...";
+    mensajeEl.innerText = "Cargando visor en 2 segundos...";
   }
 
-  // Esperar 2 segundos (2000 milisegundos) y redirigir
+  // Esperar 2 segundos y cargar el iframe
   setTimeout(() => {
-    window.location.href = "https://alexjusto96-cloud.github.io/Gr-fico-TEST/";
+    if (mensajeEl) {
+      mensajeEl.style.display = "none";
+    }
+
+    // Generar entero aleatorio entre 0 y 9999
+    const randomNum = Math.floor(Math.random() * 10000);
+    const urlDestino = `https://alexjusto96-cloud.github.io/Gr-fico-TEST/?t=${randomNum}`;
+
+    // Comprobar si ya existe el iframe creado, si no, crearlo debajo de los selectores
+    let iframeViewer = document.getElementById("webViewerFrame");
+    if (!iframeViewer) {
+      iframeViewer = document.createElement("iframe");
+      iframeViewer.id = "webViewerFrame";
+      iframeViewer.style.width = "100%";
+      iframeViewer.style.height = "600px";
+      iframeViewer.style.border = "none";
+      iframeViewer.style.marginTop = "20px";
+
+      // Insertar el iframe justo debajo del contenedor de los selectores
+      const contenedorReferencia = document.getElementById("test1").closest("form") || document.getElementById("test1").parentNode;
+      contenedorReferencia.parentNode.insertBefore(iframeViewer, contenedorReferencia.nextSibling);
+    }
+
+    // Asignar la URL con el parámetro aleatorio al iframe
+    iframeViewer.src = urlDestino;
   }, 2000);
 });
