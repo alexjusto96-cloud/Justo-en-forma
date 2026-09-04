@@ -69,8 +69,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'Test_registro.html';
   });
 
+  // Modificado: Pasa la URL del script actual por parámetro URL
   document.getElementById('btn-consultar-test').addEventListener('click', () => {
-    window.location.href = 'Test_consulta.html';
+    const scriptBase = localStorage.getItem('script') || SCRIPT_BASE;
+    window.location.href = `Test_consulta.html?script=${encodeURIComponent(scriptBase)}`;
   });
 
   // LogOut (limpia también las listas para asegurar datos frescos al volver a entrar)
@@ -120,7 +122,7 @@ async function fetchData(url, storageKey) {
   try {
     const response = await fetch(url, {
       method: 'GET',
-      redirect: 'follow' // Sigue la redirección 302 hacia script.googleusercontent.com
+      redirect: 'follow'
     });
 
     if (!response.ok) {
@@ -129,7 +131,6 @@ async function fetchData(url, storageKey) {
 
     const data = await response.json();
 
-    // Comprobamos si Apps Script mandó una respuesta con error
     if (data.error) {
       console.warn(`[Apps Script Error] ${storageKey}: ${data.error}`);
       return;
