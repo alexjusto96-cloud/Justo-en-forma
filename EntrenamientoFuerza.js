@@ -437,11 +437,11 @@ function enviarFormularioGoogle() {
     "entry.408397467": getVal("rm6")
   });
 
-  fetch(FORM_URL, {
+  const fullUrl = `${FORM_URL}?${params.toString()}`;
+
+  fetch(fullUrl, {
     method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params.toString()
+    mode: "no-cors"
   })
     .then(() => alert("Registro enviado con éxito"))
     .catch(err => console.error("Error al enviar:", err));
