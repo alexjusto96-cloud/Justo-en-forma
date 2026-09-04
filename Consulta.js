@@ -14,12 +14,19 @@ const URL_TABLA_RENDIMIENTO = "https://script.google.com/macros/s/AKfycbxms-4qo1
 
 // --- INICIALIZACIÓN ---
 document.addEventListener("DOMContentLoaded", () => {
-  globalName = TinyDB.getValue("Usuario", "");
+  globalName = TinyDB.getValue("Usuario", "") || TinyDB.getValue("usuarioLogueado", "");
+  
+  const userDisplay = document.getElementById("user-display");
+  if (userDisplay) {
+    userDisplay.textContent = globalName ? `${globalName}` : "Sin usuario";
+  }
+
   inicializarFecha();
   bindEvents();
   
   // Limpiar selección inicial por defecto sin opción vacía y forzar estado
   document.getElementById("entrenamiento").selectedIndex = -1;
+  document.getElementById("xDays").selectedIndex = -1;
   actualizarEstadoSelects();
 });
 
@@ -38,6 +45,13 @@ function bindEvents() {
   document.getElementById("ejercicio").addEventListener("change", alSeleccionarEjercicio);
   document.getElementById("consultarEntrenamiento").addEventListener("click", ejecutarConsultaEntrenamiento);
   document.getElementById("consultarRendimiento").addEventListener("click", ejecutarConsultaRendimiento);
+
+  const btnAtrasTop = document.getElementById("btnAtrasTop");
+  if (btnAtrasTop) {
+    btnAtrasTop.addEventListener("click", () => {
+      window.location.href = "menu_principal.html";
+    });
+  }
 }
 
 function actualizarEstadoSelects() {
@@ -83,8 +97,8 @@ function alSeleccionarEjercicio() {
   selectModalidad.innerHTML = "";
 
   if (entrenamientoVal === "Fuerza") {
-    // Modalidades específicas para Fuerza independientemente del ejercicio escogido
-    poblarSelect(selectModalidad, ["1:1:1:1", "1:1:2:1", "1:1:1:0"]);
+    // Modalidades específicas para Fuerza solicitadas
+    poblarSelect(selectModalidad, ["", "1:1:1:1", "1:1:2:1", "1:1:1:0"]);
   } else if (entrenamientoVal === "Cardio") {
     if (ejercicioVal === "Carrera") {
       const opcionesCarrera = JSON.parse(TinyDB.getValue("Carrera", "[]"));
@@ -171,7 +185,7 @@ function poblarSelect(selectElement, opciones) {
   opciones.forEach(opt => {
     const option = document.createElement("option");
     option.value = opt;
-    option.textContent = opt;
+    option.textContent = opt === "" ? "-- Seleccionar --" : opt;
     selectElement.appendChild(option);
   });
 }
