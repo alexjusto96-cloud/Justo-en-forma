@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Elementos del DOM
   const inputNombre = document.getElementById("nombre");
   const inputFecha = document.getElementById("fecha");
@@ -16,9 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Obtener usuario activo unificando localStorage y sessionStorage
   const usuarioActivo = localStorage.getItem("Usuario") || sessionStorage.getItem("usuarioLogueado") || "";
   
-  // Si no hay usuario o no se pasó por el menú principal (verificando que existan las listas base), se redirige
-  const testsGuardados = JSON.parse(localStorage.getItem("Test") || "[]");
-  if (!usuarioActivo || testsGuardados.length === 0) {
+  if (!usuarioActivo) {
     window.location.href = 'index.html';
     return;
   }
@@ -33,7 +31,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const day = String(hoy.getDate()).padStart(2, '0');
   inputFecha.value = `${year}-${month}-${day}`;
 
-  // Cargar opciones en el select de TEST desde localStorage
+  // Cargar opciones en el select de TEST desde localStorage (con respaldo si no existen)
+  let testsGuardados = JSON.parse(localStorage.getItem("Test") || "[]");
+  
+  if (testsGuardados.length === 0) {
+    try {
+      const scriptBase = localStorage.getItem('script') || 'https://script.google.com/macros/s/AKfycbyPfGgRmGtJ6R_5P3NA6D7dhbT0CYW0Aw6i053H-F13PpvARKWYdV_MLxtymgmglUcd6Q/exec';
+      const response = await fetch(`${scriptBase}?nombre=${encodeURIComponent(usuarioActivo)}&seccion=TipoDeTest`);
+      const data = await response.json();
+      if (data && Array.isArray(data.lista)) {
+        testsGuardados = data.lista;
+        localStorage.setItem("Test", JSON.stringify(testsGuardados));
+      }
+    } catch (e) {
+      console.error("No se pudieron cargar los tests de respaldo", e);
+    }
+  }
+
   selectTest.innerHTML = '<option value="" disabled selected>Selecciona test</option>';
   testsGuardados.forEach(item => {
     const opt = document.createElement("option");
