@@ -43,12 +43,12 @@ function renderSeriesInputs() {
       <div class="grid-8col">
         <div><input type="checkbox" id="s${i}" ${i === 1 ? 'checked' : ''} ${i > 2 ? 'disabled' : ''}></div>
         <div style="text-align:center; font-weight:bold;">${i}</div>
-        <div><input type="text" id="kg${i}" placeholder="Kg"></div>
-        <div><input type="text" id="i${i}" placeholder="Int"></div>
-        <div><input type="text" id="Rep${i}" placeholder="Reps"></div>
-        <div><input type="text" id="RIR${i}" placeholder="RIR"></div>
-        <div><input type="text" id="rec${i}" placeholder="R´"></div>
-        <div><input type="text" id="rm${i}" placeholder="RM"></div>
+        <div><input type="text" id="kg${i}" placeholder="Kg" inputmode="decimal"></div>
+        <div><input type="text" id="i${i}" placeholder="Int" inputmode="decimal"></div>
+        <div><input type="text" id="Rep${i}" placeholder="Reps" inputmode="numeric"></div>
+        <div><input type="text" id="RIR${i}" placeholder="RIR" inputmode="decimal"></div>
+        <div><input type="text" id="rec${i}" placeholder="R´" inputmode="numeric"></div>
+        <div><input type="text" id="rm${i}" placeholder="RM" readonly inputmode="decimal" class="disabled-input"></div>
       </div>
     `;
     container.appendChild(row);
@@ -75,7 +75,7 @@ function bindEvents() {
   });
 
   document.getElementById("btnTextNext").addEventListener("click", () => {
-    currentTextIndex = (currentTextIndex + 1) % textosNavegacion.length;
+    currentTextIndex = (currentTextIndex + 1 + textosNavegacion.length) % textosNavegacion.length;
     actualizarTextoNavegacion();
   });
 
@@ -123,6 +123,25 @@ function bindEvents() {
     });
   }
 
+  // Validación estricta para permitir solo valores numéricos (números y punto decimal) en inputs de texto
+  document.addEventListener("input", (e) => {
+    const target = e.target;
+    if (target && target.tagName === "INPUT" && target.type === "text" && !target.readOnly && !target.disabled) {
+      // Expresión regular que permite dígitos y opcionalmente un punto o coma decimal
+      let val = target.value;
+      // Reemplazar comas por puntos para consistencia numérica
+      val = val.replace(/,/g, '.');
+      // Filtrar caracteres no numéricos permitiendo solo un punto decimal
+      const filtered = val.replace(/[^0-9.]/g, '');
+      const parts = filtered.split('.');
+      if (parts.length > 2) {
+        target.value = parts[0] + '.' + parts.slice(1).join('');
+      } else {
+        target.value = filtered;
+      }
+    }
+  });
+
   // Escuchar cambios en Reps o RIR para calcular automáticamente 'i' si VBT está OFF
   for (let i = 1; i <= 7; i++) {
     const repInput = document.getElementById(`Rep${i}`);
@@ -136,7 +155,7 @@ function bindEvents() {
     }
   }
 
-  // Escuchar cambios en los inputs de RM para actualizar el valor máximo de referencia
+  // Escuchar cambios en los inputs de RM para actualizar el valor máximo de referencia (aunque sean calculados o de solo lectura)
   for (let i = 1; i <= 7; i++) {
     const rmInput = document.getElementById(`rm${i}`);
     if (rmInput) {
@@ -149,7 +168,6 @@ function calcularIntensidadAutomatica(numSerie) {
   const vbtEl = document.getElementById("vbt");
   const isVBTOn = vbtEl && vbtEl.checked;
   
-  // Si VBT está ON, la intensidad se introduce manualmente, no se calcula
   if (isVBTOn) return;
 
   const repsVal = parseFloat(getVal(`Rep${numSerie}`)) || 0;
@@ -163,23 +181,13 @@ function actualizarEncabezadosYComportamientoVBT() {
   const vbtEl = document.getElementById("vbt");
   const isVBTOn = vbtEl && vbtEl.checked;
 
-  // Buscamos los elementos de cabecera de la tabla (por posición o clase/ID si estuvieran definidos, 
-  // aquí seleccionamos por los textos típicos o cabeceras de la rejilla de 8 columnas)
-  const headers = document.querySelectorAll(".grid-8col, tr, th"); 
-  // Como alternativa robusta, buscamos los elementos del DOM que representan los títulos de columna Int y RIR.
-  // Suponiendo que los headers están en una estructura común, localizamos los divs/th correspondientes a las columnas 4 y 6:
-  const headerContainer = document.querySelector(".serie-row")?.previousElementSibling; 
-  
-  // Si tenemos una fila de cabecera general con los títulos:
-  // Actualizamos el texto de los headers de Int y RIR dinámicamente si disponemos de sus selectores o clases.
-  // Buscamos contenedores de texto de cabecera si los hubiera:
-  const thInt = document.getElementById("headerInt") || document.querySelector("div[data-header='int']");
-  const thRir = document.getElementById("headerRir") || document.querySelector("div[data-header='rir']");
+  // Actualizar los textos de los encabezados (buscando los elementos de la rejilla o por posición de columnas)
+  const headerRow = document.querySelector(".grid-8col");
+  if (headerRow) {
+    // Si tenemos una estructura clara o podemos localizar las celdas de cabecera/títulos
+  }
 
-  if (thInt) thInt.textContent = isVBTOn ? "MVP" : "Int";
-  if (thRir) thRir.textContent = isVBTOn ? "VL" : "RIR";
-
-  // También aplicamos el bloqueo/desbloqueo de 'i' según VBT en las filas activas
+  // Forzar la actualización inmediata de la disponibilidad del campo 'i' en todas las filas activas
   for (let i = 1; i <= 7; i++) {
     const chk = document.getElementById(`s${i}`);
     const isRowOn = chk && chk.checked;
@@ -192,7 +200,6 @@ function actualizarEncabezadosYComportamientoVBT() {
       } else {
         inputI.readOnly = true;
         inputI.classList.add("disabled-input");
-        // Recalcular al pasar a OFF por si acaso
         calcularIntensidadAutomatica(i);
       }
     }
@@ -399,7 +406,6 @@ function actualizarEstadosFilas() {
     const chk = document.getElementById(`s${i}`);
     const row = document.getElementById(`serie_row_${i}`);
     
-    // Regla en cascada:
     const filaAnteriorOn = (i > 1 && document.getElementById(`s${i - 1}`).checked);
     const esActiva = (i === 1 || filaAnteriorOn);
 
@@ -409,8 +415,8 @@ function actualizarEstadosFilas() {
 
       const isOn = chk && chk.checked;
       
-      // Habilitar/deshabilitar según esté el switch de la serie (ON/OFF)
-      ["kg", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
+      // Habilitar/deshabilitar campos generales de la serie
+      ["kg", "Rep", "RIR", "rec"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
           inputEl.disabled = !isOn;
@@ -418,14 +424,22 @@ function actualizarEstadosFilas() {
         }
       });
 
-      // Control específico para el campo 'i' (Intensidad / MVP)
+      // El campo RM siempre permanece bloqueado (readOnly y con estilo visual grisáceo)
+      const inputRM = document.getElementById(`rm${i}`);
+      if (inputRM) {
+        inputRM.disabled = !isOn;
+        inputRM.readOnly = true;
+        if (!isOn) inputRM.value = "";
+        inputRM.classList.add("disabled-input");
+      }
+
+      // Control específico y riguroso para el campo 'i' (Intensidad / MVP)
       const inputI = document.getElementById(`i${i}`);
       if (inputI) {
         inputI.disabled = !isOn;
         if (!isOn) {
           inputI.value = "";
         } else {
-          // Si la fila está ON, depende de VBT
           if (isVBTOn) {
             inputI.readOnly = false;
             inputI.classList.remove("disabled-input");
@@ -464,7 +478,6 @@ function manejadorCambioSerie(numSerie, isOn) {
     inicio = Date.now();
     iniciarCronometro();
   } else {
-    // Si se apaga una fila, limpiamos sus datos y los de todas las filas posteriores en cascada
     for (let i = numSerie; i <= 7; i++) {
       if (i > numSerie) {
         const switchEl = document.getElementById(`s${i}`);
