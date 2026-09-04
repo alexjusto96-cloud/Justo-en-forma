@@ -95,6 +95,9 @@ function bindEvents() {
 
   document.getElementById("listPicker1").addEventListener("change", (e) => {
     document.getElementById("ejercicio").value = e.target.value;
+    for (let i = 1; i <= 6; i++) {
+      calcularRM(i);
+    }
   });
 
   const buscadorInput = document.getElementById("buscadorEjercicio");
@@ -128,6 +131,11 @@ function bindEvents() {
   const vbtElement = document.getElementById("vbt");
   if (vbtElement) {
     vbtElement.addEventListener("change", () => {
+      // Al cambiar el switch de VBT, se ponen todos los RM en blanco
+      for (let i = 1; i <= 6; i++) {
+        setVal(`rm${i}`, "");
+      }
+      actualizarMaximoRM();
       actualizarEncabezadosYComportamientoVBT();
       actualizarEstadosFilas();
       for (let i = 1; i <= 6; i++) {
@@ -161,11 +169,9 @@ function bindEvents() {
     
     if (repInput) repInput.addEventListener("input", () => {
       calcularIntensidadAutomatica(i);
-      calcularRM(i);
     });
     if (rirInput) rirInput.addEventListener("input", () => {
       calcularIntensidadAutomatica(i);
-      calcularRM(i);
     });
     if (kgInput) kgInput.addEventListener("input", () => calcularRM(i));
     if (iInput) iInput.addEventListener("input", () => calcularRM(i));
@@ -190,52 +196,62 @@ function calcularRM(numSerie) {
   const vbtEl = document.getElementById("vbt");
   const isVBTOn = vbtEl && vbtEl.checked;
 
-  const kgVal = parseFloat(getVal(`kg${numSerie}`)) || 0;
-  const iVal = parseFloat(getVal(`i${numSerie}`)) || 0;
-
-  if (kgVal <= 0) {
-    setVal(`rm${numSerie}`, "");
-    actualizarMaximoRM();
-    return;
-  }
+  const kgStr = getVal(`kg${numSerie}`).trim();
+  const iStr = getVal(`i${numSerie}`).trim();
+  const ejercicioVal = document.getElementById("ejercicio").value.trim();
 
   if (!isVBTOn) {
-    // VBT OFF: nRM = nkg x (nI)^0.1
-    if (iVal > 0) {
-      const rmCalculado = kgVal * Math.pow(iVal, 0.1);
-      setVal(`rm${numSerie}`, rmCalculado.toFixed(2));
+    // VBT OFF: Se calcula solo si Kg y I son distintos de ""
+    if (kgStr !== "" && iStr !== "") {
+      const kgVal = parseFloat(kgStr);
+      const iVal = parseFloat(iStr);
+      if (!isNaN(kgVal) && !isNaN(iVal) && iVal > 0) {
+        const rmCalculado = kgVal * Math.pow(iVal, 0.1);
+        setVal(`rm${numSerie}`, rmCalculado.toFixed(2));
+      } else {
+        setVal(`rm${numSerie}`, "");
+      }
     } else {
       setVal(`rm${numSerie}`, "");
     }
     actualizarMaximoRM();
   } else {
-    // VBT ON: Petición HTTP al Apps Script siguiendo la estructura de bloques
-    const scriptUrl = TinyDB.getValue("script");
-    if (!scriptUrl) return;
+    // VBT ON: Se calcula si ejercicio <> "", kg <> "", y MVP (i) <> ""
+    if (ejercicioVal !== "" && kgStr !== "" && iStr !== "") {
+      const scriptUrl = TinyDB.getValue("script");
+      if (!scriptUrl) {
+        setVal(`rm${numSerie}`, "");
+        actualizarMaximoRM();
+        return;
+      }
 
-    const usuario = encodeURIComponent(TinyDB.getValue("Usuario") || "");
-    const ejercicio = encodeURIComponent(document.getElementById("ejercicio").value || "");
-    const kg = encodeURIComponent(kgVal);
-    const intensidad = encodeURIComponent(iVal);
-    const repes = encodeURIComponent(getVal(`Rep${numSerie}`));
-    const rirVal = encodeURIComponent(getVal(`RIR${numSerie}`));
-    const recVal = encodeURIComponent(getVal(`rec${numSerie}`));
+      const usuario = encodeURIComponent(TinyDB.getValue("Usuario") || "");
+      const ejercicio = encodeURIComponent(ejercicioVal);
+      const kg = encodeURIComponent(kgStr);
+      const intensidad = encodeURIComponent(iStr);
+      const repes = encodeURIComponent(getVal(`Rep${numSerie}`));
+      const rirVal = encodeURIComponent(getVal(`RIR${numSerie}`));
+      const recVal = encodeURIComponent(getVal(`rec${numSerie}`));
 
-    const payload = `tipo=calculoRM&serie=${numSerie}&usuario=${usuario}&ejercicio=${ejercicio}&kg=${kg}&i=${intensidad}&rep=${repes}&rir=${rirVal}&rec=${recVal}`;
+      const payload = `tipo=calculoRM&serie=${numSerie}&usuario=${usuario}&ejercicio=${ejercicio}&kg=${kg}&i=${intensidad}&rep=${repes}&rir=${rirVal}&rec=${recVal}`;
 
-    fetch(scriptUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: payload
-    })
-    .then(response => response.text())
-    .then(data => {
-      setVal(`rm${numSerie}`, data.trim());
+      fetch(scriptUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: payload
+      })
+      .then(response => response.text())
+      .then(data => {
+        setVal(`rm${numSerie}`, data.trim());
+        actualizarMaximoRM();
+      })
+      .catch(err => {
+        console.error("Error al calcular RM con VBT:", err);
+      });
+    } else {
+      setVal(`rm${numSerie}`, "");
       actualizarMaximoRM();
-    })
-    .catch(err => {
-      console.error("Error al calcular RM con VBT:", err);
-    });
+    }
   }
 }
 
