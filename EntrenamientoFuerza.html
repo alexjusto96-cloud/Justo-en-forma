@@ -4,7 +4,200 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Entrenamiento Fuerza</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 15px;
+      color: #333;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    input.disabled-input, input:disabled, input[readonly]:not(#percentage):not(#rmResultKg) {
+      background-color: #e9ecef !important;
+      color: #6c757d !important;
+      opacity: 1 !important;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:active {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    button#fin {
+      background-color: #e74c3c;
+    }
+    button#fin:active {
+      background-color: #c0392b;
+    }
+    .btn-secundario {
+      background-color: #ecf0f1;
+      color: #2c3e50;
+      border: 1px solid #bdc3c7;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    .nav-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .nav-banner button {
+      padding: 6px 12px;
+    }
+    #navTextDisplay {
+      font-size: 13px;
+      font-weight: bold;
+      color: #2c3e50;
+      text-align: center;
+      flex: 1;
+      padding: 0 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tempo-inline {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      background: #fafafa;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      justify-content: space-between;
+    }
+    .tempo-inline select {
+      width: 42px;
+      padding: 3px;
+      font-size: 11px;
+    }
+    .checkbox-inline {
+      margin-bottom: 0;
+      font-weight: bold;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .timer-card {
+      background: #eef2f5;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin: 15px 0;
+    }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slider-container input[type="range"] {
+      flex: 1;
+    }
+    .slider-container input[type="text"] {
+      width: 55px;
+      text-align: center;
+    }
+    .calc-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .serie-row {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      padding: 8px;
+      margin-bottom: 6px;
+      border-radius: 6px;
+    }
+    .serie-row.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .grid-8col {
+      display: grid;
+      grid-template-columns: 28px 26px 1fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 3px;
+      align-items: center;
+      font-size: 11px;
+    }
+    .grid-8col input[type="text"] {
+      padding: 3px;
+      font-size: 11px;
+      text-align: center;
+    }
+    .grid-header {
+      display: grid;
+      grid-template-columns: 28px 26px 1fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 3px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 4px;
+      padding: 0 4px;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 15px;
+    }
+    .button-group-inline {
+      display: flex;
+      gap: 8px;
+    }
+    .button-group-inline button {
+      flex: 1;
+    }
+  </style>
 </head>
 <body>
 
