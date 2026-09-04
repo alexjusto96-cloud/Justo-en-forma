@@ -97,8 +97,73 @@
 
     .time-group input {
       flex: 1;
-      min-width: 0; /* Impide que el input se desborde del contenedor flex */
+      min-width: 0;
       text-align: center;
+    }
+
+    /* ==========================================
+        ESTILOS ADAPTADOS PARA VBT Y CARGA
+        ========================================== */
+    .vbt-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* Rejilla adaptativa para los campos de VBT (Con, P.Con, Exc, P.Exc con label encima) */
+    .vbt-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      width: 100%;
+    }
+
+    @media (min-width: 380px) {
+      .vbt-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .vbt-item {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .vbt-item select {
+      padding: 6px 4px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    /* Controles compactos para Cálculo de Carga */
+    .carga-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .carga-controls button {
+      width: auto;
+      margin-top: 0;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+
+    .carga-controls input[type="range"] {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .carga-controls input[type="text"] {
+      width: 65px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 0.9rem;
     }
 
     /* ==========================================
@@ -165,7 +230,7 @@
         <!-- 2. Catálogo de opciones desplegado -->
         <select id="tipo" size="5" class="sub-input"></select>
         
-        <!-- 3. Campo de texto final (al seleccionar toma el valor o permite escribir un tipo nuevo) -->
+        <!-- 3. Campo de texto final -->
         <label for="tipo-texto" style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Valor que se registrará:</label>
         <input type="text" id="tipo-texto" placeholder="Escribe o selecciona un entrenamiento">
       </div>
@@ -189,6 +254,51 @@
           <input type="number" id="min" placeholder="Min / Watios">
           <span id="delimiter-seg" class="hidden">:</span>
           <input type="number" id="seg" class="hidden" placeholder="Seg">
+        </div>
+      </div>
+
+      <!-- EJEMPLO / INTEGRACIÓN VBT ADAPTADA -->
+      <div class="form-group">
+        <div class="vbt-row">
+          <input type="checkbox" id="vbt-check" style="width: auto; margin: 0;">
+          <label for="vbt-check" style="margin-bottom: 0;">VBT</label>
+        </div>
+        <div class="vbt-grid">
+          <div class="vbt-item">
+            <label>Con</label>
+            <select id="vbt-con">
+              <option>1</option><option>2</option>
+            </select>
+          </div>
+          <div class="vbt-item">
+            <label>P.Con</label>
+            <select id="vbt-pcon">
+              <option>0</option><option>1</option>
+            </select>
+          </div>
+          <div class="vbt-item">
+            <label>Exc</label>
+            <select id="vbt-exc">
+              <option>2</option><option>3</option>
+            </select>
+          </div>
+          <div class="vbt-item">
+            <label>P.Exc</label>
+            <select id="vbt-pexc">
+              <option>0</option><option>1</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- EJEMPLO / CÁLCULO DE CARGA ADAPTADO -->
+      <div class="form-group">
+        <label>Cálculo de Carga (% RM):</label>
+        <div class="carga-controls">
+          <button type="button" id="btn-rm">RM</button>
+          <input type="range" id="range-carga" min="0" max="100" value="100">
+          <input type="text" id="text-carga" value="100%">
+          <button type="button" id="btn-total">Total</button>
         </div>
       </div>
 
