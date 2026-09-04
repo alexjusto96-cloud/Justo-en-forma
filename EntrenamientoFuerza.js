@@ -10,7 +10,7 @@ let rm = 0;
 let inicio = 0;
 let timerInterval = null;
 let currentTextIndex = 0;
-const textosNavegacion = ["Texto informativo 1", "Texto informativo 2", "Texto informativo 3"];
+let textosNavegacion = ["Texto informativo 1", "Texto informativo 2", "Texto informativo 3"];
 
 // Simulación de Almacenamiento Local (sustituye a TinyDB)
 const TinyDB = {
@@ -79,13 +79,17 @@ function bindEvents() {
   });
 
   document.getElementById("btnTextPrev").addEventListener("click", () => {
-    currentTextIndex = (currentTextIndex - 1 + textosNavegacion.length) % textosNavegacion.length;
-    actualizarTextoNavegacion();
+    if (currentTextIndex > 0) {
+      currentTextIndex--;
+      actualizarTextoNavegacion();
+    }
   });
 
   document.getElementById("btnTextNext").addEventListener("click", () => {
-    currentTextIndex = (currentTextIndex + 1 + textosNavegacion.length) % textosNavegacion.length;
-    actualizarTextoNavegacion();
+    if (currentTextIndex < textosNavegacion.length - 1) {
+      currentTextIndex++;
+      actualizarTextoNavegacion();
+    }
   });
 
   document.getElementById("listPicker1").addEventListener("change", (e) => {
@@ -217,7 +221,14 @@ function actualizarEncabezadosYComportamientoVBT() {
 }
 
 function actualizarTextoNavegacion() {
-  document.getElementById("navTextDisplay").innerText = `${textosNavegacion[currentTextIndex]} (${currentTextIndex + 1}/3)`;
+  document.getElementById("navTextDisplay").innerText = textosNavegacion[currentTextIndex];
+  
+  // Actualizar estado visual de los botones de navegación (bloqueo en extremos)
+  const btnPrev = document.getElementById("btnTextPrev");
+  const btnNext = document.getElementById("btnTextNext");
+  
+  if (btnPrev) btnPrev.disabled = (currentTextIndex === 0);
+  if (btnNext) btnNext.disabled = (currentTextIndex === textosNavegacion.length - 1);
 }
 
 function calcularRMAslider(porcentaje) {
@@ -397,7 +408,19 @@ function consultarEntrenamientos() {
   .then(data => {
     calendar = 0;
     console.log("Consulta realizada:", data);
-    alert("Respuesta de consulta: " + data);
+
+    // Dividir los resultados devueltos (separados por saltos de línea o barras según prefieras, aquí por saltos o fragmentos)
+    // Asignamos hasta 3 bloques de texto a las posiciones del banner
+    let lineas = data.split('\n').filter(l => l.trim() !== "");
+    
+    textosNavegacion = [
+      lineas[0] || "Sin registros recientes",
+      lineas[1] || "Sin registros intermedios",
+      lineas[2] || "Sin registros antiguos"
+    ];
+
+    currentTextIndex = 0; // Volver al principio del banner
+    actualizarTextoNavegacion();
   })
   .catch(err => {
     console.error("Error al consultar:", err);
