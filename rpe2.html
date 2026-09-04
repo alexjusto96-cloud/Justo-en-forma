@@ -7,8 +7,8 @@
 
   <style>
     /* ==========================================
-       VARIABLES Y CONFIGURACIÓN GLOBAL
-       ========================================== */
+        VARIABLES Y CONFIGURACIÓN GLOBAL
+        ========================================== */
     :root {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
@@ -33,8 +33,8 @@
     }
 
     /* ==========================================
-       CONTENEDOR PRINCIPAL
-       ========================================== */
+        CONTENEDOR PRINCIPAL
+        ========================================== */
     .container {
       width: 100%;
       max-width: 480px;
@@ -51,8 +51,8 @@
     }
 
     /* ==========================================
-       FORMULARIO E INPUTS
-       ========================================== */
+        FORMULARIO E INPUTS
+        ========================================== */
     .form-group {
       display: flex;
       flex-direction: column;
@@ -87,21 +87,23 @@
       margin-bottom: 8px;
     }
 
-    /* Grupo de tiempo / campos dobles */
+    /* Grupo de tiempo / campos dobles (CORREGIDO) */
     .time-group {
       display: flex;
       align-items: center;
       gap: 8px;
+      width: 100%;
     }
 
     .time-group input {
       flex: 1;
+      min-width: 0; /* Impide que el input se desborde del contenedor flex */
       text-align: center;
     }
 
     /* ==========================================
-       BOTÓN Y MENSAJES DE ESTADO
-       ========================================== */
+        BOTÓN Y MENSAJES DE ESTADO
+        ========================================== */
     button {
       width: 100%;
       margin-top: 10px;
