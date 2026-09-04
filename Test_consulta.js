@@ -1,22 +1,51 @@
 let miGrafico = null;
 
-async function cargarYRenderizarGrafica() {
+// Reemplaza esta constante con la URL de tu Web App de Google Apps Script desplegada
+const SCRIPT_URL = "AQUÍ_PEGA_TU_URL_DE_GOOGLE_APPS_SCRIPT";
+
+document.getElementById("btnEnviar").addEventListener("click", async () => {
   const mensajeEl = document.getElementById("mensaje-loading");
   const canvas = document.getElementById("canvasGrafica");
 
+  const dias = document.getElementById("selectDias").value;
+  const t1 = document.getElementById("test1").value;
+  const lat1 = document.getElementById("lateralidad1").value;
+  const t2 = document.getElementById("test2").value;
+  const lat2 = document.getElementById("lateralidad2").value;
+
+  if (!t1) {
+    alert("Comprueba los campos obligatorios (Variable 1)");
+    return;
+  }
+
+  // Formatear etiquetas de envío idénticas a la lógica de tus bloques de App Inventor
+  const dato4 = lat1 === "BILATERAL" ? t1 : `${t1}${lat1}`;
+  const dato5 = t2 ? (lat2 === "BILATERAL" ? t2 : `${t2}${lat2}`) : "";
+  
+  // Obtener fecha actual en formato YYYY-MM-DD
+  const fechaHoy = new Date().toISOString().split('T')[0];
+
+  mensajeEl.style.display = "block";
+  mensajeEl.innerText = "Cargando datos de la consulta...";
+
   try {
-    // 1. Obtener los parámetros enviados por URL desde la pantalla anterior
-    const params = new URLSearchParams(window.location.search);
-    const scriptUrl = params.get("script");
+    // Petición POST equivalente a la que hacías con el componente Web de App Inventor
+    const bodyData = new URLSearchParams({
+      tipo: "cincoDatos",
+      dato1: "UsuarioEjemplo", // O puedes capturarlo de localStorage si lo guardas ahí previamente
+      dato2: fechaHoy,
+      dato3: dias,
+      dato4: dato4,
+      dato5: dato5
+    });
 
-    if (!scriptUrl) {
-      mensajeEl.innerText = "Error: URL de Apps Script no especificada.";
-      return;
-    }
-
-    // 2. Realizar la petición GET a Apps Script (accion=graficaTest)
-    const urlConsulta = `${scriptUrl}?accion=graficaTest&t=${Date.now()}`;
-    const respuesta = await fetch(urlConsulta);
+    const respuesta = await fetch(`${SCRIPT_URL}?accion=graficaTest&t=${Date.now()}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: bodyData.toString()
+    });
 
     if (!respuesta.ok) {
       throw new Error(`HTTP Error: ${respuesta.status}`);
@@ -24,28 +53,25 @@ async function cargarYRenderizarGrafica() {
 
     const data = await respuesta.json();
 
-    // Validar respuesta
     if (!Array.isArray(data) || data.length < 2) {
       mensajeEl.innerText = "No se encontraron datos para los parámetros seleccionados.";
+      if (miGrafico) miGrafico.destroy();
       return;
     }
 
     mensajeEl.style.display = "none";
 
-    // 3. Formatear la matriz recibida
     const cabeceras = data[0];
     const filas = data.slice(1);
 
-    const fechas = filas.map(f => f[0]);        // Eje X: Fecha
-    const valoresVar1 = filas.map(f => f[1]);   // Datos Variable 1
-    const valoresVar2 = filas.map(f => f[2]);   // Datos Variable 2
+    const fechas = filas.map(f => f[0]);
+    const valoresVar1 = filas.map(f => f[1]);
+    const valoresVar2 = filas.map(f => f[2]);
 
-    const labelVar1 = cabeceras[1] || "Variable 1";
-    const labelVar2 = cabeceras[2] || "Variable 2";
+    const labelVar1 = cabeceras[1] || t1;
+    const labelVar2 = cabeceras[2] || t2;
 
-    // 4. Dibujar/Actualizar gráfico en el canvas
     const ctx = canvas.getContext("2d");
-
     if (miGrafico) {
       miGrafico.destroy();
     }
@@ -65,7 +91,7 @@ async function cargarYRenderizarGrafica() {
             tension: 0.2,
             fill: true
           },
-          {
+          ...(valoresVar2.some(v => v !== undefined && v !== "") ? [{
             label: labelVar2,
             data: valoresVar2,
             borderColor: "#D32F2F",
@@ -74,30 +100,18 @@ async function cargarYRenderizarGrafica() {
             pointRadius: 4,
             tension: 0.2,
             fill: true
-          }
+          }] : [])
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            position: "top",
-            labels: {
-              boxWidth: 12,
-              font: { size: 12 }
-            }
-          }
+          legend: { position: "top" }
         },
         scales: {
-          x: {
-            title: { display: true, text: "Fecha" },
-            grid: { display: false }
-          },
-          y: {
-            title: { display: true, text: "Valor" },
-            beginAtZero: false
-          }
+          x: { title: { display: true, text: "Fecha" }, grid: { display: false } },
+          y: { title: { display: true, text: "Valor" }, beginAtZero: false }
         }
       }
     });
@@ -106,7 +120,4 @@ async function cargarYRenderizarGrafica() {
     console.error("Error cargando la gráfica:", err);
     mensajeEl.innerText = "Ocurrió un error al cargar la gráfica.";
   }
-}
-
-// Inicializar la carga cuando el documento esté listo
-document.addEventListener("DOMContentLoaded", cargarYRenderizarGrafica);
+});
