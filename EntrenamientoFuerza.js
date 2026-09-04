@@ -409,8 +409,6 @@ function consultarEntrenamientos() {
     calendar = 0;
     console.log("Consulta realizada:", data);
 
-    // Separar usando el delimitador exacto "|||" que devuelve el Apps Script
-    // para que cada celda (F2, F3, F4) mantenga sus saltos internos intactos
     let partes = data.split("|||");
     
     textosNavegacion = [
@@ -419,7 +417,7 @@ function consultarEntrenamientos() {
       partes[2] || "Sin registros antiguos"
     ];
 
-    currentTextIndex = 0; // Volver al texto 1 del banner
+    currentTextIndex = 0;
     actualizarTextoNavegacion();
   })
   .catch(err => {
@@ -455,11 +453,16 @@ function actualizarEstadosFilas() {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
           inputEl.disabled = !isOn;
-          if (!isOn) inputEl.value = "";
+          if (!isOn) {
+            inputEl.value = "";
+            inputEl.classList.add("disabled-input");
+          } else {
+            inputEl.classList.remove("disabled-input");
+          }
         }
       });
 
-      // El campo RM siempre permanece bloqueado con el gris claro estándar
+      // El campo RM siempre permanece bloqueado con la clase disabled-input
       const inputRM = document.getElementById(`rm${i}`);
       if (inputRM) {
         inputRM.disabled = !isOn;
@@ -475,18 +478,14 @@ function actualizarEstadosFilas() {
         inputI.disabled = !isOn;
         if (!isOn) {
           inputI.value = "";
-          inputI.style.backgroundColor = "";
-          inputI.classList.remove("disabled-input");
+          inputI.classList.add("disabled-input");
         } else {
           if (isVBTOn) {
             inputI.readOnly = false;
             inputI.classList.remove("disabled-input");
-            inputI.style.backgroundColor = "";
           } else {
-            // Cuando VBT está OFF, 'i' se bloquea y adopta la clase 'disabled-input' (gris claro idéntico al RM)
             inputI.readOnly = true;
             inputI.classList.add("disabled-input");
-            inputI.style.backgroundColor = ""; 
             calcularIntensidadAutomatica(i);
           }
         }
@@ -498,16 +497,13 @@ function actualizarEstadosFilas() {
         inputRIR.disabled = !isOn;
         if (!isOn) {
           inputRIR.value = "";
-          inputRIR.style.backgroundColor = "";
-          inputRIR.classList.remove("disabled-input");
+          inputRIR.classList.add("disabled-input");
         } else {
           if (!isVBTOn) {
-            // Cuando VBT está OFF, RIR está activo con normalidad
             inputRIR.readOnly = false;
             inputRIR.classList.remove("disabled-input");
-            inputRIR.style.backgroundColor = "";
           } else {
-            inputRIR.style.backgroundColor = "";
+            inputRIR.classList.remove("disabled-input");
           }
         }
       }
@@ -519,13 +515,13 @@ function actualizarEstadosFilas() {
       }
       if (row) row.classList.add("disabled");
       
+      // Aseguramos que toda la fila inactiva aplique la clase disabled-input uniformemente
       ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
           inputEl.disabled = true;
           inputEl.value = "";
-          inputEl.style.backgroundColor = "";
-          inputEl.classList.remove("disabled-input");
+          inputEl.classList.add("disabled-input");
         }
       });
     }
