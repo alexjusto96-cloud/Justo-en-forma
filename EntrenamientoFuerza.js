@@ -385,119 +385,54 @@ function ejecutarNuevoEjercicio() {
   document.getElementById("label12").innerText = "";
 }
 function enviarFormularioGoogle() {
-  console.group("🔍 [Controlador de Problemas] - Iniciando envío de formulario");
+  console.group("🚀 [Controlador] - Enviando al nuevo Apps Script independiente");
   
   try {
     const usuario = TinyDB.getValue("Usuario") || "";
-    const vbtElement = document.getElementById("vbt");
+    const vbtVal = document.getElementById("vbt") && document.getElementById("vbt").checked ? "TRUE" : "FALSE";
     
-    if (!vbtElement) {
-      console.error("❌ ERROR CRÍTICO: No se encuentra el elemento con id 'vbt' en el DOM.");
-    }
-    const vbtVal = vbtElement && vbtElement.checked ? "TRUE" : "FALSE";
-    
-    const ejercicioEl = document.getElementById("ejercicio");
-    if (!ejercicioEl || !ejercicioEl.value.trim()) {
-      console.warn("⚠️ ADVERTENCIA: El campo 'ejercicio' está vacío.");
-    }
+    // URL del nuevo Apps Script proporcionada
+    const NUEVO_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVxNM2sOq5J4MWtAA743u3BUbcvo5EpzkJF4V7PG3S3buKYjXDuarnZ31FxjEXM2Bjdw/exec";
 
-    const FORM_RESPONSE_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktWrd4r6GO_uS-qcI/formResponse";
-
-    // Objeto con todos los campos
     const datos = {
-      "entry.1052562463": usuario,
-      "entry.2002526298": fecha,
-      "entry.1315747589": ejercicioEl ? ejercicioEl.value : "",
-      "entry.9949262": vbtVal,
-      "entry.1445063449": getVal("con"),
-      "entry.2132618651": getVal("pausaCon"),
-      "entry.1198689613": getVal("ecc"),
-      "entry.2062861622": getVal("pausaEcc"),
-      "entry.631342381": getVal("kg1"),
-      "entry.1743166598": getVal("i1"),
-      "entry.189884999": getVal("Rep1"),
-      "entry.164706516": getVal("RIR1"),
-      "entry.297841540": getVal("rec1"),
-      "entry.1579682820": getVal("kg2"),
-      "entry.1209305030": getVal("i2"),
-      "entry.676283789": getVal("Rep2"),
-      "entry.1940734848": getVal("RIR2"),
-      "entry.1689760695": getVal("rec2"),
-      "entry.34824846": getVal("kg3"),
-      "entry.528917915": getVal("i3"),
-      "entry.788505499": getVal("Rep3"),
-      "entry.1498087804": getVal("RIR3"),
-      "entry.1917477661": getVal("rec3"),
-      "entry.910847423": getVal("kg4"),
-      "entry.831909719": getVal("i4"),
-      "entry.1951974537": getVal("Rep4"),
-      "entry.424157927": getVal("RIR4"),
-      "entry.1976325897": getVal("rec4"),
-      "entry.2004267982": getVal("kg5"),
-      "entry.207883616": getVal("i5"),
-      "entry.1594603315": getVal("Rep5"),
-      "entry.1303875824": getVal("RIR5"),
-      "entry.1101581192": getVal("rec5"),
-      "entry.1166189654": getVal("kg6"),
-      "entry.1135214150": getVal("i6"),
-      "entry.1557441991": getVal("Rep6"),
-      "entry.301613450": getVal("RIR6"),
-      "entry.490439673": getVal("rec6"),
-      "entry.636191433": getVal("textBox1"),
-      "entry.1607583138": getVal("rm1"),
-      "entry.337634217": getVal("rm2"),
-      "entry.975920808": getVal("rm3"),
-      "entry.810637765": getVal("rm4"),
-      "entry.30846413": getVal("rm5"),
-      "entry.408397467": getVal("rm6")
+      usuario: usuario,
+      fecha: fecha,
+      ejercicio: document.getElementById("ejercicio") ? document.getElementById("ejercicio").value : "",
+      vbt: vbtVal,
+      con: getVal("con"),
+      pausaCon: getVal("pausaCon"),
+      ecc: getVal("ecc"),
+      pausaEcc: getVal("pausaEcc"),
+      kg1: getVal("kg1"), i1: getVal("i1"), Rep1: getVal("Rep1"), RIR1: getVal("RIR1"), rec1: getVal("rec1"),
+      kg2: getVal("kg2"), i2: getVal("i2"), Rep2: getVal("Rep2"), RIR2: getVal("RIR2"), rec2: getVal("rec2"),
+      kg3: getVal("kg3"), i3: getVal("i3"), Rep3: getVal("Rep3"), RIR3: getVal("RIR3"), rec3: getVal("rec3"),
+      kg4: getVal("kg4"), i4: getVal("i4"), Rep4: getVal("Rep4"), RIR4: getVal("RIR4"), rec4: getVal("rec4"),
+      kg5: getVal("kg5"), i5: getVal("i5"), Rep5: getVal("Rep5"), RIR5: getVal("RIR5"), rec5: getVal("rec5"),
+      kg6: getVal("kg6"), i6: getVal("i6"), Rep6: getVal("Rep6"), RIR6: getVal("RIR6"), rec6: getVal("rec6"),
+      textBox1: getVal("textBox1"),
+      rm1: getVal("rm1"), rm2: getVal("rm2"), rm3: getVal("rm3"),
+      rm4: getVal("rm4"), rm5: getVal("rm5"), rm6: getVal("rm6")
     };
 
-    // Auditoría individual en consola de cada campo que se va a enviar
     console.table(datos);
 
-    // Verificamos si algún elemento del DOM requerido devolvió un error al buscarse
-    for (const [key, value] of Object.entries(datos)) {
-      if (value === undefined) {
-        console.error(`🚨 FALLO DETECTADO: El campo asociado a la clave de Google Forms '${key}' devolvió 'undefined'. Revisa los IDs de tus inputs en el HTML.`);
-      }
-    }
-
-    // Creamos el formulario dinámico
-    const form = document.createElement("form");
-    form.action = FORM_RESPONSE_URL;
-    form.method = "POST";
-    form.target = "hidden_iframe";
-
-    for (const [key, value] of Object.entries(datos)) {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = value !== null ? value : "";
-      form.appendChild(input);
-    }
-
-    let iframe = document.getElementById("hidden_iframe");
-    if (!iframe) {
-      iframe = document.createElement("iframe");
-      iframe.id = "hidden_iframe";
-      iframe.name = "hidden_iframe";
-      iframe.style.display = "none";
-      document.body.appendChild(iframe);
-      console.info("ℹ️ Creado iframe oculto para el envío.");
-    }
-
-    document.body.appendChild(form);
-    console.info("🚀 Enviando formulario mediante submit del DOM...");
-    form.submit();
-    document.body.removeChild(form);
-
-    console.log("✅ Proceso de envío ejecutado sin excepciones en JS.");
-    alert("Entrenamiento enviado correctamente.");
+    fetch(NUEVO_APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(datos)
+    })
+    .then(() => {
+      console.log("✅ Datos despachados con éxito al nuevo backend.");
+      alert("¡Entrenamiento enviado correctamente!");
+    })
+    .catch(err => {
+      console.error("🔥 Error en la petición:", err);
+      alert("Error de conexión al enviar.");
+    });
 
   } catch (error) {
-    console.error("🔥 EXCEPCIÓN CAPTURADA EN EL CONTROLADOR DE PROBLEMAS:");
-    console.error(error);
-    alert("Hubo un fallo crítico en el script. Revisa la consola para ver el detalle.");
+    console.error("🔥 Excepción:", error);
   } finally {
     console.groupEnd();
   }
