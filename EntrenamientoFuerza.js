@@ -157,7 +157,7 @@ function inicializarValores() {
   const rawEj = TinyDB.getValue("Ejercicio", "");
   const picker = document.getElementById("listPicker1");
   if (picker) {
-    picker.innerHTML = ''; // Eliminada la opción por defecto "-- Seleccionar --"
+    picker.innerHTML = '<option value="" disabled selected>Seleccionar ejercicio</option>';
     if (rawEj) {
       let lista = [];
       try {
@@ -185,7 +185,8 @@ function ejecutarNuevoEjercicio() {
   const now = new Date();
   fecha = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
 
-  document.getElementById("listPicker1").value = "";
+  const picker = document.getElementById("listPicker1");
+  if (picker) picker.value = "";
   document.getElementById("ejercicio").value = "";
   
   document.getElementById("con").value = "1";
@@ -317,33 +318,40 @@ function finalizarEntrenamiento() {
 }
 
 function actualizarEstadosFilas() {
-  let ultimaActivaIndex = 0;
+  // Encontrar el último índice de serie que tiene el switch encendido (ON)
+  let ultimoIndexOn = 0;
   for (let i = 1; i <= 7; i++) {
     const chk = document.getElementById(`s${i}`);
     if (chk && chk.checked) {
-      ultimaActivaIndex = i;
+      ultimoIndexOn = i;
     }
   }
+
+  // Si no hay ninguna encendida, por seguridad permitimos la 1
+  if (ultimoIndexOn === 0) ultimoIndexOn = 1;
 
   for (let i = 1; i <= 7; i++) {
     const chk = document.getElementById(`s${i}`);
     const row = document.getElementById(`serie_row_${i}`);
     
-    if (i === 1) {
-      if (chk) {
-        chk.disabled = false;
-        chk.checked = true;
-      }
-      if (row) row.classList.remove("disabled");
-    } else if (i <= ultimaActivaIndex + 1) {
+    // Regla en cascada:
+    // Una fila está activa (desbloqueada y con su switch habilitable) si:
+    // - Es la primera fila (i === 1)
+    // - O si la fila inmediatamente anterior (i - 1) tiene su switch ON.
+    const filaAnteriorOn = (i > 1 && document.getElementById(`s${i - 1}`).checked);
+    const esActiva = (i === 1 || filaAnteriorOn);
+
+    if (esActiva) {
       if (chk) chk.disabled = false;
       if (row) row.classList.remove("disabled");
     } else {
       if (chk) {
         chk.disabled = true;
-        chk.checked = false;
+        chk.checked = false; // Se apaga en cascada si la anterior se apaga
       }
       if (row) row.classList.add("disabled");
+      // Limpiamos los campos de texto de la fila desactivada automáticamente
+      ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => setVal(`${prefix}${i}`, ""));
     }
   }
 }
@@ -357,8 +365,7 @@ function manejadorCambioSerie(numSerie, isOn) {
     inicio = Date.now();
     iniciarCronometro();
   } else {
-    // Si se desmarca la fila n, limpiamos los datos de esta y las posteriores,
-    // pero permitimos que la siguiente fila (n+1) mantenga su switch habilitado (off) y el resto de su fila en blanco.
+    // Si se apaga una fila, limpiamos sus datos y los de todas las filas posteriores en cascada
     for (let i = numSerie; i <= 7; i++) {
       if (i > numSerie) {
         const switchEl = document.getElementById(`s${i}`);
