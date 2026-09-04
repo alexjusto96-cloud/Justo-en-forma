@@ -233,15 +233,8 @@ function calcularRM(numSerie) {
         return;
       }
 
-      const usuario = encodeURIComponent(TinyDB.getValue("Usuario") || "");
-      const ejercicio = encodeURIComponent(ejercicioVal);
-      const kg = encodeURIComponent(kgStr);
-      const intensidad = encodeURIComponent(iStr);
-      const repes = encodeURIComponent(getVal(`Rep${numSerie}`));
-      const rirVal = encodeURIComponent(getVal(`RIR${numSerie}`));
-      const recVal = encodeURIComponent(getVal(`rec${numSerie}`));
-
-      const payload = `tipo=calculoRM&serie=${numSerie}&usuario=${usuario}&ejercicio=${ejercicio}&kg=${kg}&i=${intensidad}&rep=${repes}&rir=${rirVal}&rec=${recVal}`;
+      const usuario = TinyDB.getValue("Usuario") || "";
+      const payload = `tipo=consultaRM&valor1=${encodeURIComponent(kgStr)}&valor2=${encodeURIComponent(iStr)}&texto1=${encodeURIComponent(ejercicioVal)}&texto2=${encodeURIComponent(usuario)}`;
 
       fetch(scriptUrl, {
         method: "POST",
