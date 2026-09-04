@@ -201,17 +201,12 @@ function ejecutarNuevoEjercicio() {
 
   actualizarEstadosFilas();
 
-  for (let i = 1; i <= 7; i++) {
-    const field = document.getElementById(`i${i}`);
-    if (field) field.readOnly = true;
-  }
-
   document.getElementById("label32").innerText = "";
   const vbtEl = document.getElementById("vbt");
   if (vbtEl) vbtEl.checked = false;
 
   for (let i = 1; i <= 7; i++) {
-    ["kg", "Rep", "RIR", "rec", "i", "rm"].forEach(prefix => {
+    ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
       setVal(`${prefix}${i}`, "");
     });
   }
@@ -335,7 +330,7 @@ function actualizarEstadosFilas() {
 
       // Si el switch de esta fila está ON, los inputs se habilitan. Si está OFF, se desactivan y limpian.
       const isOn = chk && chk.checked;
-      ["kg", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
+      ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
           inputEl.disabled = !isOn;
@@ -349,7 +344,7 @@ function actualizarEstadosFilas() {
       }
       if (row) row.classList.add("disabled");
       
-      // Desactivar y limpiar todos los inputs de la fila inactiva
+      // Desactivar y limpiar todos los inputs de la fila inactiva (incluyendo 'i')
       ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
         const inputEl = document.getElementById(`${prefix}${i}`);
         if (inputEl) {
