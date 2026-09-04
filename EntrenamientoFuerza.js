@@ -318,18 +318,6 @@ function finalizarEntrenamiento() {
 }
 
 function actualizarEstadosFilas() {
-  // Encontrar el último índice de serie que tiene el switch encendido (ON)
-  let ultimoIndexOn = 0;
-  for (let i = 1; i <= 7; i++) {
-    const chk = document.getElementById(`s${i}`);
-    if (chk && chk.checked) {
-      ultimoIndexOn = i;
-    }
-  }
-
-  // Si no hay ninguna encendida, por seguridad permitimos la 1
-  if (ultimoIndexOn === 0) ultimoIndexOn = 1;
-
   for (let i = 1; i <= 7; i++) {
     const chk = document.getElementById(`s${i}`);
     const row = document.getElementById(`serie_row_${i}`);
@@ -344,14 +332,31 @@ function actualizarEstadosFilas() {
     if (esActiva) {
       if (chk) chk.disabled = false;
       if (row) row.classList.remove("disabled");
+
+      // Si el switch de esta fila está ON, los inputs se habilitan. Si está OFF, se desactivan y limpian.
+      const isOn = chk && chk.checked;
+      ["kg", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
+        const inputEl = document.getElementById(`${prefix}${i}`);
+        if (inputEl) {
+          inputEl.disabled = !isOn;
+          if (!isOn) inputEl.value = "";
+        }
+      });
     } else {
       if (chk) {
         chk.disabled = true;
-        chk.checked = false; // Se apaga en cascada si la anterior se apaga
+        chk.checked = false;
       }
       if (row) row.classList.add("disabled");
-      // Limpiamos los campos de texto de la fila desactivada automáticamente
-      ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => setVal(`${prefix}${i}`, ""));
+      
+      // Desactivar y limpiar todos los inputs de la fila inactiva
+      ["kg", "i", "Rep", "RIR", "rec", "rm"].forEach(prefix => {
+        const inputEl = document.getElementById(`${prefix}${i}`);
+        if (inputEl) {
+          inputEl.disabled = true;
+          inputEl.value = "";
+        }
+      });
     }
   }
 }
