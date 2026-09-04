@@ -80,7 +80,7 @@ function bindEvents() {
   });
 
   document.getElementById("listPicker1").addEventListener("change", (e) => {
-    document.getElementById("ejercicio").value = e.target.value;
+    document.getElementById("Ejercicio").value = e.target.value;
   });
 
   document.addEventListener("change", (e) => {
