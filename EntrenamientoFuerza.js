@@ -9,7 +9,7 @@ let rm = 0;
 let inicio = 0;
 let timerInterval = null;
 let currentTextIndex = 0;
-let textosNavegacion = ["Texto informativo 1", "Texto informativo 2", "Texto informativo 3"];
+let textosNavegacion = ["", "", ""];
 
 const TinyDB = {
   getValue: (key, defaultValue = "") => localStorage.getItem(key) || defaultValue,
@@ -68,6 +68,10 @@ function bindEvents() {
   document.getElementById("enviar").addEventListener("click", enviarFormularioGoogle);
   document.getElementById("consultar").addEventListener("click", consultarEntrenamientos);
   document.getElementById("fin").addEventListener("click", finalizarEntrenamiento);
+  
+  document.getElementById("btnVolverMenu").addEventListener("click", () => {
+    window.location.href = "menu_principal.html";
+  });
 
   document.getElementById("slider1").addEventListener("input", (e) => {
     const val = e.target.value;
@@ -132,6 +136,9 @@ function bindEvents() {
   document.addEventListener("input", (e) => {
     const target = e.target;
     if (target && target.tagName === "INPUT" && target.type === "text" && !target.readOnly && !target.disabled) {
+      // Excepción para el textbox de observaciones para permitir texto libre
+      if (target.id === "textBox1" || target.id === "ejercicio" || target.id === "buscadorEjercicio") return;
+
       let val = target.value;
       val = val.replace(/,/g, '.');
       const filtered = val.replace(/[^0-9.]/g, '');
@@ -379,9 +386,9 @@ function consultarEntrenamientos() {
     calendar = 0;
     let partes = data.split("|||");
     textosNavegacion = [
-      partes[0] || "Sin registros recientes",
-      partes[1] || "Sin registros intermedios",
-      partes[2] || "Sin registros antiguos"
+      partes[0] || "",
+      partes[1] || "",
+      partes[2] || ""
     ];
     currentTextIndex = 0;
     actualizarTextoNavegacion();
