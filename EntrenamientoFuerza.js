@@ -384,15 +384,12 @@ function ejecutarNuevoEjercicio() {
   calcularRMAslider(50);
   document.getElementById("label12").innerText = "";
 }
-
 function enviarFormularioGoogle() {
   const usuario = TinyDB.getValue("Usuario") || "";
   const vbtVal = document.getElementById("vbt").checked ? "TRUE" : "FALSE";
   
-  // Base de tu Google Form terminada en /formResponse o /viewform
-  // Usamos /viewform si quieres que se abra precargado en el navegador, 
-  // o /formResponse si prefieres enviarlo en segundo plano mediante un enlace directo.
-  const BASE_FORM_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktWrd4r6GO_uS-qcI/viewform";
+  // Usamos el endpoint oficial de envío por POST
+  const FORM_RESPONSE_URL = "https://docs.google.com/forms/d/1SPk8g5W4vLU2WcD8W7re3BDanaktWrd4r6GO_uS-qcI/formResponse";
 
   const params = new URLSearchParams({
     "entry.1052562463": usuario,
@@ -442,16 +439,21 @@ function enviarFormularioGoogle() {
     "entry.408397467": getVal("rm6")
   });
 
-  // Genera el enlace completo con todas las respuestas inyectadas
-  const enlaceGenerado = `${BASE_FORM_URL}?${params.toString()}`;
-
-  // Opciones: puedes abrirlo automáticamente en una pestaña nueva o mostrarlo
-  window.open(enlaceGenerado, "_blank");
-  
-  // O si prefieres que se cree un botón o alerta con el enlace:
-  console.log("Enlace generado:", enlaceGenerado);
+  // Realizamos la petición idéntica al PostText con cabecera form-urlencoded
+  fetch(FORM_RESPONSE_URL, {
+    method: "POST",
+    mode: "no-cors", // Necesario para evitar bloqueos de CORS al impactar directamente en Google Forms
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString()
+  })
+  .then(() => {
+    alert("Entrenamiento enviado correctamente al formulario.");
+  })
+  .catch(err => {
+    console.error("Error al enviar el formulario:", err);
+    alert("Hubo un error al enviar los datos.");
+  });
 }
- 
 function consultarEntrenamientos() {
   const scriptUrl = TinyDB.getValue("script");
   const usuario = encodeURIComponent(TinyDB.getValue("Usuario"));
